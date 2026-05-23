@@ -133,7 +133,7 @@ cp .env.example .env
 | Nombre | GitHub |
 |--------|--------|
 | _Joaquin Montes_ | [@joaquingmontes](https://github.com/joaquingmontes) |
-| _Yamil Tundis_ | [@uyamiltundis](https://github.com/yamiltundis) |
+| _Yamil Tundis_ | [@yamiltundis](https://github.com/yamiltundis) |
 | _Leonel Piquet_ | [@LeonelPiquet](https://github.com/LeonelPiquet) |
 | _Leonel Piquet_ | [@JulianFigueira](https://github.com/JulianFigueira) |
 | _Jeronimo Molina_ | [@usuario](https://github.com/usuario) |
