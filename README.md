@@ -132,10 +132,11 @@ cp .env.example .env
 
 | Nombre | GitHub |
 |--------|--------|
-| _(Joaquin Montes)_ | [@usuario](https://github.com/joaquingmontes) |
-| _(Yamil Tundis)_ | [@usuario](https://github.com/yamiltundis) |
-| _(Leonel Piquet)_ | [@usuario](https://github.com/usuario) |
-| _(Jeronimo Molina)_ | [@usuario](https://github.com/usuario) |
+| _Joaquin Montes_ | [@joaquingmontes](https://github.com/joaquingmontes) |
+| _Yamil Tundis_ | [@uyamiltundis](https://github.com/yamiltundis) |
+| _Leonel Piquet_ | [@LeonelPiquet](https://github.com/LeonelPiquet) |
+| _Leonel Piquet_ | [@JulianFigueira](https://github.com/JulianFigueira) |
+| _Jeronimo Molina_ | [@usuario](https://github.com/usuario) |
 
 ---
 
