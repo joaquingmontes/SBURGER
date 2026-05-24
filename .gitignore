@@ -1,0 +1,11 @@
+# React Native / Node global ignores
+**/node_modules/
+**/.gradle/
+**/build/
+**/local.properties
+**/.idea/
+**/.DS_Store
+**/*.jsbundle
+**/Pods/
+**/.expo/
+**/.watchmanconfig
