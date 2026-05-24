@@ -1,4 +1,4 @@
-# Registro de Interacciones de Desarrollo y Consultas de IA · StackBurger E1
+# Registro de Interacciones con la IA · StackBurger E1
 
 * **Materia:** Desarrollo de Aplicaciones Móviles  
 * **Entrega:** Entrega 1 — MVP Básico (E1)  
@@ -9,194 +9,346 @@
 
 ## 📌 Índice de Temas Consultados
 
-1. [Consulta 1: Definición del Stack Tecnológico, Arquitectura de Componentes y Diseño de la Estructura de Directorios Modular para el MVP](#consulta-1-definición-del-stack-tecnológico-arquitectura-de-componentes-y-diseño-de-la-estructura-de-directorios-modular-para-el-mvp)
-2. [Consulta 2: Diagnóstico y solución a fallos en la localización del Android SDK en sistemas Windows mediante inyección de local.properties](#consulta-2-diagnóstico-y-solución-a-fallos-en-la-localización-del-android-sdk-en-sistemas-windows-mediante-inyección-de-localproperties)
-3. [Consulta 3: Resolución del error de enlace nativo en despliegue de dispositivos (DeviceException y reinicio del servidor ADB)](#consulta-3-resolución-del-error-de-enlace-nativo-en-despliegue-de-dispositivos-deviceexception-y-reinicio-del-servidor-adb)
-4. [Consulta 4: Reorganización arquitectónica del repositorio y estrategia de modularización a la carpeta raíz /app con mitigación de bloqueos de E/S en Windows](#consulta-4-reorganización-arquitectónica-del-repositorio-y-estrategia-de-modularización-a-la-carpeta-raíz-app-con-mitigación-de-bloqueos-de-es-en-windows)
-5. [Consulta 5: Actualización y re-estructuración estratégica del archivo descriptivo del proyecto (README.md)](#consulta-5-actualización-y-re-estructuración-estratégica-del-archivo-descriptivo-del-proyecto-readmemd)
+1. [Consulta 1: Recomendación de stack de software y estructura de carpetas para el MVP](#consulta-1-recomendación-de-stack-de-software-y-estructura-de-carpetas-para-el-mvp)
+2. [Consulta 2: Solución de error del Android SDK y local.properties](#consulta-2-solución-de-error-del-android-sdk-y-localproperties)
+3. [Consulta 3: Resolución de fallos en puente de comunicación (DeviceException - ADB Restart)](#consulta-3-resolución-de-fallos-en-puente-de-comunicación-deviceexception---adb-restart)
+4. [Consulta 4: Reorganización de la app a una subcarpeta /app y errores de Windows](#consulta-4-reorganización-de-la-app-a-una-subcarpeta-app-y-errores-de-windows)
+5. [Consulta 5: Modificaciones pertinentes en el archivo README.md](#consulta-5-modificaciones-pertinentes-en-el-archivo-readmemd)
 
 ---
 
-## 🛠️ Competencias de IA Aplicadas en el Ciclo de Vida del Software
+## 💬 Transcripción de Conversaciones (Completa y Verbatim)
 
-Durante el proceso incremental de desarrollo, compilación y despliegue del MVP (E1) de **StackBurger**, la Inteligencia Artificial proveyó asistencia avanzada bajo rigurosas pautas de ingeniería de software:
-* **Planificación Arquitectónica y Diseño Modular:** Estructuración del entorno móvil de React Native aislando la interfaz de presentación de las reglas del negocio, logrando un desacoplamiento óptimo mediante React Context y Custom Hooks.
-* **Depuración de Entornos Nativos de Compilación:** Solución a problemas clásicos de enlace del Android SDK mediante la inyección del mapa físico del disco con archivos `local.properties`.
-* **Diagnóstico de Enlaces de Red y ADB:** Resolución de excepciones en la capa de hardware y emulación a través del reinicio y optimización de sockets del servidor de ADB.
-
----
-
-## 💬 Transcripción de Consultas de Desarrollo
-
-### Consulta 1: Definición del Stack Tecnológico, Arquitectura de Componentes y Diseño de la Estructura de Directorios Modular para el MVP
+### Consulta 1: Recomendación de stack de software y estructura de carpetas para el MVP
 
 **Usuario:**
-> Presento el Documento de Alcance Técnico y Funcional para el MVP Básico (E1) del proyecto StackBurger. El objetivo es desarrollar una aplicación de pedidos digitales para optimizar la experiencia de compra en locales gastronómicos, eliminando filas y gestionando transacciones. Requiero que me propongas un stack tecnológico robusto que asegure el cumplimiento de los Requerimientos Funcionales (catálogo visual, personalización, gestión de carrito y checkout validado) y los No Funcionales (tiempos de respuesta inferiores a 2 segundos, compatibilidad mínima con Android API 24+, navegación nativa fluida, y adaptabilidad visual). Asimismo, solicito el diseño de una arquitectura y estructura de directorios modular que organice de forma escalable el código TypeScript.
+> necesito crear una aplicacion mobil de hamburguesas que cumpla lo siguiente
+> 
+> DOCUMENTO DE ALCANCE
+> Entrega 1 — MVP Básico
+> Aplicación de pedidos digitales para optimizar la experiencia de compra en locales gastronómicos. Elimina las filas presenciales y moderniza la gestión de pedidos mediante una interfaz móvil rápida e intuitiva.
+> Proyecto: StackBurger Mobile App
+> Versión: 1.0 · E1
+> Criterios cubiertos en esta entrega:
+> ✅ Descripción del problema (RF/RNF)
+> ✅ Reglas de negocio explícitas
+> ✅ User Stories + criterios de aceptación
+> ✅ Backlog E2/E3 documentado
+> 
+> Documento de Alcance Técnico y Funcional · Desarrollo de Aplicaciones Móviles · 2026
+> StackBurger · Documento de Alcance E1 MVP Básico · 2026
+> Entrega 1 Página 2
+> 
+> 1. Descripción del Problema
+> 1.1 ¿Qué problema resuelve la app?
+> La aplicación resuelve la fricción generada por las largas filas presenciales y las demoras en el proceso tradicional de toma de pedidos dentro del local físico. Al descentralizar la toma de pedidos, se optimiza el tiempo del personal y se mejora sustancialmente la experiencia del consumidor.
+> 1.2 ¿A quién está dirigida?
+> Está orientada al cliente final del local gastronómico: principalmente jóvenes y adultos que buscan inmediatez, comodidad y una experiencia digital fluida, rápida y visual para armar y pedir su comida.
+> 1.3 ¿Por qué una app móvil?
+> Se elige una aplicación móvil porque ofrece ventajas concretas sobre otras soluciones:
+> • Portabilidad: el usuario la lleva siempre encima, sin fricciones de acceso.
+> • UX optimizada: interfaz táctil más rápida e interactiva que una web para navegar menús visuales.
+> • Escalabilidad técnica: sienta las bases para notificaciones push, geolocalización de sucursales y módulo de cocina en entregas futuras.
+> 
+> 2. Requerimientos Funcionales
+> 2.1 Alcance E1 — MVP Básico
+> Cobertura de rúbrica: RF numerados · Descripción clara · Alcance E1 explícito · Backlog E2/E3 referenciado
+> 
+> Código | Nombre | Descripción
+> RF-01 | Catálogo de productos | El sistema debe permitir visualizar las hamburguesas disponibles con foto, nombre, descripción y precio.
+> RF-02 | Detalle y Personalización del producto | El sistema debe permitir seleccionar una hamburguesa, configurar ingredientes adicionales (extras) y añadir notas o aclaraciones de cocina especiales.
+> RF-03 | Gestión de Carrito de Compras | El sistema debe permitir agregar, visualizar, modificar cantidades o eliminar ítems del carrito de compras.
+> RF-04 | Formulario de Pedido | El sistema debe recolectar y validar los datos del cliente (nombre, mesa/dirección, teléfono) para registrar el pedido.
+> RF-05 | Visualización de totales | El sistema debe calcular y exponer subtotal, recargos de envío o descuentos aplicables y el total general en tiempo real.
+> RF-06 | Confirmación de compra | El sistema debe simular el envío del pedido a la cocina mediante una vista de éxito del ticket.
+> 
+> Reglas de Negocio Explícitas:
+> RN-01: Control de Carrito Vacío. El sistema no debe permitir avanzar al checkout si el carrito de compras no cuenta con al menos un ítem agregado.
+> RN-02: Límite de Adicionales. El cliente solo podrá seleccionar hasta un máximo de 5 unidades de un mismo extra por ingrediente (ej. máximo 5 porciones extras de queso cheddar).
+> RN-03: Límite de Aclaraciones Especiales. El campo de texto de aclaraciones para cocina no debe exceder los 150 caracteres.
+> RN-04: Horario de Cocina. El sistema bloqueará la confirmación de pedidos fuera de la franja horaria comercial operativa permitida (19:00 a 23:30 hs).
+> 
+> User Stories:
+> HU-04 Controlar cantidad del producto (Prioridad: Alta)
+> Como cliente, quiero poder incrementar o decrementar la cantidad del producto antes de agregarlo al carrito o dentro del carrito.
+> ✅ Escenario de Éxito — Incrementar / Decrementar
+> Dado que el usuario está en la pantalla de detalle de una hamburguesa seleccionada.
+> Cuando presiona el botón "+" o "-", la cantidad de unidades se actualiza instantáneamente sumando o restando el precio correspondiente en el subtotal.
+> ❌ Escenario de Fallo — Cantidad mínima
+> Dado que el usuario está en el detalle de un producto con 1 unidad seleccionada.
+> Cuando intenta presionar el botón "-" para reducir la cantidad por debajo de 1.
+> Entonces el botón permanece deshabilitado, el sistema muestra "Mínimo 1 unidad" y evita generar un estado negativo en el carrito.
+> 
+> HU-05 Agregar aclaraciones al producto (Prioridad: Media)
+> Como cliente, quiero ingresar una aclaración especial para mi pedido, para que la cocina prepare el producto según mis preferencias alimentarias.
+> ✅ Escenario de Éxito — Aclaración válida
+> Dado que el usuario está en la pantalla de detalle de un producto y desea ingresar una nota especial.
+> Cuando escribe una aclaración de hasta 150 caracteres (ej: "sin cebolla, aderezo aparte") y presiona "Agregar al carrito".
+> Entonces el sistema guarda la aclaración junto con el ítem, muestra un mensaje de éxito y el producto aparece en el carrito con la nota visible.
+> ❌ Escenario de Fallo — Aclaración demasiado larga
+> Dado que el usuario está en la pantalla de detalle e intenta ingresar una aclaración extensa.
+> Cuando escribe un texto que supera los 150 caracteres.
+> Entonces el campo muestra un contador de caracteres en rojo, bloquea el ingreso de caracteres adicionales y muestra "Máximo 150 caracteres permitidos".
+> 
+> que estructura de carpetas y software recomendas?
 
 **Asistente de IA:**
-> Tomando como base estricta la rúbrica del proyecto y los requerimientos funcionales del documento de alcance, se expone a continuación el diseño técnico y arquitectónico óptimo para la realización del MVP:
+> Viendo que buscas estructurar una aplicación móvil robusta y nativa para Android e iOS, y analizando los requerimientos descritos en tu documento de alcance del MVP Básico (E1) de **StackBurger**, la recomendación estándar y más óptima de la industria para entornos universitarios y comerciales es la siguiente:
 > 
-> ### 📱 Propuesta de Stack de Software
-> 1. **Core Framework:** **React Native CLI (Bare Workflow)**. Garantiza la máxima optimización de recursos a nivel de hardware, cubriendo sin inconvenientes la compatibilidad con Android API 24+ de forma nativa.
-> 2. **Navegación:** **React Navigation (Stack Navigator)**. Provee una pila de navegación nativa con transiciones fluidas por hardware, reteniendo reactivamente el estado de la app al realizar transiciones hacia atrás.
-> 3. **Gestión de Estado Global (Carrito):** **React Context API + `useReducer`** en TypeScript. Centraliza de forma predecible el ciclo de vida del carrito (alta, edición, conteo y cálculo de totales) sin la sobrecarga de dependencias externas pesadas.
-> 4. **Estilos y Responsividad:** **Vanilla StyleSheet (React Native)**. El uso de Flexbox nativo permite la correcta adaptabilidad responsiva requerida para la diversidad de dispositivos del local físico.
+> ### 📱 El Stack Tecnológico Recomendado
+> 1. **Framework Principal:** **React Native CLI (Bare Workflow)**
+>    * **¿Por qué?** Provee una integración 100% nativa con las herramientas de plataforma, cumpliendo con la exigencia de una navegación táctil fluida y de alta performance. Ofrece acceso directo a las carpetas `/android` e `/ios` para configuraciones nativas críticas.
+> 2. **Navegación:** **React Navigation (Stack Navigator nativo)**
+>    * Cumple perfectamente con el requerimiento de transiciones nativas y dinámicas por hardware. Permite apilar pantallas (Home -> Detail -> Cart -> Checkout) y regresar de manera natural mediante gestos y botones nativos sin corromper o limpiar el estado de la app de fondo.
+> 3. **Gestión de Estado Global (Carrito):** **React Context API + useReducer** en TypeScript
+>    * Al ser un MVP (E1), un `CartContext` con TypeScript y un reductor (`useReducer`) es la arquitectura ideal. Centraliza de forma predecible la máquina de estados del carrito (agregar, modificar cantidad, eliminar ítems y autocalcular importes y envío) sin la enorme sobrecarga de configuraciones complejas que traen librerías pesadas como Redux.
+> 4. **Maquetación y Diseño Responsivo:** **Vanilla StyleSheet (nativos de React Native)**
+>    * Permite estructurar interfaces sumamente fluidas y adaptables a múltiples relaciones de aspecto mediante Flexbox. Cumple con la pauta no funcional de áreas táctiles interactivas óptimas (áreas de toque mínimas de 48x48dp para botones de incrementar/decrementar en celulares).
 > 
-> ### 📂 Arquitectura de Directorios Modular
-> Se propone estructurar el código en una carpeta unificada `/src` bajo el subdirectorio de aplicación `/app`, organizando el software por su responsabilidad única:
+> ---
+> 
+> ### 📂 Estructura de Carpetas Modular
+> Para mantener la escalabilidad de cara a las entregas E2 (autenticación e historial) y E3 (rol administrador/cocina), te recomiendo estructurar tu proyecto de la siguiente manera:
 > 
 > ```text
-> SBURGER/
-> ├── app/                         # Carpeta raíz del entorno React Native CLI
-> │   ├── android/                 # Módulo nativo compilable para Android (API 24+)
-> │   ├── ios/                     # Módulo nativo para iOS (escalabilidad futura)
-> │   ├── src/                     # Código fuente del aplicativo
-> │   │   ├── components/          # Componentes visuales atómicos reutilizables
-> │   │   │   ├── BurgerCard.tsx   # Tarjeta de catálogo para el renderizado de productos
-> │   │   │   ├── CartItem.tsx     # Fila interactiva para el desglose del carrito
-> │   │   │   ├── CustomButton.tsx # Componente de interacción táctil con área >= 48dp (RNF)
-> │   │   │   └── ExtraOption.tsx  # Controlador de adicionales con incrementadores atómicos
-> │   │   ├── constants/           # Recursos estáticos e inmutables del sistema
-> │   │   │   ├── colors.ts        # Definición del sistema de diseño (coral, gris oscuro, blanco)
-> │   │   │   └── mockData.ts      # Catálogo JSON del menú de hamburguesas
-> │   │   ├── context/             # Capa lógica de estado compartido
-> │   │   │   └── CartContext.tsx  # Motor reductor del carrito con persistencia reactiva
-> │   │   ├── hooks/               # Reglas de negocio y lógica asíncrona
-> │   │   │   └── useBusinessHours.ts # Validador del horario de atención comercial (19:00 - 23:30 hs)
-> │   │   ├── navigation/          # Enrutamiento y pila de navegación nativa
-> │   │   │   └── AppNavigator.tsx # Configuración de transiciones entre HomeScreen y DetailScreen
-> │   │   └── screens/             # Vistas de visualización principal
-> │   │       ├── HomeScreen.tsx   # Catálogo principal con lógica de carga y manejo de fallos
-> │   │       ├── DetailScreen.tsx # Personalizador con límites de extras e ingresos de notas
-> │   │       ├── CartScreen.tsx   # Resumen matemático de ítems, adiciones y costos de envío
-> │   │       └── CheckoutScreen.tsx # Formulario con validación de datos del cliente
-> │   └── App.tsx                  # Envoltura de Providers y punto de arranque del compilador
-> └── documentacion/               # Archivos de rúbricas y especificaciones de la cátedra
+> app/
+> ├── android/                     # Código nativo Android (SDK API 24+)
+> ├── ios/                         # Código nativo iOS
+> ├── src/                         # Código fuente principal de la aplicación
+> │   ├── components/              # Componentes visuales reutilizables
+> │   │   ├── BurgerCard.tsx       # Tarjeta optimizada para renderizar hamburguesas en FlatList
+> │   │   ├── CartItem.tsx         # Elemento de fila para desglose en el carrito
+> │   │   ├── CustomButton.tsx     # Botón táctil estandarizado con área interactiva >= 48dp
+> │   │   └── ExtraOption.tsx      # Selector de ingredientes adicionales (tope de 5)
+> │   ├── constants/               # Constantes e inmutables del sistema
+> │   │   ├── colors.ts            # Paleta de colores (Gris oscuro, coral de acento, blanco)
+> │   │   └── mockData.ts          # Menú estático precargado para simular la API
+> │   ├── context/                 # Lógica de estados compartidos
+> │   │   └── CartContext.tsx      # Contexto y reductor matemático de totales del carrito
+> │   ├── hooks/                   # Reglas de negocio aisladas
+> │   │   └── useBusinessHours.ts  # Hook validador del horario de cocina (19:00 a 23:30 hs)
+> │   ├── navigation/              # Configurador de rutas
+> │   │   └── AppNavigator.tsx     # Definición de la pila Stack de transiciones
+> │   └── screens/                 # Vistas principales de la interfaz
+> │       ├── HomeScreen.tsx       # Catálogo con indicador de carga y bypass de depuración
+> │       ├── DetailScreen.tsx     # Detalle de hamburguesa con selector de extras y validador de notas
+> │       ├── CartScreen.tsx       # Resumen analítico de compra y totales de ticket
+> │       └── CheckoutScreen.tsx   # Formulario con validaciones nativas y pantalla de éxito
+> ├── App.tsx                      # Componente raíz envoltorio de Providers y Stack
+> ├── package.json                 # Gestión de dependencias y scripts de ejecución
+> └── tsconfig.json                # Configuración sintáctica de TypeScript
 > ```
 > 
-> ### ⚙️ Mapeo Técnico de Reglas de Negocio en Código:
-> * **RN-01 (Monto de Envío Dinámico):** El reductor de `CartContext` inicializa dinámicamente el costo de envío en `0` si el array del carrito de compras está vacío, inhabilitando en la interfaz visual el botón de checkout.
-> * **RN-02 (Límite de Adicionales):** Al invocar `ADD_TO_CART`, se restringe programáticamente mediante `Math.min(5, count)` el tope máximo de adiciones por cada ingrediente extra (cebolla, panceta, cheddar, carne).
-> * **RN-03 (Límite de Aclaraciones Especiales):** Se añade un campo `maxLength={150}` en el componente `TextInput` de aclaraciones especiales en `DetailScreen.tsx`, acompañado de un contador dinámico visual en color rojo que advierte e impide el desborde en comanda.
-> * **RN-05 (Horario de Cierre de Cocina):** El custom hook `useBusinessHours.ts` analiza la hora actual del sistema mediante el objeto nativo `Date` de JavaScript, arrojando un estado booleano para bloquear el despacho del pedido fuera de la franja horaria permitida (19:00 a 23:30 hs).
+> ---
+> 
+> ### 🎯 Mapeo Técnico de las Reglas de Negocio en la Arquitectura:
+> 
+> * **RF-01 (Menú) y HomeScreen:** Se resuelve implementando un `FlatList` de React Native de alto rendimiento dentro de `screens/HomeScreen.tsx`, el cual consume el catálogo inmutable desde `constants/mockData.ts` y renderiza cada ítem de forma eficiente mediante `components/BurgerCard.tsx`.
+> * **RF-02 (Detalle y Personalización) & RN-02 (Límites de Extras):** Al seleccionar una hamburguesa, se navega al detalle. Usamos controles atómicos de `components/ExtraOption.tsx` para cada adicional (queso, carne, cebolla, panceta). El incrementador valida dinámicamente que el valor del extra esté estrictamente en el rango `[0, 5]` (RN-02), deshabilitando los botones táctiles en los límites.
+> * **RN-03 (Límite de Notas de Cocina):** El componente `TextInput` de aclaraciones especiales en `screens/DetailScreen.tsx` incluye un atributo nativo `maxLength={150}`. Acompañamos esto con una validación reactiva en tiempo real: un contador de caracteres visual que cambia a color rojo de advertencia cuando se aproxima al límite de los 150 caracteres permitidos para cocina, bloqueando el footer de agregar al carrito.
+> * **RF-03, RF-05 y RN-01 (Carrito Centralizado):** El reductor centralizado `CartContext.tsx` gestiona el estado dinámicamente. Al calcular totales mediante una función lineal, valida que si `cart.length === 0`, el costo de envío se inicialice estrictamente en `0` (RN-01), bloqueando a nivel de UI el paso a la pasarela de confirmación.
+> * **RN-05 (Horario de Cocina 19:00 - 23:30 hs):** El custom hook `useBusinessHours.ts` encapsula la lógica horaria. Obtiene la hora actual del servidor/dispositivo y arroja un estado booleano. Si la hora se encuentra fuera del rango permitido, deshabilita por completo la pasarela final en `screens/CheckoutScreen.tsx` impidiendo el despacho del pedido.
 
 ---
 
-### Consulta 2: Diagnóstico y solución a fallos en la localización del Android SDK en sistemas Windows mediante inyección de local.properties
+### Consulta 2: Solución de error del Android SDK y local.properties
 
 **Usuario:**
-> Durante la etapa de construcción nativa y despliegue del aplicativo móvil de React Native mediante el comando `npm run android` en un sistema operativo Windows, el motor de compilación Gradle aborta el proceso de forma crítica, arrojando el error `SDK location not found. Define location with an sdk.dir in the local.properties file or with an ANDROID_HOME environment variable`. ¿Cuál es la causa subyacente de este fallo de vinculación y cómo puedo solucionarlo de forma permanente y robusta en mi estación de trabajo?
+> Al intentar compilar e instalar la aplicación mediante el comando `npm run android` en Windows, Gradle arroja un error crítico reportando `SDK location not found`. ¿Cómo solucionar este fallo de enlace de forma consistente?
 
 **Asistente de IA:**
-> #### 1. Diagnóstico y Causa Subyacente
-> El compilador automatizado de tareas de Android, Gradle, necesita enlazar librerías binarias nativas de compilación provistas por el kit de desarrollo (Android SDK). En estaciones de trabajo Windows, Gradle busca esta ruta a través de la variable de entorno del sistema `ANDROID_HOME`.
+> **Causa del Fallo:** La compilación nativa en plataformas Windows gestionada por Gradle requiere acceder a los binarios del compilador de Android (Android SDK). Gradle busca esta ubicación de forma predeterminada leyendo la variable de entorno global `ANDROID_HOME` del sistema operativo.
 > 
-> Si no se ha configurado la variable de entorno global, o si el proceso de terminal en ejecución (PowerShell/CMD) carece de permisos de lectura para heredar el mapa de variables de entorno de Windows, Gradle fallará inmediatamente al no poder localizar el compilador nativo de Java/C++.
+> Sin embargo, Windows no siempre hereda las variables globales de entorno de forma consistente a los procesos hijos de Node.js o las terminales activas de comandos, provocando que la fase de análisis inicial de Gradle aborte con el mensaje `SDK location not found. Define location with an sdk.dir in the local.properties file or with an ANDROID_HOME environment variable`.
 > 
-> #### 2. Solución Arquitectónica Recomendada
-> Para evitar inconsistencias de enlace a nivel global, se debe inyectar de forma directa y local la ruta física absoluta de las herramientas del SDK de Android en el subproyecto nativo.
+> ### 🛠️ Solución Permanente y Robusta:
+> Para independizar la compilación de las variables de entorno globales de la máquina activa, se debe crear un archivo de configuración nativo en la raíz del subproyecto Android:
 > 
-> Proceda a crear el archivo local de propiedades en la siguiente ruta:
-> `/app/android/local.properties`
-> 
-> Introduzca la siguiente directiva apuntando al directorio de instalación por defecto del SDK de su usuario en Windows:
+> 1. Ve a la carpeta nativa de Android de tu proyecto: `/app/android/`
+> 2. Crea un archivo llamado **`local.properties`**
+> 3. Abre el archivo e inserta la ruta física exacta donde se instala por defecto el Android SDK en tu usuario de Windows:
 > 
 > ```ini
 > sdk.dir=C:/Users/Joaquin/AppData/Local/Android/Sdk
 > ```
 > 
 > > [!IMPORTANT]
-> > **Detalle de Escape de Caracteres en Windows:** Note que en el archivo de propiedades se emplean barras diagonales estándar (`/`) en lugar de barras invertidas (`\`). Gradle procesa este archivo interpretando las diagonales invertidas como secuencias de escape de caracteres de cadena, lo que provocaría un error de sintaxis nativa si no se realiza esta adaptación.
+> > **Detalle Crítico de Escape:** Nota que la ruta debe ser escrita utilizando barras diagonales normales (`/`) en lugar de las tradicionales barras invertidas (`\`) de Windows. Gradle analiza este archivo de propiedades en formato Java, por lo que las barras invertidas se interpretan como escapes de caracteres, corrompiendo la ruta y manteniendo el error si no se realiza esta corrección de sintaxis.
 > 
-> #### 3. Verificación Física del SDK
-> Si el error persiste posterior a la creación del archivo, significa que no se ha descargado el SDK propiamente dicho en el disco. Para corregirlo:
-> 1. Inicie la interfaz de **Android Studio**.
-> 2. Si es el arranque inicial, complete el asistente de bienvenida (**Setup Wizard**) con configuración estándar para que el sistema descargue de forma automatizada los componentes e imágenes del SDK.
-> 3. Si la interfaz principal ya está activa, acceda a **Settings** -> **Appearance & Behavior** -> **System Settings** -> **Android SDK** y verifique que la ruta de destino coincida con el archivo `local.properties`.
+> ### 🔍 ¿Qué pasa si la carpeta física no existe en tu disco C?
+> Si al explorar no encuentras el subdirectorio del SDK de Android, significa que no has completado la descarga de herramientas nativas de desarrollo en tu estación.
+> 
+> Para solucionarlo:
+> 1. Abre la aplicación de **Android Studio** en tu computadora.
+> 2. Si te aparece el asistente inicial (**Setup Wizard**), haz clic en *Next*, selecciona la instalación *Standard* y dale a *Finish*. Esto descargará de forma automatizada las herramientas de plataforma, el SDK y el emulador (pesa aproximadamente 1.5 GB).
+> 3. Si el programa abre directamente en la lista de proyectos, haz clic en los tres puntos de la esquina superior derecha (*More Actions*) -> selecciona **SDK Manager**.
+> 4. En la pestaña *Android SDK*, verifica que el campo superior **Android SDK Location** apunte a `C:\Users\Joaquin\AppData\Local\Android\Sdk`. Si no hay ningún SDK instalado, marca la última API estable disponible (ej. Android 13.0 o 14.0) y dale a **Apply** para iniciar la descarga.
 
 ---
 
-### Consulta 3: Resolución del error de enlace nativo en despliegue de dispositivos (DeviceException y reinicio del servidor ADB)
+### Consulta 3: Resolución de fallos en puente de comunicación (DeviceException - ADB Restart)
 
 **Usuario:**
-> La compilación del código nativo Java/Kotlin y C++ mediante Gradle se completa de forma exitosa (100% de tareas ejecutadas de fondo). Sin embargo, el despliegue a dispositivo de destino falla con la excepción `com.android.builder.testing.api.DeviceException: No connected devices!` o `No online devices found`. ¿Cuáles son las causas y cómo restablecer la conexión del puente de depuración (ADB) y la instancia del emulador AVD (Android Virtual Device) para lograr un despliegue exitoso?
+> FAILURE: Build failed with an exception.
+> 
+> * What went wrong:
+> Execution failed for task ':app:installDebug'.
+> > com.android.builder.testing.api.DeviceException: No connected devices!
+> 
+> BUILD FAILED in 25m 31s
+> error Failed to install the app. Make sure you have an Android emulator running or a device connected.
+> PS E:\SBURGER> 
 
 **Asistente de IA:**
-> #### 1. Diagnóstico Técnico
-> Este escenario de error indica que el compilador nativo ha estructurado el paquete compilado en depuración (`app-debug.apk`) con éxito, pero la herramienta de subida al dispositivo en caliente (Android Debug Bridge - ADB) no encuentra un canal de comunicación de sockets TCP activo para inyectar el archivo binario. Esto se debe a dos causas principales:
-> * **Ausencia de Emulación Activa:** No se encuentra levantado en memoria ningún dispositivo virtual emulado (AVD).
-> * **Bloqueo del Demonio ADB (ADB Server):** La pila de red interna del puente de comunicación ADB se encuentra bloqueada, desincronizada o bloqueando el puerto estándar `5037`.
+> ¡Esta es una excelente noticia a nivel de compilación! La parte más pesada del desarrollo móvil (la descarga de librerías nativas C++, la compilación nativa de Gradle de 165 tareas y el enlace de dependencias complejas como `react-native-gesture-handler`) **ha finalizado 100% con éxito** en tu terminal (BUILD SUCCESSFUL).
 > 
-> #### 2. Protocolo de Saneamiento y Reinicio del Servidor ADB
-> Debe depurar la cola de red del puente de comunicación cerrando forzadamente el daemon y reiniciando el servicio desde la consola de comandos de Windows:
+> El único motivo por el que Gradle falló en el último milisegundo al ejecutar la tarea `:app:installDebug` es porque **no hay ningún emulador de Android abierto o encendido** en tu sistema. Al no encontrar un dispositivo en línea, el instalador no puede inyectar el archivo binario (`app-debug.apk`).
+> 
+> A continuación se detalla el procedimiento técnico para destrabar el puente de comunicación e iniciar el entorno virtual:
+> 
+> ### 1. Reiniciar y destrabar el servidor de ADB (Android Debug Bridge)
+> A veces, el daemon local de ADB que gestiona la red TCP del puerto `5037` en Windows se congela o pierde sincronía. Ejecuta los siguientes comandos desde tu consola de PowerShell para destrabar el socket:
 > 
 > ```powershell
-> # Detención absoluta del proceso daemon congelado
+> # Detener forzadamente el servidor de ADB que esté congelado en Windows
 > C:\Users\Joaquin\AppData\Local\Android\Sdk\platform-tools\adb.exe kill-server
 > 
-> # Inicialización limpia del socket de red
+> # Inicializar limpiamente el servicio daemon de puente nativo
 > C:\Users\Joaquin\AppData\Local\Android\Sdk\platform-tools\adb.exe start-server
 > ```
+> *(Verás la salida confirmando que el demonio se inició limpiamente en el puerto TCP local).*
 > 
-> #### 3. Verificación de Dispositivos y Despliegue en Emulador
-> 1. Corrobore si el sistema operativo registra el dispositivo virtual de destino con el comando:
->    ```bash
->    adb devices
->    ```
-> 2. Si la lista retorna vacía, abra **Android Studio** -> **Virtual Device Manager**.
-> 3. En caso de no poseer ningún emulador creado, seleccione **Create Device**, asigne un perfil responsivo (ej. **Pixel 6 / API 33**) y permita la descarga de la imagen correspondiente.
-> 4. Inicie el emulador haciendo clic en el botón de reproducción (**Play**). Una vez que la pantalla de inicio de Android esté cargada en su totalidad en el entorno gráfico, reejecute en la consola:
->    ```bash
->    npm run android
->    ```
->    *La app se desplegará e iniciará en pocos segundos debido a que las dependencias nativas pesadas de Gradle ya se encuentran completamente cacheadas en memoria.*
+> ### 2. Crear e iniciar el Emulador Virtual (AVD) en Android Studio:
+> Dado que la lista de emuladores locales está vacía, debemos crear un celular virtual en tu entorno:
+> 
+> 1. Abre **Android Studio** en tu computadora.
+> 2. Haz clic en la opción **"More Actions"** (esquina superior derecha de la pantalla de bienvenida) y selecciona **"Virtual Device Manager"** (o simplemente *Device Manager*).
+> 3. Haz clic en el botón azul **"Create Device"** (o *Create Virtual Device*).
+> 4. **Selecciona el perfil de hardware:** Elige un modelo convencional balanceado, por ejemplo, **Pixel 6** o **Pixel 7**, y haz clic en *Next* (Siguiente).
+> 5. **Selecciona el sistema operativo (System Image):** Elige una versión moderna de Android en la lista (se recomienda **API 33** o **API 34**).
+>    * *Nota: Si al lado de la API aparece una flechita de descarga ("Download"), haz clic en ella y permite que descargue la imagen del sistema por completo. Una vez terminada la descarga, selecciónala en la lista.*
+> 6. Haz clic en *Next* y luego presiona **"Finish"** para consolidar el dispositivo.
+> 7. ¡Excelente! Ahora verás el emulador creado en el listado del *Device Manager*. Haz clic en el botón de **Play (flecha verde)** que tiene a la derecha.
+> 8. **Espera a que el celular virtual encienda por completo en tu pantalla** (debes ver la animación de Android y llegar al escritorio de inicio con los íconos de aplicaciones).
+> 
+> ### 3. Despliegue en Caliente:
+> Con el celular virtual encendido y en línea en tu monitor, regresa a tu terminal de PowerShell y vuelve a correr:
+> 
+> ```bash
+> npm run android
+> ```
+> 
+> > [!TIP]
+> > **Optimización de Tiempos de Carga:** No tendrás que esperar 25 minutos nuevamente. Como toda la base nativa del proyecto ya está compilada y empaquetada con éxito de la sesión anterior, Gradle detectará que no existen cambios a nivel de compiladores nDk/C++ y completará la instalación e inicio en tu emulador en menos de **30 segundos**.
 
 ---
 
-### Consulta 4: Reorganización arquitectónica del repositorio y estrategia de modularización a la carpeta raíz /app con mitigación de bloqueos de E/S en Windows
+### Consulta 4: Reorganización de la app a una subcarpeta /app y errores de Windows
 
 **Usuario:**
-> Con el fin de optimizar el orden estructural del repositorio, aislar el entorno móvil del resto de la documentación académica y preparar el proyecto para futuras entregas (E2/E3), requiero reorganizar la base de código. Sin embargo, al intentar trasladar carpetas nativas e instaladas (`android/`, `ios/`, `node_modules/`, `src/`) a un nuevo subdirectorio `/app/`, el sistema operativo Windows aborta la operación arrojando errores de 'Acceso Denegado' y bloqueo de recursos. ¿A qué se deben estos bloqueos del sistema de archivos y cuál es la estrategia recomendada para efectuar esta mudanza arquitectónica de forma segura y sin corromper las dependencias de Metro?
+> ahora podes mover la aplicacion a una carpeta nueva que se llame app
 
 **Asistente de IA:**
-> #### 1. Causa del Bloqueo del Sistema de Archivos en Windows
-> El kernel del sistema operativo Windows implementa mecanismos estrictos de exclusión mutua de archivos. Cuando el servidor empaquetador de JavaScript Metro (`npm start`) o el emulador de Android están activos, mantienen descriptores de archivos (*file handles*) y sockets abiertos sobre librerías nativas clave, dependencias binarias en `node_modules` y carpetas de código fuente en `src/`. Esto le impide al sistema operativo ejecutar operaciones de renombrado, movimiento o borrado sobre esos subdirectorios, resultando en excepciones inmediatas de **Acceso Denegado**.
+> Entendido. Para estructurar y modularizar de forma limpia el repositorio de StackBurger, aislando las configuraciones de React Native y dejando la raíz ordenada para las rúbricas docentes, debemos mover el aplicativo móvil a una subcarpeta independiente `/app/`.
 > 
-> #### 2. Estrategia de Mitigación y Mudanza Segura
-> Para resolver el bloqueo de E/S y asegurar la modularización sin pérdida de consistencia en el control de cambios de Git, aplique el siguiente procedimiento técnico secuencial:
+> Sin embargo, al intentar trasladar las carpetas nativas e intermediarios clave del entorno (`android/`, `ios/`, `node_modules/` y `src/`), el sistema operativo Windows aborta el proceso de forma drástica arrojando la excepción `Move-Item : Acceso denegado a la ruta de acceso`.
 > 
-> 1. **Corte Seguro de Procesos:** Cierre todas las instancias abiertas de la terminal y finalice el servidor de Metro presionando `Ctrl + C` en la consola de comandos de Node.
-> 2. **Creación del Espacio Aislado:** Cree el nuevo directorio de forma segura:
->    ```powershell
->    New-Item -Path app -ItemType Directory -Force
->    ```
-> 3. **Estrategia de Copiado y Clonación de Recursos:** Para evadir bloqueos en caliente remanentes, realice un copiado recursivo completo a `/app/` excluyendo directorios protegidos por el sistema (ej. `.git` y `.gradle` local):
->    ```powershell
->    Get-ChildItem -Path . -Force | Where-Object { $_.Name -notin 'app', 'documentacion', 'README.md', '.git', '.' , '..' } | Copy-Item -Destination app -Recurse -Force
->    ```
-> 4. **Limpieza del Entorno Antiguo:** Una vez replicado el ecosistema en la carpeta de destino, elimine los residuos y archivos duplicados de la raíz.
-> 5. **Reconstrucción del Árbol de Dependencias:** Al trasladar el archivo `package.json` de ubicación física, es indispensable refrescar el enlazador de módulos. Ingrese a la carpeta aislada y ejecute una instalación limpia:
+> ### ❓ ¿Por qué ocurre este bloqueo de Windows?
+> El sistema de archivos de Windows implementa bloqueos estrictos sobre recursos en uso. Cuando mantienes el servidor de desarrollo empaquetador de JavaScript de React Native activo (el famoso **Metro Bundler** que corre de fondo en el puerto `8081` a través del comando `npm start`), el proceso Node mantiene descriptores de archivos (*file handles*) y sockets abiertos sobre la totalidad de los subdirectorios del proyecto. Esto le impide físicamente a Windows renombrar o desplazar las carpetas.
+> 
+> ### 🛠️ Estrategia de Mudanza Segura en 4 Pasos:
+> 
+> #### Paso 1: Apagar Metro Bundler
+> 1. Ve a la consola o terminal activa en tu computadora donde esté ejecutándose el comando **`npm start`**.
+> 2. Presiona la combinación de teclas **`Ctrl + C`** (y confirma con `S` en caso de que PowerShell pregunte si deseas terminar el trabajo por lotes).
+> 3. Cierra cualquier terminal o proceso secundario asociado que interactúe con el emulador.
+> 
+> #### Paso 2: Crear el Directorio Destino
+> Creamos de forma segura la nueva carpeta modular en la raíz de tu repositorio:
+> ```powershell
+> New-Item -Path app -ItemType Directory -Force
+> ```
+> 
+> #### Paso 3: Estrategia de Copiado y Clonado Recursivo Seguro
+> Para evadir los bloqueos persistentes que el sistema de archivos de Windows a veces mantiene activos sobre la caché de Gradle o node_modules, realizamos una réplica limpia de la base de código móvil en la nueva subcarpeta, excluyendo deliberadamente directorios del sistema (como `.git`, la carpeta `documentacion/` o el `README.md` principal que deben quedarse en la raíz):
+> ```powershell
+> Get-ChildItem -Path . -Force | Where-Object { $_.Name -notin 'app', 'documentacion', 'README.md', '.git', '.' , '..' } | Copy-Item -Destination app -Recurse -Force
+> ```
+> 
+> #### Paso 4: Limpieza e Instalación Aislada
+> 1. Con la estructura duplicada exitosamente dentro del subdirectorio `/app/`, eliminamos los subdirectorios antiguos redundantes que quedaron en la raíz del proyecto para despejar el área de trabajo.
+> 2. Accedemos a la carpeta móvil recién creada:
 >    ```bash
 >    cd app
+>    ```
+> 3. Ejecutamos una instalación limpia y fresca para reconstruir y re-enlazar de forma óptima los binarios aislados de Metro y Gradle:
+>    ```bash
 >    npm install
 >    ```
-> 6. **Configuración del GitIgnore Global:** Configure un archivo `.gitignore` en la raíz del repositorio para impedir que los directorios locales de Gradle (`/app/android/.gradle`), variables del SDK y compilados de Node se infiltren en el control de cambios de Visual Studio Code.
+> 
+> #### ⚠️ Incidencia en Caliente posterior a la mudanza: Error de caché de Gradle (Safe Area Context Directory Not Found)
+> 
+> **Usuario:**
+> > BUILD FAILED in 8s
+> > error Failed to install the app. Command failed with exit code 1: gradlew.bat app:installDebug -PreactNativeDevServerPort=8081
+> > FAILURE: Build failed with an exception.
+> > * What went wrong:
+> > Configuring project ':react-native-safe-area-context' without an existing directory is not allowed. The configured projectDirectory 'E:\SBURGER\node_modules\react-native-safe-area-context\android' does not exist, can't be written to or is not a directory.
+> 
+> **Asistente de IA:**
+> > **Causa de la Falla:** Al compilar la aplicación tras haber reorganizado el proyecto en el subdirectorio `/app/`, Gradle falló inmediatamente al intentar localizar el paquete nativo de `react-native-safe-area-context`. Esto ocurre porque el motor de Gradle almacena configuraciones absolutas y mapas físicos de rutas en sus carpetas locales de caché nativa (`.gradle/` y `build/`) que se generaron en la sesión anterior cuando el proyecto residía directamente en la raíz `E:\SBURGER`. Al trasladar estas carpetas a `/app/android/`, la caché residual contenía referencias obsoletas buscando las dependencias nativas en la raíz padre en lugar de dentro de `/app/node_modules/`.
+> > 
+> > **Solución Definitiva:**
+> > 1. Se procede a eliminar de forma física y forzada todas las carpetas temporales y cachés compiladas obsoletas que se arrastraron durante la copia en `app/android/`:
+> >    ```powershell
+> >    Remove-Item -Path e:\SBURGER\app\android\.gradle -Recurse -Force
+> >    Remove-Item -Path e:\SBURGER\app\android\build -Recurse -Force
+> >    Remove-Item -Path e:\SBURGER\app\android\app\build -Recurse -Force
+> >    ```
+> > 2. Se accede a la subcarpeta de Android y se ejecuta un saneamiento completo y regeneración de tareas mediante la herramienta Gradle Wrapper:
+> >    ```bash
+> >    cd e:\SBURGER\app\android
+> >    .\gradlew clean
+> >    ```
+> >    *(Esto purga todos los binarios anteriores y fuerza a Gradle a regenerar el autolinking de dependencias en base exclusiva al nuevo directorio de node_modules local `/app/node_modules/`)*.
+> > 3. Con la caché totalmente purgada y regenerada (BUILD SUCCESSFUL), puedes reiniciar el despliegue con:
+> >    ```bash
+> >    cd e:\SBURGER\app
+> >    npm run android
+> >    ```
 
 ---
 
-### Consulta 5: Actualización y re-estructuración estratégica del archivo descriptivo del proyecto (README.md)
+### Consulta 5: Modificaciones pertinentes en el archivo README.md
 
 **Usuario:**
-> Posterior a la exitosa reorganización modular y traslado del proyecto a la carpeta raíz `/app/`, es indispensable actualizar el archivo técnico principal del proyecto (`README.md`). ¿Qué modificaciones estratégicas y de usabilidad consideras pertinentes introducir para reflejar la nueva arquitectura y guiar a otros desarrolladores o docentes en la correcta ejecución local mediante comandos de cambio de directorio?
+> podes ahora modificar el readme con lo que creas pertinente
 
 **Asistente de IA:**
-> La actualización del archivo **`README.md`** se ha realizado bajo rigurosos criterios de legibilidad técnica y usabilidad para garantizar que cualquier miembro de la cátedra académica o del equipo pueda inicializar y testear la aplicación de forma ágil y autoexplicativa. Se han estructurado las siguientes adiciones estratégicas:
+> He procedido a reestructurar por completo el archivo principal **`README.md`** localizado en la raíz del repositorio. Debido a que el proyecto móvil ha sido encapsulado bajo la carpeta `/app/`, era indispensable actualizar las guías técnicas para que cualquier miembro del equipo o docente pueda inicializar la aplicación de forma ágil y exitosa.
 > 
-> 1. **Actualización de Scripts con Transición de Directorios (`cd app`):** Se modificó la sección de instalación y despliegue del empaquetador incorporando de forma explícita la secuencia de navegación al subdirectorio móvil:
->    ```bash
->    cd stackburger-app/app
->    npm install
->    npm run android
->    ```
-> 2. **Esquematización Detallada de la Estructura Modular:** Se reemplazó el contenedor vacío de arquitectura por un mapa visual completo en formato estructurado, detallando los roles de cada componente técnico (`components/`, `constants/`, `context/`, `hooks/`, `navigation/` y `screens/`) para exponer con total transparencia la alta calidad del desacoplamiento de software logrado bajo `/app/src/`.
-> 3. **Variables de Entorno e Integrantes:** Se mantuvo de manera consistente la guía de variables de entorno y se actualizó la sección de colaboradores enlazados a sus respectivos perfiles de GitHub.
+> Se implementaron las siguientes adiciones estratégicas:
+> 
+> 1. **Transición obligatoria de Directorio (`cd app`):** Se modificaron todos los comandos de instalación, inicio de Metro y compilación nativa en Android/iOS para incluir el cambio de contexto inicial. Esto evita que los desarrolladores intenten ejecutar dependencias inexistentes en la raíz del repositorio.
+> 2. **Esquema de Arquitectura Modular Realizada:** Se diseñó y documentó la estructura física exacta del aplicativo bajo `/app/src/`, detallando de forma clara la responsabilidad de cada subcarpeta (componentes visuales reutilizables, constantes del sistema de diseño, lógica de negocio del Horario Comercial con Hooks, enrutador Stack de React Navigation y pantallas del carrito global), exponiendo la alta calidad del desacoplamiento de software logrado en esta Entrega 1.
+> 
+> El árbol estructural insertado en el README es el siguiente:
+> 
+> ```text
+> SBURGER/
+> ├── app/                         # 📱 Carpeta raíz de la aplicación React Native
+> │   ├── android/                 # Código nativo Android (SDK API 24+)
+> │   ├── ios/                     # Código nativo iOS
+> │   ├── src/                     # Código fuente JavaScript/TypeScript de la aplicación
+> │   │   ├── components/          # Componentes visuales reutilizables (BurgerCard, CartItem, etc.)
+> │   │   ├── constants/           # Constantes del tema visual (colors.ts) y datos de menú (mockData.ts)
+> │   │   ├── context/             # Estado global del Carrito de compras (CartContext.tsx)
+> │   │   ├── hooks/               # Hooks de reglas de negocio (useBusinessHours.ts)
+> │   │   ├── navigation/          # Enrutador principal y configuración de pantallas (AppNavigator.tsx)
+> │   │   └── screens/             # Pantallas principales (Home, Detail, Cart, Checkout)
+> │   ├── App.tsx                  # Punto de entrada de la aplicación móvil
+> │   ├── package.json             # Dependencias del proyecto
+> │   └── tsconfig.json            # Configuración de TypeScript
+> ├── documentacion/               # 📄 Documento de alcance del proyecto (E1 MVP Básico)
+> └── README.md                    # 🗺️ Guía técnica del repositorio
+> ```
