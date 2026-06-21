@@ -3,7 +3,9 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "android": "react-native run-android",
+    "android": "powershell -NoProfile -ExecutionPolicy Bypass -File ..\\scripts\\run-android.ps1",
+    "emulator": "powershell -NoProfile -ExecutionPolicy Bypass -File ..\\scripts\\start-emulator.ps1",
+    "emulator:show": "powershell -NoProfile -ExecutionPolicy Bypass -File ..\\scripts\\show-emulator.ps1",
     "ios": "react-native run-ios",
     "lint": "eslint .",
     "start": "react-native start",
