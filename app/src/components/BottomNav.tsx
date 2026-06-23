@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Platform } from 'react-native';
+import { Colors } from '../constants/colors';
 
 export type BottomNavTab = 'catalog' | 'orders';
 
@@ -8,13 +9,6 @@ interface BottomNavProps {
   onCatalogPress: () => void;
   onOrdersPress: () => void;
 }
-
-const NavColors = {
-  background: '#0C0C0C',
-  border: '#2A2A2A',
-  accent: '#F39C12',
-  inactive: '#666666',
-};
 
 export const BottomNav: React.FC<BottomNavProps> = ({
   activeTab,
@@ -58,9 +52,9 @@ export const BottomNav: React.FC<BottomNavProps> = ({
 const styles = StyleSheet.create({
   bottomNav: {
     flexDirection: 'row',
-    backgroundColor: NavColors.background,
+    backgroundColor: Colors.background,
     borderTopWidth: 1,
-    borderTopColor: NavColors.border,
+    borderTopColor: Colors.border,
     paddingTop: 10,
     paddingBottom: Platform.OS === 'ios' ? 6 : 10,
     paddingHorizontal: 20,
@@ -74,7 +68,7 @@ const styles = StyleSheet.create({
   tabIcon: {
     fontSize: 22,
     marginBottom: 4,
-    opacity: 0.5,
+    opacity: 0.45,
   },
   tabIconActive: {
     opacity: 1,
@@ -82,9 +76,9 @@ const styles = StyleSheet.create({
   tabLabel: {
     fontSize: 12,
     fontWeight: '600',
-    color: NavColors.inactive,
+    color: Colors.tabInactive,
   },
   tabLabelActive: {
-    color: NavColors.accent,
+    color: Colors.accent,
   },
 });

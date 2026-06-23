@@ -1,0 +1,293 @@
+mutation SeedPedidos @auth(level: PUBLIC, insecureReason: "Seed pedidos de prueba") {
+  pedidoYamilPrep: pedido_insert(
+    data: {
+      id: "33333333-3333-3333-3333-333333333301"
+      codigo: "SB-40101"
+      usuarioId: "11111111-1111-1111-1111-111111111101"
+      estado: PREPARING
+      subtotal: 7500
+      costoEnvio: 0
+      total: 7500
+      modalidadEntrega: TAKEAWAY
+      nombreContacto: "Yamil Tundis"
+      telefonoContacto: "11939393939"
+    }
+  )
+
+  itemYamilPrep1: pedidoItem_insert(
+    data: {
+      pedidoId: "33333333-3333-3333-3333-333333333301"
+      productoId: "22222222-2222-2222-2222-222222222201"
+      nombreProducto: "Stack Simple"
+      cantidad: 1
+      precioUnitario: 4500
+      precioTotalLinea: 4500
+    }
+  )
+
+  itemYamilPrep2: pedidoItem_insert(
+    data: {
+      pedidoId: "33333333-3333-3333-3333-333333333301"
+      productoId: "22222222-2222-2222-2222-222222222205"
+      nombreProducto: "Papas Fritas Clásicas"
+      cantidad: 1
+      precioUnitario: 1800
+      precioTotalLinea: 1800
+    }
+  )
+
+  itemYamilPrep3: pedidoItem_insert(
+    data: {
+      pedidoId: "33333333-3333-3333-3333-333333333301"
+      productoId: "22222222-2222-2222-2222-222222222209"
+      nombreProducto: "Coca-Cola"
+      cantidad: 1
+      precioUnitario: 1200
+      precioTotalLinea: 1200
+    }
+  )
+
+  pedidoYamilDone: pedido_insert(
+    data: {
+      id: "33333333-3333-3333-3333-333333333302"
+      codigo: "SB-40095"
+      usuarioId: "11111111-1111-1111-1111-111111111101"
+      estado: COMPLETED
+      subtotal: 13600
+      costoEnvio: 1000
+      total: 14600
+      modalidadEntrega: DELIVERY
+      nombreContacto: "Yamil Tundis"
+      telefonoContacto: "11939393939"
+      direccion: "Av. Corrientes 1234, CABA"
+    }
+  )
+
+  itemYamilDone1: pedidoItem_insert(
+    data: {
+      pedidoId: "33333333-3333-3333-3333-333333333302"
+      productoId: "22222222-2222-2222-2222-222222222202"
+      nombreProducto: "Stack Bacon & Cheddar"
+      cantidad: 2
+      precioUnitario: 5200
+      precioTotalLinea: 10400
+      extraMedallon: 1
+    }
+  )
+
+  itemYamilDone2: pedidoItem_insert(
+    data: {
+      pedidoId: "33333333-3333-3333-3333-333333333302"
+      productoId: "22222222-2222-2222-2222-222222222206"
+      nombreProducto: "Papas con Cheddar"
+      cantidad: 1
+      precioUnitario: 2400
+      precioTotalLinea: 2400
+    }
+  )
+
+  itemYamilDone3: pedidoItem_insert(
+    data: {
+      pedidoId: "33333333-3333-3333-3333-333333333302"
+      productoId: "22222222-2222-2222-2222-222222222210"
+      nombreProducto: "Agua Mineral"
+      cantidad: 1
+      precioUnitario: 800
+      precioTotalLinea: 800
+    }
+  )
+
+  pedidoJuanPrep: pedido_insert(
+    data: {
+      id: "33333333-3333-3333-3333-333333333303"
+      codigo: "SB-40102"
+      usuarioId: "11111111-1111-1111-1111-111111111102"
+      estado: PREPARING
+      subtotal: 9500
+      costoEnvio: 1000
+      total: 10500
+      modalidadEntrega: DELIVERY
+      nombreContacto: "Juan Pérez"
+      telefonoContacto: "1123456789"
+      direccion: "Calle Falsa 742, CABA"
+    }
+  )
+
+  itemJuanPrep1: pedidoItem_insert(
+    data: {
+      pedidoId: "33333333-3333-3333-3333-333333333303"
+      productoId: "22222222-2222-2222-2222-222222222203"
+      nombreProducto: "Stack Crispy Chicken"
+      cantidad: 1
+      precioUnitario: 5500
+      precioTotalLinea: 5500
+    }
+  )
+
+  itemJuanPrep2: pedidoItem_insert(
+    data: {
+      pedidoId: "33333333-3333-3333-3333-333333333303"
+      productoId: "22222222-2222-2222-2222-222222222207"
+      nombreProducto: "Papas con Bacon"
+      cantidad: 1
+      precioUnitario: 2600
+      precioTotalLinea: 2600
+    }
+  )
+
+  itemJuanPrep3: pedidoItem_insert(
+    data: {
+      pedidoId: "33333333-3333-3333-3333-333333333303"
+      productoId: "22222222-2222-2222-2222-222222222211"
+      nombreProducto: "Jugo de Naranja"
+      cantidad: 1
+      precioUnitario: 1400
+      precioTotalLinea: 1400
+    }
+  )
+
+  pedidoJuanDone: pedido_insert(
+    data: {
+      id: "33333333-3333-3333-3333-333333333304"
+      codigo: "SB-40088"
+      usuarioId: "11111111-1111-1111-1111-111111111102"
+      estado: COMPLETED
+      subtotal: 12300
+      costoEnvio: 0
+      total: 12300
+      modalidadEntrega: TAKEAWAY
+      nombreContacto: "Juan Pérez"
+      telefonoContacto: "1123456789"
+    }
+  )
+
+  itemJuanDone1: pedidoItem_insert(
+    data: {
+      pedidoId: "33333333-3333-3333-3333-333333333304"
+      productoId: "22222222-2222-2222-2222-222222222201"
+      nombreProducto: "Stack Simple"
+      cantidad: 1
+      precioUnitario: 4500
+      precioTotalLinea: 4500
+    }
+  )
+
+  itemJuanDone2: pedidoItem_insert(
+    data: {
+      pedidoId: "33333333-3333-3333-3333-333333333304"
+      productoId: "22222222-2222-2222-2222-222222222204"
+      nombreProducto: "Stack Veggie Premium"
+      cantidad: 1
+      precioUnitario: 4800
+      precioTotalLinea: 4800
+    }
+  )
+
+  itemJuanDone3: pedidoItem_insert(
+    data: {
+      pedidoId: "33333333-3333-3333-3333-333333333304"
+      productoId: "22222222-2222-2222-2222-222222222212"
+      nombreProducto: "Limonada Casera"
+      cantidad: 2
+      precioUnitario: 1500
+      precioTotalLinea: 3000
+    }
+  )
+
+  pedidoMariaPrep: pedido_insert(
+    data: {
+      id: "33333333-3333-3333-3333-333333333305"
+      codigo: "SB-40103"
+      usuarioId: "11111111-1111-1111-1111-111111111103"
+      estado: PREPARING
+      subtotal: 8200
+      costoEnvio: 0
+      total: 8200
+      modalidadEntrega: TAKEAWAY
+      nombreContacto: "María López"
+      telefonoContacto: "1155667788"
+    }
+  )
+
+  itemMariaPrep1: pedidoItem_insert(
+    data: {
+      pedidoId: "33333333-3333-3333-3333-333333333305"
+      productoId: "22222222-2222-2222-2222-222222222204"
+      nombreProducto: "Stack Veggie Premium"
+      cantidad: 1
+      precioUnitario: 4800
+      precioTotalLinea: 4800
+    }
+  )
+
+  itemMariaPrep2: pedidoItem_insert(
+    data: {
+      pedidoId: "33333333-3333-3333-3333-333333333305"
+      productoId: "22222222-2222-2222-2222-222222222208"
+      nombreProducto: "Papas Cajún"
+      cantidad: 1
+      precioUnitario: 2200
+      precioTotalLinea: 2200
+    }
+  )
+
+  itemMariaPrep3: pedidoItem_insert(
+    data: {
+      pedidoId: "33333333-3333-3333-3333-333333333305"
+      productoId: "22222222-2222-2222-2222-222222222209"
+      nombreProducto: "Coca-Cola"
+      cantidad: 1
+      precioUnitario: 1200
+      precioTotalLinea: 1200
+    }
+  )
+
+  pedidoMariaDone: pedido_insert(
+    data: {
+      id: "33333333-3333-3333-3333-333333333306"
+      codigo: "SB-40076"
+      usuarioId: "11111111-1111-1111-1111-111111111103"
+      estado: COMPLETED
+      subtotal: 9900
+      costoEnvio: 1000
+      total: 10900
+      modalidadEntrega: DELIVERY
+      nombreContacto: "María López"
+      telefonoContacto: "1155667788"
+      direccion: "Av. Santa Fe 2500, CABA"
+    }
+  )
+
+  itemMariaDone1: pedidoItem_insert(
+    data: {
+      pedidoId: "33333333-3333-3333-3333-333333333306"
+      productoId: "22222222-2222-2222-2222-222222222202"
+      nombreProducto: "Stack Bacon & Cheddar"
+      cantidad: 1
+      precioUnitario: 5200
+      precioTotalLinea: 5200
+    }
+  )
+
+  itemMariaDone2: pedidoItem_insert(
+    data: {
+      pedidoId: "33333333-3333-3333-3333-333333333306"
+      productoId: "22222222-2222-2222-2222-222222222213"
+      nombreProducto: "Brownie de Chocolate"
+      cantidad: 1
+      precioUnitario: 2500
+      precioTotalLinea: 2500
+    }
+  )
+
+  itemMariaDone3: pedidoItem_insert(
+    data: {
+      pedidoId: "33333333-3333-3333-3333-333333333306"
+      productoId: "22222222-2222-2222-2222-222222222215"
+      nombreProducto: "Helado Artesanal"
+      cantidad: 1
+      precioUnitario: 2200
+      precioTotalLinea: 2200
+    }
+  )
+}

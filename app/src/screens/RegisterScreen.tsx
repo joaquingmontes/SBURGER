@@ -9,47 +9,88 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  ActivityIndicator,
 } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { useFocusEffect } from '@react-navigation/native';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { ScreenSafeArea } from '../components/ScreenSafeArea';
-
+import { Colors } from '../constants/colors';
+import { useAuth, AuthUser } from '../context/AuthContext';
+import { resetAfterAuth } from '../navigation/navigationUtils';
+import { AppDialogModal, AppDialogVariant } from '../components/AppDialogModal';
 type RegisterScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Register'>;
 
 interface RegisterScreenProps {
   navigation: RegisterScreenNavigationProp;
 }
 
-const AuthColors = {
-  background: '#0D0D0D',
-  inputBackground: '#1F1F1F',
-  inputBorder: '#2A2A2A',
-  textPrimary: '#FFFFFF',
-  textSecondary: '#888888',
-  label: '#777777',
-  placeholder: '#555555',
-  primaryButton: '#8B5A10',
-  primaryButtonText: '#1A1208',
-  accent: '#FF9800',
-  backButtonBackground: '#1F1F1F',
-  backButtonBorder: '#2A2A2A',
-  logoTop: '#FFB347',
-  logoBottom: '#FF8C00',
+interface RegisterDialogState {
+  visible: boolean;
+  title: string;
+  message: string;
+  variant: AppDialogVariant;
+  primaryLabel: string;
+  onPrimary: () => void;
+}
+
+const INITIAL_DIALOG: RegisterDialogState = {
+  visible: false,
+  title: '',
+  message: '',
+  variant: 'error',
+  primaryLabel: 'Entendido',
+  onPrimary: () => {},
 };
 
 export const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
+  const { register } = useAuth();
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [dialog, setDialog] = useState<RegisterDialogState>(INITIAL_DIALOG);
 
+  const showDialog = (config: Omit<RegisterDialogState, 'visible'>) => {
+    setDialog({
+      ...config,
+      visible: true,
+    });
+  };
+
+  const closeDialog = () => {
+    setDialog(current => ({ ...current, visible: false }));
+  };
+
+  const showErrorDialog = (message: string, title = 'Error') => {
+    showDialog({
+      title,
+      message,
+      variant: 'error',
+      primaryLabel: 'Entendido',
+      onPrimary: closeDialog,
+    });
+  };
+
+  const showSuccessDialog = (user: AuthUser) => {
+    showDialog({
+      title: 'Cuenta creada',
+      message: 'Tu cuenta fue creada correctamente.',
+      variant: 'success',
+      primaryLabel: 'Continuar',
+      onPrimary: () => {
+        closeDialog();
+        resetAfterAuth(navigation, user);
+      },
+    });
+  };
   useFocusEffect(
     useCallback(() => {
-      StatusBar.setBarStyle('light-content');
+      StatusBar.setBarStyle('dark-content');
       if (Platform.OS === 'android') {
-        StatusBar.setBackgroundColor(AuthColors.background);
+        StatusBar.setBackgroundColor(Colors.background);
       }
     }, []),
   );
@@ -58,6 +99,41 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) =>
     navigation.goBack();
   };
 
+  const handleRegister = async () => {
+    if (fullName.trim().length < 3) {
+      showErrorDialog('Ingresá tu nombre completo.');
+      return;
+    }
+
+    if (!email.trim()) {
+      showErrorDialog('Ingresá un email válido.');
+      return;
+    }
+
+    if (password.length < 6) {
+      showErrorDialog('La contraseña debe tener al menos 6 caracteres.');
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      showErrorDialog('Las contraseñas no coinciden.');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const user = await register(fullName, email, password);
+      showSuccessDialog(user);
+    } catch (error) {
+      showErrorDialog(
+        error instanceof Error
+          ? error.message
+          : 'No se pudo crear la cuenta. Verificá tu conexión e intentá de nuevo.',
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
   return (
     <ScreenSafeArea style={styles.safeArea}>
       <KeyboardAvoidingView
@@ -99,7 +175,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) =>
               <TextInput
                 style={styles.input}
                 placeholder="Juan García"
-                placeholderTextColor={AuthColors.placeholder}
+                placeholderTextColor={Colors.placeholder}
                 value={fullName}
                 onChangeText={setFullName}
                 autoCapitalize="words"
@@ -112,7 +188,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) =>
               <TextInput
                 style={styles.input}
                 placeholder="tu@email.com"
-                placeholderTextColor={AuthColors.placeholder}
+                placeholderTextColor={Colors.placeholder}
                 value={email}
                 onChangeText={setEmail}
                 keyboardType="email-address"
@@ -127,7 +203,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) =>
                 <TextInput
                   style={styles.passwordInput}
                   placeholder="Mínimo 6 caracteres"
-                  placeholderTextColor={AuthColors.placeholder}
+                  placeholderTextColor={Colors.placeholder}
                   value={password}
                   onChangeText={setPassword}
                   secureTextEntry={!showPassword}
@@ -153,7 +229,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) =>
               <TextInput
                 style={styles.input}
                 placeholder="Repetí tu contraseña"
-                placeholderTextColor={AuthColors.placeholder}
+                placeholderTextColor={Colors.placeholder}
                 value={confirmPassword}
                 onChangeText={setConfirmPassword}
                 secureTextEntry={!showPassword}
@@ -163,13 +239,17 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) =>
             </View>
 
             <TouchableOpacity
-              style={styles.primaryButton}
+              style={[styles.primaryButton, loading && styles.primaryButtonDisabled]}
               activeOpacity={0.85}
-              onPress={() => navigation.replace('Home')}
+              onPress={handleRegister}
+              disabled={loading}
             >
-              <Text style={styles.primaryButtonText}>Crear cuenta</Text>
+              {loading ? (
+                <ActivityIndicator color={Colors.accentText} />
+              ) : (
+                <Text style={styles.primaryButtonText}>Crear cuenta</Text>
+              )}
             </TouchableOpacity>
-
             <View style={styles.loginRow}>
               <Text style={styles.loginPrompt}>¿Ya tenés cuenta? </Text>
               <TouchableOpacity activeOpacity={0.7} onPress={goToLogin}>
@@ -179,6 +259,15 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) =>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
+
+      <AppDialogModal
+        visible={dialog.visible}
+        title={dialog.title}
+        message={dialog.message}
+        variant={dialog.variant}
+        primaryLabel={dialog.primaryLabel}
+        onPrimary={dialog.onPrimary}
+      />
     </ScreenSafeArea>
   );
 };
@@ -186,7 +275,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) =>
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: AuthColors.background,
+    backgroundColor: Colors.background,
   },
   flex: {
     flex: 1,
@@ -201,16 +290,16 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 10,
-    backgroundColor: AuthColors.backButtonBackground,
+    backgroundColor: Colors.surface,
     borderWidth: 1,
-    borderColor: AuthColors.backButtonBorder,
+    borderColor: Colors.border,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 24,
   },
   backArrow: {
     fontSize: 20,
-    color: AuthColors.textPrimary,
+    color: Colors.textPrimary,
     fontWeight: '600',
     marginTop: -2,
   },
@@ -234,7 +323,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     height: '55%',
-    backgroundColor: AuthColors.logoTop,
+    backgroundColor: Colors.logoTop,
   },
   logoGradientBottom: {
     position: 'absolute',
@@ -242,7 +331,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     height: '55%',
-    backgroundColor: AuthColors.logoBottom,
+    backgroundColor: Colors.logoBottom,
   },
   logoEmoji: {
     fontSize: 26,
@@ -254,13 +343,13 @@ const styles = StyleSheet.create({
   brandName: {
     fontSize: 20,
     fontWeight: '700',
-    color: AuthColors.textPrimary,
+    color: Colors.textPrimary,
     letterSpacing: 0.3,
     marginBottom: 2,
   },
   brandSubtext: {
     fontSize: 13,
-    color: AuthColors.textSecondary,
+    color: Colors.textSecondary,
     fontWeight: '400',
   },
   formSection: {
@@ -269,12 +358,12 @@ const styles = StyleSheet.create({
   formTitle: {
     fontSize: 26,
     fontWeight: '700',
-    color: AuthColors.textPrimary,
+    color: Colors.textPrimary,
     marginBottom: 6,
   },
   formSubtitle: {
     fontSize: 14,
-    color: AuthColors.textSecondary,
+    color: Colors.textSecondary,
     marginBottom: 28,
   },
   fieldGroup: {
@@ -283,27 +372,27 @@ const styles = StyleSheet.create({
   fieldLabel: {
     fontSize: 11,
     fontWeight: '600',
-    color: AuthColors.label,
+    color: Colors.label,
     letterSpacing: 1.2,
     marginBottom: 8,
     textTransform: 'uppercase',
   },
   input: {
-    backgroundColor: AuthColors.inputBackground,
+    backgroundColor: Colors.inputBackground,
     borderWidth: 1,
-    borderColor: AuthColors.inputBorder,
+    borderColor: Colors.inputBorder,
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 14,
     fontSize: 16,
-    color: AuthColors.textPrimary,
+    color: Colors.textPrimary,
   },
   passwordWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: AuthColors.inputBackground,
+    backgroundColor: Colors.inputBackground,
     borderWidth: 1,
-    borderColor: AuthColors.inputBorder,
+    borderColor: Colors.inputBorder,
     borderRadius: 12,
   },
   passwordInput: {
@@ -311,7 +400,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 14,
     fontSize: 16,
-    color: AuthColors.textPrimary,
+    color: Colors.textPrimary,
   },
   eyeButton: {
     paddingHorizontal: 14,
@@ -345,17 +434,19 @@ const styles = StyleSheet.create({
     transform: [{ rotate: '-35deg' }],
   },
   primaryButton: {
-    backgroundColor: AuthColors.primaryButton,
+    backgroundColor: Colors.accent,
     borderRadius: 12,
     paddingVertical: 16,
     alignItems: 'center',
     marginTop: 8,
     marginBottom: 24,
   },
-  primaryButtonText: {
+  primaryButtonDisabled: {
+    opacity: 0.7,
+  },  primaryButtonText: {
     fontSize: 16,
     fontWeight: '700',
-    color: AuthColors.primaryButtonText,
+    color: Colors.accentText,
   },
   loginRow: {
     flexDirection: 'row',
@@ -364,11 +455,11 @@ const styles = StyleSheet.create({
   },
   loginPrompt: {
     fontSize: 14,
-    color: AuthColors.textSecondary,
+    color: Colors.textSecondary,
   },
   loginLink: {
     fontSize: 14,
     fontWeight: '600',
-    color: AuthColors.accent,
+    color: Colors.accent,
   },
 });

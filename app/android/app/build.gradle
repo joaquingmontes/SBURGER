@@ -93,6 +93,11 @@ android {
             keyPassword 'android'
         }
     }
+    adbOptions {
+        timeOutInMs 600000
+        installOptions "-r", "-d", "-t"
+    }
+
     buildTypes {
         debug {
             signingConfig signingConfigs.debug

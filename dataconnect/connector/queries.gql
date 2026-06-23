@@ -1,0 +1,102 @@
+query ListProductosActivos @auth(level: PUBLIC, insecureReason: "Catalogo publico del menu") {
+  productos(where: { activo: { eq: true } }) {
+    id
+    nombre
+    descripcion
+    ingredientes
+    precio
+    categoria
+    imagenUrl
+  }
+}
+
+query ListProductosAdmin @auth(level: PUBLIC, insecureReason: "Pendiente restringir acceso admin") {
+  productos(orderBy: { createdAt: DESC }) {
+    id
+    nombre
+    descripcion
+    ingredientes
+    precio
+    categoria
+    imagenUrl
+    activo
+  }
+}
+
+query ListPedidosByUsuario($usuarioId: UUID!) @auth(level: PUBLIC, insecureReason: "Pendiente integrar Firebase Auth") {
+  pedidos(where: { usuario: { id: { eq: $usuarioId } } }, orderBy: { createdAt: DESC }) {
+    id
+    codigo
+    estado
+    subtotal
+    costoEnvio
+    total
+    modalidadEntrega
+    nombreContacto
+    telefonoContacto
+    direccion
+    createdAt
+    pedidoItems_on_pedido {
+      id
+      nombreProducto
+      cantidad
+      precioUnitario
+      precioTotalLinea
+      extraMedallon
+      extraCheddar
+      extraPanceta
+      extraCebolla
+      notas
+    }
+  }
+}
+
+query ListPedidosAdmin @auth(level: PUBLIC, insecureReason: "Pendiente restringir acceso admin") {
+  pedidos(orderBy: { createdAt: DESC }) {
+    id
+    codigo
+    estado
+    subtotal
+    costoEnvio
+    total
+    modalidadEntrega
+    nombreContacto
+    telefonoContacto
+    direccion
+    createdAt
+    pedidoItems_on_pedido {
+      id
+      nombreProducto
+      cantidad
+      precioUnitario
+      precioTotalLinea
+      extraMedallon
+      extraCheddar
+      extraPanceta
+      extraCebolla
+      notas
+    }
+  }
+}
+
+query GetUsuarioByEmail($email: String!) @auth(level: PUBLIC, insecureReason: "Login custom pendiente de Auth") {
+  usuarios(where: { email: { eq: $email } }, limit: 1) {
+    id
+    nombreCompleto
+    email
+    passwordHash
+    rol
+  }
+}
+
+query GetProductoById($id: UUID!) @auth(level: PUBLIC, insecureReason: "Catalogo publico del menu") {
+  productos(where: { id: { eq: $id } }, limit: 1) {
+    id
+    nombre
+    descripcion
+    ingredientes
+    precio
+    categoria
+    imagenUrl
+  }
+}

@@ -1,0 +1,121 @@
+mutation CreateUsuario(
+  $nombreCompleto: String!
+  $email: String!
+  $passwordHash: String!
+  $rol: RolUsuario
+) @auth(level: PUBLIC, insecureReason: "Registro publico pendiente de Auth") {
+  usuario_insert(
+    data: {
+      nombreCompleto: $nombreCompleto
+      email: $email
+      passwordHash: $passwordHash
+      rol: $rol
+    }
+  )
+}
+
+mutation CreateProducto(
+  $nombre: String!
+  $descripcion: String!
+  $ingredientes: String
+  $precio: Int!
+  $categoria: CategoriaProducto!
+  $imagenUrl: String!
+) @auth(level: PUBLIC, insecureReason: "Pendiente restringir acceso admin") {
+  producto_insert(
+    data: {
+      nombre: $nombre
+      descripcion: $descripcion
+      ingredientes: $ingredientes
+      precio: $precio
+      categoria: $categoria
+      imagenUrl: $imagenUrl
+    }
+  )
+}
+
+mutation UpdateProducto(
+  $id: UUID!
+  $nombre: String!
+  $descripcion: String!
+  $ingredientes: String
+  $precio: Int!
+  $categoria: CategoriaProducto!
+  $imagenUrl: String!
+) @auth(level: PUBLIC, insecureReason: "Pendiente restringir acceso admin") {
+  producto_update(
+    id: $id
+    data: {
+      nombre: $nombre
+      descripcion: $descripcion
+      ingredientes: $ingredientes
+      precio: $precio
+      categoria: $categoria
+      imagenUrl: $imagenUrl
+    }
+  )
+}
+
+mutation DeleteProducto($id: UUID!) @auth(level: PUBLIC, insecureReason: "Pendiente restringir acceso admin") {
+  producto_update(id: $id, data: { activo: false })
+}
+
+mutation CreatePedido(
+  $codigo: String!
+  $usuarioId: UUID!
+  $subtotal: Int!
+  $costoEnvio: Int!
+  $total: Int!
+  $modalidadEntrega: ModalidadEntrega!
+  $nombreContacto: String!
+  $telefonoContacto: String!
+  $direccion: String
+) @auth(level: PUBLIC, insecureReason: "Requiere usuario logueado; pendiente integrar Firebase Auth") {
+  pedido_insert(
+    data: {
+      codigo: $codigo
+      usuarioId: $usuarioId
+      subtotal: $subtotal
+      costoEnvio: $costoEnvio
+      total: $total
+      modalidadEntrega: $modalidadEntrega
+      nombreContacto: $nombreContacto
+      telefonoContacto: $telefonoContacto
+      direccion: $direccion
+    }
+  )
+}
+
+mutation CreatePedidoItem(
+  $pedidoId: UUID!
+  $productoId: UUID
+  $nombreProducto: String!
+  $cantidad: Int!
+  $precioUnitario: Int!
+  $precioTotalLinea: Int!
+  $extraMedallon: Int
+  $extraCheddar: Int
+  $extraPanceta: Int
+  $extraCebolla: Int
+  $notas: String
+) @auth(level: PUBLIC, insecureReason: "Checkout publico") {
+  pedidoItem_insert(
+    data: {
+      pedidoId: $pedidoId
+      productoId: $productoId
+      nombreProducto: $nombreProducto
+      cantidad: $cantidad
+      precioUnitario: $precioUnitario
+      precioTotalLinea: $precioTotalLinea
+      extraMedallon: $extraMedallon
+      extraCheddar: $extraCheddar
+      extraPanceta: $extraPanceta
+      extraCebolla: $extraCebolla
+      notas: $notas
+    }
+  )
+}
+
+mutation UpdatePedidoEstado($id: UUID!, $estado: EstadoPedido!) @auth(level: PUBLIC, insecureReason: "Pendiente restringir acceso admin") {
+  pedido_update(id: $id, data: { estado: $estado })
+}

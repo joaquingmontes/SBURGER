@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useLayoutEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -13,10 +13,13 @@ import {
 import { RouteProp } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
+import { MenuCategory } from '../constants/mockData';
 import { Colors } from '../constants/colors';
 import { CustomButton } from '../components/CustomButton';
 import { ExtraOption } from '../components/ExtraOption';
+import { LoginRequiredModal } from '../components/LoginRequiredModal';
 import { useCart, Customizations, calculateItemPrice } from '../context/CartContext';
+import { resetToLogin } from '../navigation/navigationUtils';
 
 type DetailScreenRouteProp = RouteProp<RootStackParamList, 'Detail'>;
 type DetailScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Detail'>;
@@ -26,28 +29,37 @@ interface DetailScreenProps {
   navigation: DetailScreenNavigationProp;
 }
 
+const EMPTY_CUSTOMIZATIONS: Customizations = {
+  medallon: 0,
+  cheddar: 0,
+  panceta: 0,
+  cebolla: 0,
+};
+
+const isSimpleProductCategory = (category: MenuCategory): boolean =>
+  category === 'fries' || category === 'drinks' || category === 'desserts';
+
 export const DetailScreen: React.FC<DetailScreenProps> = ({ route, navigation }) => {
-  const { burger } = route.params;
+  const { burger, guestMode = false } = route.params;
   const { addToCart } = useCart();
+  const isSimpleProduct = isSimpleProductCategory(burger.category);
 
-  // Estados locales para las personalizaciones (RF-02 / RN-02)
-  const [customizations, setCustomizations] = useState<Customizations>({
-    medallon: 0,
-    cheddar: 0,
-    panceta: 0,
-    cebolla: 0,
-  });
-
-  // Estado local para notas especiales (RF-02 / RN-03 / HU-05)
+  const [customizations, setCustomizations] = useState<Customizations>(EMPTY_CUSTOMIZATIONS);
   const [notes, setNotes] = useState('');
-
-  // Cantidad general de esta hamburguesa que se va a agregar
   const [quantity, setQuantity] = useState(1);
-
-  // Estado para feedback de éxito flotante
   const [showFeedback, setShowFeedback] = useState(false);
+  const [loginModalVisible, setLoginModalVisible] = useState(false);
 
-  // Manejo de incrementos de extras (límite estricto de 5 - RN-02)
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      title: burger.name,
+      headerTitleStyle: {
+        fontWeight: '700',
+        fontSize: 17,
+      },
+    });
+  }, [burger.name, navigation]);
+
   const handleIncrement = (key: keyof Customizations) => {
     setCustomizations(prev => ({
       ...prev,
@@ -62,20 +74,27 @@ export const DetailScreen: React.FC<DetailScreenProps> = ({ route, navigation })
     }));
   };
 
-  // Calcular precio unitario y total del ítem en tiempo real (RF-06)
-  const unitPrice = calculateItemPrice(burger.price, customizations);
-  const totalPrice = unitPrice * quantity;
+  const unitPrice = isSimpleProduct
+    ? burger.price
+    : calculateItemPrice(burger.price, customizations);
+  const totalPrice = unitPrice * (isSimpleProduct ? 1 : quantity);
 
-  // Manejo de guardado en el carrito (RF-03, RN-03)
   const handleAddToCart = () => {
+    if (guestMode) {
+      setLoginModalVisible(true);
+      return;
+    }
+
     if (notes.length > 150) {
       Alert.alert('Error', 'Las aclaraciones no pueden superar los 150 caracteres.');
       return;
     }
 
-    addToCart(burger, quantity, customizations, notes);
-    
-    // Feedback visual premium flotante (HU-04) sin romper flujo, y luego vuelve atrás
+    const itemQuantity = isSimpleProduct ? 1 : quantity;
+    const itemCustomizations = isSimpleProduct ? EMPTY_CUSTOMIZATIONS : customizations;
+
+    addToCart(burger, itemQuantity, itemCustomizations, notes);
+
     setShowFeedback(true);
     setTimeout(() => {
       setShowFeedback(false);
@@ -86,6 +105,49 @@ export const DetailScreen: React.FC<DetailScreenProps> = ({ route, navigation })
   const isNotesLengthExceeded = notes.length > 150;
   const isNotesApproachingLimit = notes.length >= 130;
 
+  const notesInput = (
+    <>
+      <View style={isSimpleProduct ? styles.simpleNotesHeader : styles.notesHeader}>
+        <Text style={isSimpleProduct ? styles.simpleNotesLabel : styles.sectionTitle}>
+          {isSimpleProduct ? 'ACLARACIONES (opcional)' : 'Aclaraciones especiales de cocina'}
+        </Text>
+        {!isSimpleProduct && (
+          <Text
+            style={[
+              styles.charCounter,
+              isNotesLengthExceeded && styles.errorText,
+              isNotesApproachingLimit && !isNotesLengthExceeded && styles.warningText,
+            ]}
+          >
+            {notes.length}/150
+          </Text>
+        )}
+      </View>
+
+      <TextInput
+        style={[
+          isSimpleProduct ? styles.simpleTextInput : styles.textInput,
+          isNotesLengthExceeded && styles.textInputError,
+          isNotesApproachingLimit && !isNotesLengthExceeded && styles.textInputWarning,
+        ]}
+        placeholder={
+          isSimpleProduct
+            ? 'Sin cebolla, sin salsa, cocción a punto...'
+            : 'Ej: sin cebolla, salsa stack aparte, etc.'
+        }
+        placeholderTextColor={Colors.textSecondary}
+        multiline
+        numberOfLines={3}
+        value={notes}
+        maxLength={160}
+        onChangeText={setNotes}
+      />
+      {isNotesLengthExceeded && (
+        <Text style={styles.validationError}>Máximo 150 caracteres permitidos.</Text>
+      )}
+    </>
+  );
+
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -93,117 +155,111 @@ export const DetailScreen: React.FC<DetailScreenProps> = ({ route, navigation })
       keyboardVerticalOffset={Platform.OS === 'ios' ? 88 : 0}
     >
       <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-        {/* Banner de imagen de producto (Hero Image) según wireframe SBURG002 */}
         <Image source={{ uri: burger.image }} style={styles.image} resizeMode="cover" />
 
         <View style={styles.content}>
           <Text style={styles.name}>{burger.name}</Text>
-          <Text style={styles.ingredientsTitle}>Ingredientes Base:</Text>
-          <Text style={styles.ingredients}>{burger.ingredients}</Text>
-          
-          <Text style={styles.basePriceText}>
-            Precio Base: <Text style={styles.basePrice}>${burger.price.toLocaleString('es-AR')}</Text>
-          </Text>
 
-          <View style={styles.divider} />
+          {isSimpleProduct ? (
+            <>
+              <Text style={styles.description}>{burger.description}</Text>
 
-          {/* Sección EXTRAS (+$800) */}
-          <Text style={styles.sectionTitle}>EXTRAS (+$800 c/u)</Text>
-          <Text style={styles.sectionSubtitle}>Máximo 5 unidades de cada extra por hamburguesa</Text>
+              <View style={styles.priceBox}>
+                <Text style={styles.priceBoxLabel}>Precio base</Text>
+                <Text style={styles.priceBoxValue}>
+                  ${burger.price.toLocaleString('es-AR')}
+                </Text>
+              </View>
 
-          <ExtraOption
-            title="Medallón de Carne adicional"
-            count={customizations.medallon}
-            onIncrement={() => handleIncrement('medallon')}
-            onDecrement={() => handleDecrement('medallon')}
-          />
-          <ExtraOption
-            title="Queso Cheddar extra"
-            count={customizations.cheddar}
-            onIncrement={() => handleIncrement('cheddar')}
-            onDecrement={() => handleDecrement('cheddar')}
-          />
-          <ExtraOption
-            title="Panceta Crocante extra"
-            count={customizations.panceta}
-            onIncrement={() => handleIncrement('panceta')}
-            onDecrement={() => handleDecrement('panceta')}
-          />
-          <ExtraOption
-            title="Cebolla Caramelizada extra"
-            count={customizations.cebolla}
-            onIncrement={() => handleIncrement('cebolla')}
-            onDecrement={() => handleDecrement('cebolla')}
-          />
+              {notesInput}
+            </>
+          ) : (
+            <>
+              <Text style={styles.ingredientsTitle}>Ingredientes Base:</Text>
+              <Text style={styles.ingredients}>{burger.ingredients}</Text>
 
-          <View style={styles.divider} />
+              <Text style={styles.basePriceText}>
+                Precio Base:{' '}
+                <Text style={styles.basePrice}>
+                  ${burger.price.toLocaleString('es-AR')}
+                </Text>
+              </Text>
 
-          {/* Campo de Notas Especiales con validación de 150 caracteres (RN-03 / HU-05) */}
-          <View style={styles.notesHeader}>
-            <Text style={styles.sectionTitle}>Aclaraciones especiales de cocina</Text>
-            <Text 
-              style={[
-                styles.charCounter, 
-                isNotesLengthExceeded && styles.errorText,
-                isNotesApproachingLimit && !isNotesLengthExceeded && styles.warningText
-              ]}
-            >
-              {notes.length}/150
-            </Text>
-          </View>
-          
-          <TextInput
-            style={[
-              styles.textInput, 
-              isNotesLengthExceeded && styles.textInputError,
-              isNotesApproachingLimit && !isNotesLengthExceeded && styles.textInputWarning
-            ]}
-            placeholder="Ej: sin cebolla, salsa stack aparte, etc."
-            placeholderTextColor={Colors.textSecondary}
-            multiline
-            numberOfLines={3}
-            value={notes}
-            maxLength={160} // Dejamos un poco más para que la validación visual actúe en 150
-            onChangeText={(text) => setNotes(text)}
-          />
-          {isNotesLengthExceeded && (
-            <Text style={styles.validationError}>Máximo 150 caracteres permitidos.</Text>
+              <View style={styles.divider} />
+
+              <Text style={styles.sectionTitle}>EXTRAS (+$800 c/u)</Text>
+              <Text style={styles.sectionSubtitle}>
+                Máximo 5 unidades de cada extra por hamburguesa
+              </Text>
+
+              <ExtraOption
+                title="Medallón de Carne adicional"
+                count={customizations.medallon}
+                onIncrement={() => handleIncrement('medallon')}
+                onDecrement={() => handleDecrement('medallon')}
+              />
+              <ExtraOption
+                title="Queso Cheddar extra"
+                count={customizations.cheddar}
+                onIncrement={() => handleIncrement('cheddar')}
+                onDecrement={() => handleDecrement('cheddar')}
+              />
+              <ExtraOption
+                title="Panceta Crocante extra"
+                count={customizations.panceta}
+                onIncrement={() => handleIncrement('panceta')}
+                onDecrement={() => handleDecrement('panceta')}
+              />
+              <ExtraOption
+                title="Cebolla Caramelizada extra"
+                count={customizations.cebolla}
+                onIncrement={() => handleIncrement('cebolla')}
+                onDecrement={() => handleDecrement('cebolla')}
+              />
+
+              <View style={styles.divider} />
+
+              {notesInput}
+
+              <View style={styles.quantitySection}>
+                <Text style={styles.quantityTitle}>Cantidad de hamburguesas</Text>
+                <View style={styles.stepperContainer}>
+                  <CustomButton
+                    title="−"
+                    onPress={() => setQuantity(q => Math.max(1, q - 1))}
+                    disabled={quantity <= 1}
+                    style={styles.qtyBtn}
+                    textStyle={styles.qtyBtnText}
+                  />
+                  <Text style={styles.qtyValue}>{quantity}</Text>
+                  <CustomButton
+                    title="+"
+                    onPress={() => setQuantity(q => q + 1)}
+                    style={styles.qtyBtn}
+                    textStyle={styles.qtyBtnText}
+                  />
+                </View>
+              </View>
+            </>
           )}
 
-          {/* Selector de cantidad general de hamburguesas */}
-          <View style={styles.quantitySection}>
-            <Text style={styles.quantityTitle}>Cantidad de hamburguesas</Text>
-            <View style={styles.stepperContainer}>
-              <CustomButton
-                title="−"
-                onPress={() => setQuantity(q => Math.max(1, q - 1))}
-                disabled={quantity <= 1}
-                style={styles.qtyBtn}
-                textStyle={styles.qtyBtnText}
-              />
-              <Text style={styles.qtyValue}>{quantity}</Text>
-              <CustomButton
-                title="+"
-                onPress={() => setQuantity(q => q + 1)}
-                style={styles.qtyBtn}
-                textStyle={styles.qtyBtnText}
-              />
-            </View>
-          </View>
-          
           <View style={styles.spacer} />
         </View>
       </ScrollView>
 
-      {/* Botón inferior fijo de Agregar al carrito con precio dinámico (SBURG002) */}
       <View style={styles.footer}>
         <CustomButton
           title="Agregar al carrito"
           onPress={handleAddToCart}
           disabled={isNotesLengthExceeded}
-          variant={isNotesLengthExceeded ? 'disabled' : 'primary'}
+          variant={isNotesLengthExceeded ? 'disabled' : isSimpleProduct ? 'accent' : 'primary'}
           rightElement={
-            <Text style={styles.footerPrice}>
+            <Text
+              style={[
+                styles.footerPrice,
+                isSimpleProduct && styles.footerPriceAccent,
+              ]}
+            >
               ${totalPrice.toLocaleString('es-AR')}
             </Text>
           }
@@ -211,12 +267,20 @@ export const DetailScreen: React.FC<DetailScreenProps> = ({ route, navigation })
         />
       </View>
 
-      {/* Banner flotante de feedback visual exitoso (HU-04) */}
       {showFeedback && (
         <View style={styles.feedbackToast}>
           <Text style={styles.feedbackToastText}>✅ ¡Agregado con éxito!</Text>
         </View>
       )}
+
+      <LoginRequiredModal
+        visible={loginModalVisible}
+        onLogin={() => {
+          setLoginModalVisible(false);
+          resetToLogin(navigation);
+        }}
+        onCancel={() => setLoginModalVisible(false)}
+      />
     </KeyboardAvoidingView>
   );
 };
@@ -243,6 +307,33 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     color: Colors.textPrimary,
     marginBottom: 12,
+  },
+  description: {
+    fontSize: 14,
+    color: Colors.textSecondary,
+    lineHeight: 22,
+    marginBottom: 20,
+  },
+  priceBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderWidth: 1,
+    borderColor: Colors.border,
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    marginBottom: 24,
+    backgroundColor: Colors.background,
+  },
+  priceBoxLabel: {
+    fontSize: 14,
+    color: Colors.textSecondary,
+  },
+  priceBoxValue: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: Colors.textPrimary,
   },
   ingredientsTitle: {
     fontSize: 14,
@@ -282,6 +373,15 @@ const styles = StyleSheet.create({
     marginTop: 2,
     marginBottom: 8,
   },
+  simpleNotesHeader: {
+    marginBottom: 10,
+  },
+  simpleNotesLabel: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: Colors.textSecondary,
+    letterSpacing: 0.4,
+  },
   notesHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -303,6 +403,17 @@ const styles = StyleSheet.create({
     backgroundColor: '#FAF9F9',
     textAlignVertical: 'top',
     minHeight: 80,
+  },
+  simpleTextInput: {
+    borderWidth: 1,
+    borderColor: Colors.border,
+    borderRadius: 12,
+    padding: 14,
+    fontSize: 14,
+    color: Colors.textPrimary,
+    backgroundColor: Colors.background,
+    textAlignVertical: 'top',
+    minHeight: 96,
   },
   textInputWarning: {
     borderColor: Colors.warning,
@@ -358,7 +469,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   spacer: {
-    height: 100, // Espacio al pie para permitir scroll total sobre el teclado y footer
+    height: 100,
   },
   footer: {
     backgroundColor: '#FFFFFF',
@@ -368,13 +479,16 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
   },
   addToCartButton: {
-    justifyContent: 'space-between', // Para empujar precio a la derecha
+    justifyContent: 'space-between',
   },
   footerPrice: {
     color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '800',
     marginLeft: 8,
+  },
+  footerPriceAccent: {
+    color: Colors.accentText,
   },
   feedbackToast: {
     position: 'absolute',

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import {
   View,
   Text,
@@ -11,37 +11,31 @@ import {
   TextInput,
   ScrollView,
 } from 'react-native';
-import { useFocusEffect } from '@react-navigation/native';
+import { useFocusEffect, RouteProp } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
+import { useListProductosActivos } from '@dataconnect/generated/react';
 import { RootStackParamList } from '../navigation/AppNavigator';
-import { BURGER_MENU, Burger } from '../constants/mockData';
+import { Burger } from '../constants/mockData';
 import { BurgerCard } from '../components/BurgerCard';
 import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext';
 import { CustomButton } from '../components/CustomButton';
 import { BottomNav } from '../components/BottomNav';
 import { ScreenSafeArea } from '../components/ScreenSafeArea';
+import { ClientHeaderActions } from '../components/ClientHeaderActions';
+import { Colors } from '../constants/colors';
+import { dataConnect } from '../config/firebase';
+import { mapProductoToBurger } from '../utils/firebaseMappers';
+import { useRefetchOnFocus } from '../hooks/useRefetchOnFocus';
+import { resetToLogin, resetToUserHome } from '../navigation/navigationUtils';
 
 type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Home'>;
+type HomeScreenRouteProp = RouteProp<RootStackParamList, 'Home'>;
 
 interface HomeScreenProps {
   navigation: HomeScreenNavigationProp;
+  route: HomeScreenRouteProp;
 }
-
-const HomeColors = {
-  background: '#0C0C0C',
-  surface: '#1A1A1A',
-  surfaceLight: '#242424',
-  border: '#2A2A2A',
-  textPrimary: '#FFFFFF',
-  textSecondary: '#888888',
-  textMuted: '#666666',
-  placeholder: '#555555',
-  accent: '#F39C12',
-  accentText: '#1A1208',
-  logoTop: '#FFB347',
-  logoBottom: '#FF8C00',
-  tabInactive: '#666666',
-};
 
 const CATEGORIES = [
   { id: 'burgers', label: 'Hamburguesas', emoji: '🍔' },
@@ -50,69 +44,78 @@ const CATEGORIES = [
   { id: 'desserts', label: 'Postres', emoji: '🍰' },
 ] as const;
 
-export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
+export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
   const { items } = useCart();
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
-  const [menuItems, setMenuItems] = useState<Burger[]>([]);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<string>('burgers');
+  const { user, logout } = useAuth();
+  const guestMode = route.params?.guestMode ?? false;
+  const [searchQuery, setSearchQuery] = React.useState('');
+  const [selectedCategory, setSelectedCategory] = React.useState<string>('burgers');
+
+  const {
+    data,
+    isPending,
+    isError,
+    refetch,
+    isRefetching,
+  } = useListProductosActivos(dataConnect);
+
+  useRefetchOnFocus(refetch);
 
   const totalCartQuantity = items.reduce((acc, item) => acc + item.quantity, 0);
 
-  const loadMenu = (simulateError = false) => {
-    setLoading(true);
-    setError(false);
-
-    setTimeout(() => {
-      if (simulateError) {
-        setLoading(false);
-        setError(true);
-      } else {
-        setMenuItems(BURGER_MENU);
-        setLoading(false);
-      }
-    }, 1200);
+  const goToLogin = () => {
+    logout();
+    resetToLogin(navigation);
   };
 
-  useEffect(() => {
-    loadMenu();
-  }, []);
+  const menuItems = useMemo(() => {
+    const products = data?.productos ?? [];
+    const mapped = products.map(mapProductoToBurger);
+    const query = searchQuery.trim().toLowerCase();
+
+    return mapped.filter(item => {
+      const matchesCategory = item.category === selectedCategory;
+      const matchesSearch =
+        !query ||
+        item.name.toLowerCase().includes(query) ||
+        item.description.toLowerCase().includes(query);
+
+      return matchesCategory && matchesSearch;
+    });
+  }, [data?.productos, searchQuery, selectedCategory]);
 
   useFocusEffect(
     useCallback(() => {
-      StatusBar.setBarStyle('light-content');
+      StatusBar.setBarStyle('dark-content');
       if (Platform.OS === 'android') {
-        StatusBar.setBackgroundColor(HomeColors.background);
+        StatusBar.setBackgroundColor(Colors.background);
       }
     }, []),
   );
 
-  const goToLogin = () => {
-    navigation.replace('Login');
-  };
+  const firstName = user?.nombreCompleto.split(' ')[0] ?? 'Usuario';
 
-  if (loading) {
+  if (isPending) {
     return (
       <ScreenSafeArea style={[styles.safeArea, styles.center]}>
-        <ActivityIndicator size="large" color={HomeColors.accent} />
+        <ActivityIndicator size="large" color={Colors.accent} />
         <Text style={styles.loadingText}>Cargando delicias...</Text>
       </ScreenSafeArea>
     );
   }
 
-  if (error) {
+  if (isError) {
     return (
       <ScreenSafeArea style={[styles.safeArea, styles.center]}>
         <View style={styles.errorContainer}>
           <Text style={styles.errorIcon}>⚠️</Text>
           <Text style={styles.errorTitle}>Error de Conexión</Text>
           <Text style={styles.errorSubtitle}>
-            No se pudo cargar el menú gastronómico.
+            No se pudo cargar el menú desde Firebase.
           </Text>
           <CustomButton
             title="Reintentar"
-            onPress={() => loadMenu(false)}
+            onPress={() => refetch()}
             style={styles.retryButton}
           />
         </View>
@@ -131,38 +134,30 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
           </View>
           <View>
             <Text style={styles.brandName}>StackBurger</Text>
-            <Text style={styles.greeting}>Hola, Yamil</Text>
+            <Text style={styles.greeting}>
+              {guestMode ? 'Modo invitado' : `Hola, ${firstName}`}
+            </Text>
           </View>
         </View>
 
-        <View style={styles.headerActions}>
+        {guestMode ? (
           <TouchableOpacity
-            activeOpacity={0.7}
-            onPress={() => navigation.navigate('Cart')}
-            style={styles.iconButton}
-            accessibilityLabel="Ver carrito"
-          >
-            <Text style={styles.cartIcon}>🛒</Text>
-            {totalCartQuantity > 0 && (
-              <View style={styles.badge}>
-                <Text style={styles.badgeText}>{totalCartQuantity}</Text>
-              </View>
-            )}
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            activeOpacity={0.7}
+            style={styles.loginHeaderButton}
+            activeOpacity={0.85}
             onPress={goToLogin}
-            style={styles.iconButton}
-            accessibilityLabel="Cerrar sesión"
           >
-            <View style={styles.logoutIcon}>
-              <View style={styles.logoutBracket} />
-              <View style={styles.logoutArrowLine} />
-              <View style={styles.logoutArrowHead} />
-            </View>
+            <Text style={styles.loginHeaderButtonText}>Iniciar sesión</Text>
           </TouchableOpacity>
-        </View>
+        ) : (
+          <ClientHeaderActions
+            showCart
+            cartQuantity={totalCartQuantity}
+            onCartPress={() => navigation.navigate('Cart', {})}
+            onLogout={goToLogin}
+            userName={user?.nombreCompleto.split(' ')[0] ?? 'Usuario'}
+            userEmail={user?.email ?? ''}
+          />
+        )}
       </View>
 
       <View style={styles.searchContainer}>
@@ -170,13 +165,24 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
         <TextInput
           style={styles.searchInput}
           placeholder="Buscar en el menú..."
-          placeholderTextColor={HomeColors.placeholder}
+          placeholderTextColor={Colors.placeholder}
           value={searchQuery}
           onChangeText={setSearchQuery}
           autoCapitalize="none"
           autoCorrect={false}
         />
       </View>
+
+      {guestMode && (
+        <View style={styles.guestBanner}>
+          <Text style={styles.guestBannerText}>
+            Estás viendo el menú como invitado
+          </Text>
+          <TouchableOpacity activeOpacity={0.7} onPress={goToLogin}>
+            <Text style={styles.guestBannerLink}>Ingresar ›</Text>
+          </TouchableOpacity>
+        </View>
+      )}
 
       <ScrollView
         horizontal
@@ -224,19 +230,31 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
         renderItem={({ item }) => (
           <BurgerCard
             burger={item}
-            onPress={() => navigation.navigate('Detail', { burger: item })}
+            onPress={() =>
+              navigation.navigate('Detail', {
+                burger: item,
+                guestMode,
+              })
+            }
           />
         )}
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
-        onRefresh={() => loadMenu(false)}
-        refreshing={false}
+        onRefresh={() => refetch()}
+        refreshing={isRefetching}
+        ListEmptyComponent={
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyText}>No hay productos en esta categoría.</Text>
+          </View>
+        }
       />
 
       <BottomNav
         activeTab="catalog"
         onCatalogPress={() => {}}
-        onOrdersPress={() => navigation.navigate('Orders')}
+        onOrdersPress={() =>
+          guestMode ? goToLogin() : navigation.navigate('Orders')
+        }
       />
     </ScreenSafeArea>
   );
@@ -245,7 +263,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: HomeColors.background,
+    backgroundColor: Colors.background,
   },
   center: {
     justifyContent: 'center',
@@ -279,7 +297,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     height: '55%',
-    backgroundColor: HomeColors.logoTop,
+    backgroundColor: Colors.logoTop,
   },
   logoGradientBottom: {
     position: 'absolute',
@@ -287,7 +305,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     height: '55%',
-    backgroundColor: HomeColors.logoBottom,
+    backgroundColor: Colors.logoBottom,
   },
   logoEmoji: {
     fontSize: 22,
@@ -296,93 +314,60 @@ const styles = StyleSheet.create({
   brandName: {
     fontSize: 18,
     fontWeight: '700',
-    color: HomeColors.textPrimary,
+    color: Colors.textPrimary,
     letterSpacing: 0.3,
   },
   greeting: {
     fontSize: 13,
-    color: HomeColors.textSecondary,
+    color: Colors.textSecondary,
     marginTop: 1,
   },
-  headerActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
+  loginHeaderButton: {
+    backgroundColor: Colors.accent,
+    borderRadius: 20,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
   },
-  iconButton: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
-    backgroundColor: HomeColors.surface,
+  loginHeaderButtonText: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: Colors.accentText,
+  },
+  guestBanner: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginHorizontal: 20,
+    marginBottom: 16,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    backgroundColor: '#FFF8EE',
+    borderRadius: 12,
     borderWidth: 1,
-    borderColor: HomeColors.border,
-    justifyContent: 'center',
-    alignItems: 'center',
-    position: 'relative',
+    borderColor: '#FFE0B2',
   },
-  cartIcon: {
-    fontSize: 18,
+  guestBannerText: {
+    flex: 1,
+    fontSize: 13,
+    color: Colors.accent,
+    fontWeight: '500',
+    marginRight: 8,
   },
-  badge: {
-    position: 'absolute',
-    top: -2,
-    right: -2,
-    backgroundColor: HomeColors.accent,
-    borderRadius: 9,
-    minWidth: 18,
-    height: 18,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 4,
-    borderWidth: 1.5,
-    borderColor: HomeColors.background,
-  },
-  badgeText: {
-    color: HomeColors.accentText,
-    fontSize: 10,
-    fontWeight: '800',
-  },
-  logoutIcon: {
-    width: 22,
-    height: 16,
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  logoutBracket: {
-    width: 9,
-    height: 14,
-    borderWidth: 1.5,
-    borderColor: HomeColors.textPrimary,
-    borderRightWidth: 0,
-    borderTopLeftRadius: 3,
-    borderBottomLeftRadius: 3,
-  },
-  logoutArrowLine: {
-    width: 7,
-    height: 1.5,
-    backgroundColor: HomeColors.textPrimary,
-  },
-  logoutArrowHead: {
-    width: 0,
-    height: 0,
-    borderTopWidth: 4,
-    borderBottomWidth: 4,
-    borderLeftWidth: 5,
-    borderTopColor: 'transparent',
-    borderBottomColor: 'transparent',
-    borderLeftColor: HomeColors.textPrimary,
-    marginLeft: -1,
+  guestBannerLink: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: Colors.accent,
   },
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: HomeColors.surface,
+    backgroundColor: Colors.surface,
     borderRadius: 24,
     marginHorizontal: 20,
     marginBottom: 16,
     paddingHorizontal: 16,
     borderWidth: 1,
-    borderColor: HomeColors.border,
+    borderColor: Colors.border,
   },
   searchIcon: {
     fontSize: 16,
@@ -393,7 +378,7 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: 13,
     fontSize: 15,
-    color: HomeColors.textPrimary,
+    color: Colors.textPrimary,
   },
   categoriesScroll: {
     maxHeight: 44,
@@ -406,17 +391,17 @@ const styles = StyleSheet.create({
   categoryPill: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: HomeColors.surface,
+    backgroundColor: Colors.surface,
     borderRadius: 20,
     paddingHorizontal: 14,
     paddingVertical: 9,
     borderWidth: 1,
-    borderColor: HomeColors.border,
+    borderColor: Colors.border,
     marginRight: 10,
   },
   categoryPillSelected: {
-    backgroundColor: HomeColors.accent,
-    borderColor: HomeColors.accent,
+    backgroundColor: Colors.accent,
+    borderColor: Colors.accent,
   },
   categoryEmoji: {
     fontSize: 14,
@@ -425,10 +410,10 @@ const styles = StyleSheet.create({
   categoryLabel: {
     fontSize: 13,
     fontWeight: '600',
-    color: HomeColors.textPrimary,
+    color: Colors.textPrimary,
   },
   categoryTextSelected: {
-    color: HomeColors.accentText,
+    color: Colors.accentText,
   },
   list: {
     flex: 1,
@@ -437,10 +422,19 @@ const styles = StyleSheet.create({
     paddingTop: 4,
     paddingBottom: 90,
   },
+  emptyContainer: {
+    paddingHorizontal: 20,
+    paddingTop: 32,
+    alignItems: 'center',
+  },
+  emptyText: {
+    fontSize: 14,
+    color: Colors.textSecondary,
+  },
   loadingText: {
     marginTop: 16,
     fontSize: 15,
-    color: HomeColors.textSecondary,
+    color: Colors.textSecondary,
     fontWeight: '600',
   },
   errorContainer: {
@@ -454,12 +448,12 @@ const styles = StyleSheet.create({
   errorTitle: {
     fontSize: 20,
     fontWeight: '800',
-    color: HomeColors.textPrimary,
+    color: Colors.textPrimary,
     marginBottom: 8,
   },
   errorSubtitle: {
     fontSize: 14,
-    color: HomeColors.textSecondary,
+    color: Colors.textSecondary,
     textAlign: 'center',
     marginBottom: 24,
     lineHeight: 20,

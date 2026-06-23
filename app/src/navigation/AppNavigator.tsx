@@ -8,16 +8,23 @@ import { DetailScreen } from '../screens/DetailScreen';
 import { CartScreen } from '../screens/CartScreen';
 import { CheckoutScreen } from '../screens/CheckoutScreen';
 import { OrdersScreen } from '../screens/OrdersScreen';
+import { AdminProductsScreen } from '../screens/AdminProductsScreen';
+import { AdminOrdersScreen } from '../screens/AdminOrdersScreen';
+import { AdminOrderDetailScreen } from '../screens/AdminOrderDetailScreen';
 import { Colors } from '../constants/colors';
 import { Burger } from '../constants/mockData';
+import { AdminClientOrder } from '../constants/mockAdminOrders';
 
 // Tipado de rutas para navegación segura
 export type RootStackParamList = {
   Login: undefined;
   Register: undefined;
-  Home: undefined;
+  Home: { guestMode?: boolean } | undefined;
   Orders: undefined;
-  Detail: { burger: Burger };
+  AdminProducts: undefined;
+  AdminOrders: undefined;
+  AdminOrderDetail: { order: AdminClientOrder };
+  Detail: { burger: Burger; guestMode?: boolean };
   Cart: { simulateError?: boolean }; // Soporta simulación de estado de error por rúbrica
   Checkout: undefined;
 };
@@ -77,10 +84,31 @@ export const AppNavigator = () => {
         }}
       />
       <Stack.Screen
+        name="AdminProducts"
+        component={AdminProductsScreen}
+        options={{
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="AdminOrders"
+        component={AdminOrdersScreen}
+        options={{
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="AdminOrderDetail"
+        component={AdminOrderDetailScreen}
+        options={{
+          title: 'Detalle del pedido',
+        }}
+      />
+      <Stack.Screen
         name="Detail"
         component={DetailScreen}
         options={{
-          title: 'Personalizar Producto',
+          headerBackTitleVisible: false,
         }}
       />
       <Stack.Screen
@@ -94,7 +122,7 @@ export const AppNavigator = () => {
         name="Checkout"
         component={CheckoutScreen}
         options={{
-          title: 'Datos de Entrega',
+          headerShown: false,
         }}
       />
     </Stack.Navigator>

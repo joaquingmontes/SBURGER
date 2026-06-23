@@ -7,21 +7,12 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { Burger } from '../constants/mockData';
+import { Colors } from '../constants/colors';
 
 interface BurgerCardProps {
   burger: Burger;
   onPress: () => void;
 }
-
-const CardColors = {
-  cardBackground: '#1A1A1A',
-  cardBorder: '#2A2A2A',
-  textPrimary: '#FFFFFF',
-  textSecondary: '#888888',
-  textMuted: '#666666',
-  accent: '#F39C12',
-  imagePlaceholder: '#2A2A2A',
-};
 
 export const BurgerCard: React.FC<BurgerCardProps> = ({ burger, onPress }) => {
   return (
@@ -56,18 +47,23 @@ export const BurgerCard: React.FC<BurgerCardProps> = ({ burger, onPress }) => {
 const styles = StyleSheet.create({
   card: {
     flexDirection: 'row',
-    backgroundColor: CardColors.cardBackground,
+    backgroundColor: Colors.cardBackground,
     borderRadius: 18,
     marginHorizontal: 20,
     marginBottom: 14,
     borderWidth: 1,
-    borderColor: CardColors.cardBorder,
+    borderColor: Colors.border,
     overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.04,
+    shadowRadius: 3,
+    elevation: 1,
   },
   image: {
     width: 110,
     height: 110,
-    backgroundColor: CardColors.imagePlaceholder,
+    backgroundColor: Colors.surface,
   },
   infoSection: {
     flex: 1,
@@ -78,12 +74,12 @@ const styles = StyleSheet.create({
   name: {
     fontSize: 16,
     fontWeight: '700',
-    color: CardColors.textPrimary,
+    color: Colors.textPrimary,
     marginBottom: 4,
   },
   description: {
     fontSize: 12,
-    color: CardColors.textSecondary,
+    color: Colors.textSecondary,
     lineHeight: 17,
     flex: 1,
   },
@@ -96,11 +92,11 @@ const styles = StyleSheet.create({
   price: {
     fontSize: 16,
     fontWeight: '700',
-    color: CardColors.accent,
+    color: Colors.accent,
   },
   seeMore: {
     fontSize: 12,
-    color: CardColors.textMuted,
+    color: Colors.textMuted,
     fontWeight: '500',
   },
 });

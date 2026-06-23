@@ -1,0 +1,33 @@
+STACKBURGER - CREDENCIALES DE PRUEBA (EJEMPLO)
+==============================================
+
+Copiá este archivo como credenciales-prueba.txt en la raíz del repo.
+Ese archivo está en .gitignore y no se sube a GitHub.
+
+Proyecto Firebase: sburger-a3265
+
+USUARIOS CLIENTE
+----------------
+1) Yamil Tundis      | yamil@gmail.com          | Yamil123!
+2) Juan Pérez        | juan.perez@gmail.com     | Juan123!
+3) María López       | maria.lopez@gmail.com    | Maria123!
+
+USUARIO ADMIN
+-------------
+4) Admin StackBurger | admin@stackburger.com    | Admin123!
+
+CARGAR DATOS EN FIREBASE (consola o CLI)
+----------------------------------------
+Opción CLI (recomendada, en orden):
+  npx firebase-tools login
+  powershell -File scripts\seed-firebase.ps1
+
+Opción consola (Firebase → Data Connect → Operations):
+  1) Ejecutar dataconnect/seed_01_usuarios.gql
+  2) Ejecutar dataconnect/seed_02_productos.gql
+  3) Ejecutar dataconnect/seed_03_pedidos.gql
+
+CONFIG FIREBASE EN LA APP
+-------------------------
+Copiá app/src/config/firebaseConfig.example.ts → firebaseConfig.ts
+y completá apiKey, messagingSenderId y appId desde Firebase Console.

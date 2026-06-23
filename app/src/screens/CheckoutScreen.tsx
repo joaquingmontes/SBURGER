@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -8,41 +8,67 @@ import {
   KeyboardAvoidingView,
   Platform,
   Alert,
+  TouchableOpacity,
+  StatusBar,
 } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
+import { useQueryClient } from '@tanstack/react-query';
+import { ModalidadEntrega } from '@dataconnect/generated';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext';
 import { Colors } from '../constants/colors';
 import { CustomButton } from '../components/CustomButton';
 import { useBusinessHours } from '../hooks/useBusinessHours';
 import { ScreenSafeArea } from '../components/ScreenSafeArea';
-
+import {
+  createOrderInFirebase,
+  generateOrderCode,
+} from '../services/orderService';
+import { invalidateOrdersQueries } from '../utils/queryInvalidation';
+import { resetToLogin, resetToUserHome } from '../navigation/navigationUtils';
 type CheckoutScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Checkout'>;
 
 interface CheckoutScreenProps {
   navigation: CheckoutScreenNavigationProp;
 }
 
-export const CheckoutScreen: React.FC<CheckoutScreenProps> = ({ navigation }) => {
-  const { total, items, clearCart } = useCart();
-  const { isOpen, businessHoursText } = useBusinessHours();
+type DeliveryMethod = 'delivery' | 'takeaway';
 
-  // Estados del Formulario (RF-04)
+const DELIVERY_FEE = 1000;
+const PICKUP_ADDRESS = 'Av. Corrientes 1850, CABA · Lun–Dom 12:00–00:00';
+
+export const CheckoutScreen: React.FC<CheckoutScreenProps> = ({ navigation }) => {
+  const queryClient = useQueryClient();
+  const { user } = useAuth();
+  const { subtotal, items, clearCart } = useCart();
+  const { isOpen, businessHoursText } = useBusinessHours();
+  const [deliveryMethod, setDeliveryMethod] = useState<DeliveryMethod>('delivery');
   const [nombre, setNombre] = useState('');
   const [telefono, setTelefono] = useState('');
   const [direccion, setDireccion] = useState('');
 
-  // Estados de errores de validación (RN-04 / HU-01)
   const [nombreErr, setNombreErr] = useState(false);
   const [telefonoErr, setTelefonoErr] = useState(false);
   const [direccionErr, setDireccionErr] = useState(false);
 
-  // Estados de éxito y procesamiento
   const [processing, setProcessing] = useState(false);
   const [orderConfirmed, setOrderConfirmed] = useState(false);
-  const [simulatedOrderId, setSimulatedOrderId] = useState('');
+  const [confirmedOrderCode, setConfirmedOrderCode] = useState('');
+  const itemCount = items.reduce((acc, item) => acc + item.quantity, 0);
+  const shippingCost = deliveryMethod === 'delivery' ? DELIVERY_FEE : 0;
+  const orderTotal = subtotal + shippingCost;
 
-  // Validador rápido de formato
+  useFocusEffect(
+    useCallback(() => {
+      StatusBar.setBarStyle('dark-content');
+      if (Platform.OS === 'android') {
+        StatusBar.setBackgroundColor(Colors.background);
+      }
+    }, []),
+  );
+
   const validateForm = (): boolean => {
     let isValid = true;
 
@@ -53,7 +79,6 @@ export const CheckoutScreen: React.FC<CheckoutScreenProps> = ({ navigation }) =>
       setNombreErr(false);
     }
 
-    // Teléfono: al menos 8 dígitos numéricos
     const cleanPhone = telefono.replace(/\D/g, '');
     if (cleanPhone.length < 8) {
       setTelefonoErr(true);
@@ -62,9 +87,13 @@ export const CheckoutScreen: React.FC<CheckoutScreenProps> = ({ navigation }) =>
       setTelefonoErr(false);
     }
 
-    if (direccion.trim().length < 5) {
-      setDireccionErr(true);
-      isValid = false;
+    if (deliveryMethod === 'delivery') {
+      if (direccion.trim().length < 5) {
+        setDireccionErr(true);
+        isValid = false;
+      } else {
+        setDireccionErr(false);
+      }
     } else {
       setDireccionErr(false);
     }
@@ -72,58 +101,110 @@ export const CheckoutScreen: React.FC<CheckoutScreenProps> = ({ navigation }) =>
     return isValid;
   };
 
-  const handleConfirmOrder = () => {
-    // RN-05: Validar disponibilidad horaria de la cocina
+  const handleConfirmOrder = async () => {
+    if (!user) {
+      Alert.alert('Error', 'Tenés que iniciar sesión para confirmar el pedido.');
+      resetToLogin(navigation);
+      return;
+    }
+
     if (!isOpen) {
       Alert.alert(
         'Cocina Cerrada',
-        `Lo sentimos, solo aceptamos pedidos en el horario de ${businessHoursText}. Tu pedido sigue guardado en el carrito.`
+        `Lo sentimos, solo aceptamos pedidos en el horario de ${businessHoursText}. Tu pedido sigue guardado en el carrito.`,
       );
       return;
     }
 
-    // RN-04: Validar campos obligatorios
     if (!validateForm()) {
-      Alert.alert('Datos Incompletos', 'Por favor, completá correctamente los campos obligatorios marcados en rojo.');
+      Alert.alert(
+        'Datos Incompletos',
+        'Por favor, completá correctamente los campos obligatorios marcados en rojo.',
+      );
       return;
     }
 
-    // Simular el registro del pedido en el servidor (RF-04)
     setProcessing(true);
-    setTimeout(() => {
-      setProcessing(false);
-      setSimulatedOrderId(`SB-${Math.floor(Math.random() * 90000) + 10000}`);
+    try {
+      const codigo = generateOrderCode();
+      await createOrderInFirebase({
+        usuarioId: user.id,
+        codigo,
+        subtotal,
+        costoEnvio: shippingCost,
+        total: orderTotal,
+        modalidadEntrega:
+          deliveryMethod === 'delivery'
+            ? ModalidadEntrega.DELIVERY
+            : ModalidadEntrega.TAKEAWAY,
+        nombreContacto: nombre.trim(),
+        telefonoContacto: telefono.trim(),
+        direccion: deliveryMethod === 'delivery' ? direccion.trim() : null,
+        items,
+      });
+
+      await invalidateOrdersQueries(queryClient);
+      setConfirmedOrderCode(codigo);
       setOrderConfirmed(true);
-    }, 1800); // Carga simulada menor a 2 segundos (RNF-Rendimiento)
+    } catch {
+      Alert.alert(
+        'Error',
+        'No se pudo confirmar el pedido. Verificá tu conexión e intentá de nuevo.',
+      );
+    } finally {
+      setProcessing(false);
+    }
   };
-
   const handleSuccessClose = () => {
-    // Limpia el carrito y vuelve a la pantalla inicial (RF-04)
     clearCart();
-    navigation.popToTop();
+    resetToUserHome(navigation, user);
   };
 
-  // Habilitar visualmente el botón (Wireframe) solo si hay texto en todos los campos obligatorios
-  const isFormFilled = nombre.trim() !== '' && telefono.trim() !== '' && direccion.trim() !== '';
+  const isFormFilled =
+    nombre.trim() !== '' &&
+    telefono.trim() !== '' &&
+    (deliveryMethod === 'takeaway' || direccion.trim() !== '');
 
-  // 1. Pantalla de Éxito (Estado: Éxito)
+  const deliveryMethodLabel =
+    deliveryMethod === 'delivery' ? 'Delivery' : 'Retiro en local';
+
   if (orderConfirmed) {
     return (
-      <ScreenSafeArea edges={['left', 'right', 'bottom']} style={styles.successSafeArea}>
+      <ScreenSafeArea style={styles.successSafeArea}>
         <View style={styles.successContainer}>
           <Text style={styles.successIcon}>🎉</Text>
           <Text style={styles.successTitle}>¡Pedido Confirmado!</Text>
-          <Text style={styles.successSubtitle}>Tu pedido ya fue enviado al sector de producción de cocina.</Text>
+          <Text style={styles.successSubtitle}>
+            Tu pedido ya fue enviado al sector de producción de cocina.
+          </Text>
 
           <View style={styles.ticketCard}>
             <Text style={styles.ticketHeader}>DETALLE DE LA COMANDA</Text>
             <View style={styles.ticketDivider} />
-            <Text style={styles.ticketText}><Text style={styles.ticketBold}>ID Pedido:</Text> #{simulatedOrderId}</Text>
-            <Text style={styles.ticketText}><Text style={styles.ticketBold}>Cliente:</Text> {nombre}</Text>
-            <Text style={styles.ticketText}><Text style={styles.ticketBold}>Teléfono:</Text> {telefono}</Text>
-            <Text style={styles.ticketText}><Text style={styles.ticketBold}>Dirección:</Text> {direccion}</Text>
+            <Text style={styles.ticketText}>
+              <Text style={styles.ticketBold}>ID Pedido:</Text> #{confirmedOrderCode}            </Text>
+            <Text style={styles.ticketText}>
+              <Text style={styles.ticketBold}>Cliente:</Text> {nombre}
+            </Text>
+            <Text style={styles.ticketText}>
+              <Text style={styles.ticketBold}>Teléfono:</Text> {telefono}
+            </Text>
+            <Text style={styles.ticketText}>
+              <Text style={styles.ticketBold}>Modalidad:</Text> {deliveryMethodLabel}
+            </Text>
+            {deliveryMethod === 'delivery' ? (
+              <Text style={styles.ticketText}>
+                <Text style={styles.ticketBold}>Dirección:</Text> {direccion}
+              </Text>
+            ) : (
+              <Text style={styles.ticketText}>
+                <Text style={styles.ticketBold}>Retiro:</Text> {PICKUP_ADDRESS}
+              </Text>
+            )}
             <View style={styles.ticketDivider} />
-            <Text style={styles.ticketTotal}>Total Pagado: ${total.toLocaleString('es-AR')}</Text>
+            <Text style={styles.ticketTotal}>
+              Total Pagado: ${orderTotal.toLocaleString('es-AR')}
+            </Text>
           </View>
 
           <CustomButton
@@ -137,19 +218,20 @@ export const CheckoutScreen: React.FC<CheckoutScreenProps> = ({ navigation }) =>
     );
   }
 
-  // 2. Pantalla de Horario Comercial Cerrado (RN-05)
   if (!isOpen) {
     return (
-      <ScreenSafeArea edges={['left', 'right', 'bottom']} style={styles.safeArea}>
+      <ScreenSafeArea style={styles.safeArea}>
         <View style={styles.closedContainer}>
           <Text style={styles.closedIcon}>🕒</Text>
           <Text style={styles.closedTitle}>Cocina Cerrada</Text>
           <Text style={styles.closedSubtitle}>
-            Actualmente nos encontramos fuera de horario comercial. Aceptamos pedidos de lunes a domingo de{' '}
+            Actualmente nos encontramos fuera de horario comercial. Aceptamos pedidos
+            de lunes a domingo de{' '}
             <Text style={styles.closedHighlight}>{businessHoursText}</Text>.
           </Text>
           <Text style={styles.closedNote}>
-            Tus productos siguen guardados en el carrito para que los confirmes en cuanto abramos. ¡Muchas gracias!
+            Tus productos siguen guardados en el carrito para que los confirmes en cuanto
+            abramos. ¡Muchas gracias!
           </Text>
           <CustomButton
             title="Volver al Carrito"
@@ -161,103 +243,234 @@ export const CheckoutScreen: React.FC<CheckoutScreenProps> = ({ navigation }) =>
     );
   }
 
-  // 3. Formulario Normal
   return (
-    <ScreenSafeArea edges={['left', 'right', 'bottom']} style={styles.safeArea}>
+    <ScreenSafeArea style={styles.safeArea}>
+      <View style={styles.header}>
+        <TouchableOpacity
+          style={styles.backButton}
+          activeOpacity={0.7}
+          onPress={() => navigation.goBack()}
+          accessibilityLabel="Volver"
+        >
+          <Text style={styles.backArrow}>←</Text>
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Finalizar pedido</Text>
+      </View>
+
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardContainer}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 88 : 0}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
       >
-        <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-          <View style={styles.formContainer}>
-            <Text style={styles.formInstructions}>
-              Por favor completa tus datos para coordinar el envío de tu pedido a domicilio.
+        <ScrollView
+          style={styles.container}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        >
+          <Text style={styles.sectionLabel}>¿CÓMO QUERÉS RECIBIRLO?</Text>
+          <View style={styles.methodRow}>
+            <TouchableOpacity
+              activeOpacity={0.85}
+              style={[
+                styles.methodCard,
+                deliveryMethod === 'delivery' && styles.methodCardSelected,
+              ]}
+              onPress={() => setDeliveryMethod('delivery')}
+            >
+              <Text
+                style={[
+                  styles.methodIcon,
+                  deliveryMethod === 'delivery' && styles.methodIconSelected,
+                ]}
+              >
+                📍
+              </Text>
+              <Text
+                style={[
+                  styles.methodTitle,
+                  deliveryMethod === 'delivery' && styles.methodTitleSelected,
+                ]}
+              >
+                Delivery
+              </Text>
+              <Text
+                style={[
+                  styles.methodSubtitle,
+                  deliveryMethod === 'delivery'
+                    ? styles.methodSubtitleAccent
+                    : styles.methodSubtitleMuted,
+                ]}
+              >
+                +$1.000 de envío
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              activeOpacity={0.85}
+              style={[
+                styles.methodCard,
+                deliveryMethod === 'takeaway' && styles.methodCardSelected,
+              ]}
+              onPress={() => setDeliveryMethod('takeaway')}
+            >
+              <Text
+                style={[
+                  styles.methodIcon,
+                  deliveryMethod === 'takeaway'
+                    ? styles.methodIconSelected
+                    : styles.methodIconMuted,
+                ]}
+              >
+                🛍
+              </Text>
+              <Text
+                style={[
+                  styles.methodTitle,
+                  deliveryMethod === 'takeaway' && styles.methodTitleSelected,
+                ]}
+              >
+                Takeaway
+              </Text>
+              <Text
+                style={[
+                  styles.methodSubtitle,
+                  deliveryMethod === 'takeaway'
+                    ? styles.methodSubtitleFree
+                    : styles.methodSubtitleMuted,
+                ]}
+              >
+                Envío gratis
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          {deliveryMethod === 'takeaway' && (
+            <View style={styles.pickupCard}>
+              <Text style={styles.pickupTitle}>📍 Retirá en el local</Text>
+              <Text style={styles.pickupAddress}>{PICKUP_ADDRESS}</Text>
+            </View>
+          )}
+
+          <Text style={[styles.sectionLabel, styles.sectionLabelSpaced]}>
+            TUS DATOS
+          </Text>
+
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>
+              Nombre y apellido <Text style={styles.required}>*</Text>
             </Text>
+            <TextInput
+              style={[styles.input, nombreErr && styles.inputError]}
+              placeholder="Yamil"
+              placeholderTextColor={Colors.placeholder}
+              value={nombre}
+              onChangeText={text => {
+                setNombre(text);
+                if (text.trim().length >= 3) setNombreErr(false);
+              }}
+              autoCapitalize="words"
+            />
+            {nombreErr && (
+              <Text style={styles.errorHelper}>
+                Ingresá tu nombre y apellido (mín. 3 letras).
+              </Text>
+            )}
+          </View>
 
-            {/* Campo NOMBRE Y APELLIDO */}
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>NOMBRE Y APELLIDO *</Text>
-              <TextInput
-                style={[styles.input, nombreErr && styles.inputError]}
-                placeholder="Nombre completo"
-                placeholderTextColor={Colors.textSecondary}
-                value={nombre}
-                onChangeText={(text) => {
-                  setNombre(text);
-                  if (text.trim().length >= 3) setNombreErr(false);
-                }}
-                autoCapitalize="words"
-              />
-              {nombreErr && (
-                <Text style={styles.errorHelper}>Ingresá tu nombre y apellido (mín. 3 letras).</Text>
-              )}
-            </View>
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>
+              Teléfono de contacto <Text style={styles.required}>*</Text>
+            </Text>
+            <TextInput
+              style={[styles.input, telefonoErr && styles.inputError]}
+              placeholder="11 1234-5678"
+              placeholderTextColor={Colors.placeholder}
+              keyboardType="phone-pad"
+              value={telefono}
+              onChangeText={text => {
+                setTelefono(text);
+                if (text.replace(/\D/g, '').length >= 8) setTelefonoErr(false);
+              }}
+            />
+            {telefonoErr && (
+              <Text style={styles.errorHelper}>
+                Ingresá un teléfono de contacto válido (mín. 8 números).
+              </Text>
+            )}
+          </View>
 
-            {/* Campo TELÉFONO DE CONTACTO */}
+          {deliveryMethod === 'delivery' && (
             <View style={styles.inputGroup}>
-              <Text style={styles.label}>TELÉFONO DE CONTACTO *</Text>
-              <TextInput
-                style={[styles.input, telefonoErr && styles.inputError]}
-                placeholder="11 1234-5678"
-                placeholderTextColor={Colors.textSecondary}
-                keyboardType="phone-pad"
-                value={telefono}
-                onChangeText={(text) => {
-                  setTelefono(text);
-                  if (text.replace(/\D/g, '').length >= 8) setTelefonoErr(false);
-                }}
-              />
-              {telefonoErr && (
-                <Text style={styles.errorHelper}>Ingresá un teléfono de contacto válido (mín. 8 números).</Text>
-              )}
-            </View>
-
-            {/* Campo DIRECCIÓN DE ENTREGA */}
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>DIRECCIÓN DE ENTREGA *</Text>
+              <Text style={styles.label}>
+                Dirección de entrega <Text style={styles.required}>*</Text>
+              </Text>
               <TextInput
                 style={[styles.input, styles.textArea, direccionErr && styles.inputError]}
-                placeholder="Calle, número, departamento, aclaraciones..."
-                placeholderTextColor={Colors.textSecondary}
+                placeholder="Calle, número, piso, depto..."
+                placeholderTextColor={Colors.placeholder}
                 multiline
                 numberOfLines={2}
                 value={direccion}
-                onChangeText={(text) => {
+                onChangeText={text => {
                   setDireccion(text);
                   if (text.trim().length >= 5) setDireccionErr(false);
                 }}
               />
               {direccionErr && (
-                <Text style={styles.errorHelper}>Ingresá una dirección de entrega válida (mín. 5 caracteres).</Text>
+                <Text style={styles.errorHelper}>
+                  Ingresá una dirección de entrega válida (mín. 5 caracteres).
+                </Text>
               )}
             </View>
+          )}
 
-            {/* Tarjeta de Resumen Rápido (Wireframe Checkout) */}
-            <View style={styles.summaryCard}>
-              <Text style={styles.summaryTitle}>RESUMEN DE COMPRA</Text>
-              <View style={styles.summaryRow}>
-                <Text style={styles.summaryLabel}>Total a Pagar:</Text>
-                <Text style={styles.summaryValue}>${total.toLocaleString('es-AR')}</Text>
-              </View>
-              <Text style={styles.summaryDetails}>
-                {items.reduce((acc, item) => acc + item.quantity, 0)} productos · envío incluido
+          <View style={styles.summaryCard}>
+            <Text style={styles.summaryTitle}>RESUMEN</Text>
+            <View style={styles.summaryRow}>
+              <Text style={styles.summaryLabel}>
+                Subtotal ({itemCount} {itemCount === 1 ? 'item' : 'items'})
+              </Text>
+              <Text style={styles.summaryValue}>
+                ${subtotal.toLocaleString('es-AR')}
+              </Text>
+            </View>
+            <View style={styles.summaryRow}>
+              <Text style={styles.summaryLabel}>Envío</Text>
+              {shippingCost > 0 ? (
+                <Text style={styles.summaryValue}>
+                  ${shippingCost.toLocaleString('es-AR')}
+                </Text>
+              ) : (
+                <Text style={styles.summaryFree}>Gratis</Text>
+              )}
+            </View>
+            <View style={styles.summaryDivider} />
+            <View style={styles.summaryRow}>
+              <Text style={styles.summaryTotalLabel}>Total</Text>
+              <Text style={styles.summaryTotalValue}>
+                ${orderTotal.toLocaleString('es-AR')}
               </Text>
             </View>
           </View>
-          <View style={styles.spacer} />
         </ScrollView>
 
-        {/* Footer con el botón dinámico (Wireframe) */}
         <View style={styles.footer}>
-          <CustomButton
-            title="Confirmar Pedido"
+          <TouchableOpacity
+            style={[
+              styles.confirmButton,
+              (!isFormFilled || processing) && styles.confirmButtonDisabled,
+            ]}
+            activeOpacity={0.85}
+            disabled={!isFormFilled || processing}
             onPress={handleConfirmOrder}
-            loading={processing}
-            disabled={!isFormFilled}
-            variant={isFormFilled ? 'accent' : 'disabled'} // Coral/Rojo si está completo, Gris si está incompleto
-            style={styles.confirmButton}
-          />
+          >
+            <Text style={styles.confirmButtonText}>
+              {processing
+                ? 'Procesando...'
+                : `Confirmar pedido · $${orderTotal.toLocaleString('es-AR')}`}
+            </Text>
+          </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
     </ScreenSafeArea>
@@ -269,43 +482,153 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.background,
   },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingTop: 8,
+    paddingBottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.border,
+  },
+  backButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: Colors.surface,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
+  backArrow: {
+    fontSize: 20,
+    color: Colors.textPrimary,
+    fontWeight: '600',
+    marginTop: -2,
+  },
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: Colors.textPrimary,
+  },
   keyboardContainer: {
     flex: 1,
   },
   container: {
     flex: 1,
   },
-  formContainer: {
-    padding: 20,
+  scrollContent: {
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 120,
   },
-  formInstructions: {
-    fontSize: 13,
+  sectionLabel: {
+    fontSize: 11,
+    fontWeight: '700',
     color: Colors.textSecondary,
-    marginBottom: 20,
-    lineHeight: 18,
+    letterSpacing: 1,
+    marginBottom: 12,
   },
-  inputGroup: {
-    marginBottom: 18,
+  sectionLabelSpaced: {
+    marginTop: 8,
   },
-  label: {
-    fontSize: 12,
-    fontWeight: '800',
-    color: Colors.textPrimary,
+  methodRow: {
+    flexDirection: 'row',
+    gap: 12,
+    marginBottom: 16,
+  },
+  methodCard: {
+    flex: 1,
+    backgroundColor: Colors.surface,
+    borderRadius: 14,
+    borderWidth: 1.5,
+    borderColor: Colors.border,
+    paddingVertical: 16,
+    paddingHorizontal: 12,
+    alignItems: 'center',
+  },
+  methodCardSelected: {
+    borderColor: Colors.accent,
+    backgroundColor: '#FFF9F0',
+  },
+  methodIcon: {
+    fontSize: 22,
     marginBottom: 8,
-    letterSpacing: 0.5,
+    opacity: 0.45,
   },
-  input: {
-    backgroundColor: '#FFFFFF',
+  methodIconSelected: {
+    opacity: 1,
+  },
+  methodIconMuted: {
+    opacity: 0.45,
+  },
+  methodTitle: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: Colors.textSecondary,
+    marginBottom: 4,
+  },
+  methodTitleSelected: {
+    color: Colors.textPrimary,
+  },
+  methodSubtitle: {
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  methodSubtitleAccent: {
+    color: Colors.accent,
+  },
+  methodSubtitleFree: {
+    color: Colors.success,
+  },
+  methodSubtitleMuted: {
+    color: Colors.textMuted,
+  },
+  pickupCard: {
+    backgroundColor: Colors.surface,
+    borderRadius: 14,
     borderWidth: 1,
     borderColor: Colors.border,
-    borderRadius: 8,
+    padding: 16,
+    marginBottom: 8,
+  },
+  pickupTitle: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: Colors.textPrimary,
+    marginBottom: 6,
+  },
+  pickupAddress: {
+    fontSize: 13,
+    color: Colors.textSecondary,
+    lineHeight: 19,
+  },
+  inputGroup: {
+    marginBottom: 16,
+  },
+  label: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: Colors.textPrimary,
+    marginBottom: 8,
+  },
+  required: {
+    color: Colors.error,
+  },
+  input: {
+    backgroundColor: Colors.surface,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    borderRadius: 12,
     paddingHorizontal: 16,
-    paddingVertical: 12,
-    fontSize: 14,
+    paddingVertical: 14,
+    fontSize: 15,
     color: Colors.textPrimary,
   },
   textArea: {
-    minHeight: 60,
+    minHeight: 72,
     textAlignVertical: 'top',
   },
   inputError: {
@@ -319,59 +642,80 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   summaryCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: Colors.surface,
+    borderRadius: 14,
     borderWidth: 1,
     borderColor: Colors.border,
-    borderRadius: 8,
     padding: 16,
-    marginTop: 10,
+    marginTop: 8,
   },
   summaryTitle: {
     fontSize: 11,
-    fontWeight: '800',
+    fontWeight: '700',
     color: Colors.textSecondary,
-    marginBottom: 8,
-    letterSpacing: 0.5,
+    letterSpacing: 1,
+    marginBottom: 14,
   },
   summaryRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'baseline',
+    alignItems: 'center',
+    marginBottom: 10,
   },
   summaryLabel: {
     fontSize: 14,
+    color: Colors.textSecondary,
+  },
+  summaryValue: {
+    fontSize: 14,
+    color: Colors.textPrimary,
+    fontWeight: '600',
+  },
+  summaryFree: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: Colors.success,
+  },
+  summaryDivider: {
+    height: 1,
+    backgroundColor: Colors.border,
+    marginVertical: 6,
+  },
+  summaryTotalLabel: {
+    fontSize: 16,
     fontWeight: '700',
     color: Colors.textPrimary,
   },
-  summaryValue: {
-    fontSize: 16,
-    fontWeight: '800',
-    color: Colors.textPrimary,
-  },
-  summaryDetails: {
-    fontSize: 12,
-    color: Colors.textSecondary,
-    marginTop: 4,
-  },
-  spacer: {
-    height: 120, // Espacio al pie para el scroll
+  summaryTotalValue: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: Colors.accent,
   },
   footer: {
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: Colors.background,
     borderTopWidth: 1,
     borderTopColor: Colors.border,
-    paddingHorizontal: 16,
+    paddingHorizontal: 20,
     paddingVertical: 14,
   },
   confirmButton: {
-    width: '100%',
+    backgroundColor: Colors.accent,
+    borderRadius: 14,
+    paddingVertical: 16,
+    alignItems: 'center',
   },
-  
-  // Estilos de la pantalla de cocina cerrada (RN-05)
+  confirmButtonDisabled: {
+    backgroundColor: Colors.disabled,
+  },
+  confirmButtonText: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: Colors.accentText,
+  },
   closedContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -406,7 +750,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 18,
     marginBottom: 32,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: Colors.surface,
     padding: 12,
     borderRadius: 8,
     borderWidth: 1,
@@ -415,11 +759,9 @@ const styles = StyleSheet.create({
   retryButton: {
     width: 180,
   },
-
-  // Estilos de la pantalla de éxito (HU-01)
   successSafeArea: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: Colors.background,
   },
   successContainer: {
     flex: 1,
@@ -446,10 +788,10 @@ const styles = StyleSheet.create({
   },
   ticketCard: {
     width: '100%',
-    backgroundColor: '#FAFAFA',
+    backgroundColor: Colors.surface,
     borderWidth: 1,
     borderColor: Colors.border,
-    borderRadius: 8,
+    borderRadius: 12,
     padding: 20,
     marginBottom: 32,
   },

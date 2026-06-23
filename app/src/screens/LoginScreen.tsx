@@ -9,54 +9,63 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  Alert,
+  ActivityIndicator,
 } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { useFocusEffect } from '@react-navigation/native';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { ScreenSafeArea } from '../components/ScreenSafeArea';
-
+import { Colors } from '../constants/colors';
+import { useAuth } from '../context/AuthContext';
+import {
+  resetAfterAuth,
+  resetToGuestHome,
+} from '../navigation/navigationUtils';
 type LoginScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Login'>;
 
 interface LoginScreenProps {
   navigation: LoginScreenNavigationProp;
 }
 
-const LoginColors = {
-  background: '#0D0D0D',
-  inputBackground: '#1F1F1F',
-  inputBorder: '#2A2A2A',
-  textPrimary: '#FFFFFF',
-  textSecondary: '#888888',
-  textMuted: '#666666',
-  label: '#777777',
-  placeholder: '#555555',
-  primaryButton: '#B8860B',
-  primaryButtonText: '#1A1208',
-  accent: '#FF9800',
-  divider: '#333333',
-  outlineBorder: '#444444',
-  logoTop: '#FFB347',
-  logoBottom: '#FF8C00',
-};
-
 export const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
+  const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-
+  const [loading, setLoading] = useState(false);
   useFocusEffect(
     useCallback(() => {
-      StatusBar.setBarStyle('light-content');
+      StatusBar.setBarStyle('dark-content');
       if (Platform.OS === 'android') {
-        StatusBar.setBackgroundColor(LoginColors.background);
+        StatusBar.setBackgroundColor(Colors.background);
       }
     }, []),
   );
 
-  const goToHome = () => {
-    navigation.replace('Home');
+  const goToGuestHome = () => {
+    resetToGuestHome(navigation);
   };
 
+  const handleLogin = async () => {
+    if (!email.trim() || !password) {
+      Alert.alert('Error', 'Ingresá email y contraseña.');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const user = await login(email, password);
+      resetAfterAuth(navigation, user);
+    } catch (error) {
+      Alert.alert(
+        'Error',
+        error instanceof Error ? error.message : 'No se pudo iniciar sesión.',
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
   return (
     <ScreenSafeArea style={styles.safeArea}>
       <KeyboardAvoidingView
@@ -87,7 +96,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
               <TextInput
                 style={styles.input}
                 placeholder="tu@email.com"
-                placeholderTextColor={LoginColors.placeholder}
+                placeholderTextColor={Colors.placeholder}
                 value={email}
                 onChangeText={setEmail}
                 keyboardType="email-address"
@@ -102,7 +111,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
                 <TextInput
                   style={styles.passwordInput}
                   placeholder="••••••••"
-                  placeholderTextColor={LoginColors.placeholder}
+                  placeholderTextColor={Colors.placeholder}
                   value={password}
                   onChangeText={setPassword}
                   secureTextEntry={!showPassword}
@@ -124,13 +133,17 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
             </View>
 
             <TouchableOpacity
-              style={styles.primaryButton}
+              style={[styles.primaryButton, loading && styles.primaryButtonDisabled]}
               activeOpacity={0.85}
-              onPress={goToHome}
+              onPress={handleLogin}
+              disabled={loading}
             >
-              <Text style={styles.primaryButtonText}>Iniciar sesión</Text>
+              {loading ? (
+                <ActivityIndicator color={Colors.accentText} />
+              ) : (
+                <Text style={styles.primaryButtonText}>Iniciar sesión</Text>
+              )}
             </TouchableOpacity>
-
             <View style={styles.registerRow}>
               <Text style={styles.registerPrompt}>¿No tenés cuenta? </Text>
               <TouchableOpacity
@@ -150,9 +163,32 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
             <TouchableOpacity
               style={styles.outlineButton}
               activeOpacity={0.85}
-              onPress={goToHome}
+              onPress={goToGuestHome}
             >
               <Text style={styles.outlineButtonText}>Ver menú sin registrarse</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.adminDevButton}
+              activeOpacity={0.85}
+              onPress={async () => {
+                setLoading(true);
+                try {
+                  const adminUser = await login('admin@stackburger.com', 'Admin123!');
+                  resetAfterAuth(navigation, adminUser);
+                } catch (error) {
+                  Alert.alert(
+                    'Error',
+                    error instanceof Error
+                      ? error.message
+                      : 'No se pudo iniciar sesión como admin.',
+                  );
+                } finally {
+                  setLoading(false);
+                }
+              }}
+            >
+              <Text style={styles.adminDevButtonText}>entrar como admin</Text>
             </TouchableOpacity>
           </View>
         </ScrollView>
@@ -164,7 +200,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: LoginColors.background,
+    backgroundColor: Colors.background,
   },
   flex: {
     flex: 1,
@@ -195,7 +231,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     height: '55%',
-    backgroundColor: LoginColors.logoTop,
+    backgroundColor: Colors.logoTop,
   },
   logoGradientBottom: {
     position: 'absolute',
@@ -203,7 +239,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     height: '55%',
-    backgroundColor: LoginColors.logoBottom,
+    backgroundColor: Colors.logoBottom,
   },
   logoEmoji: {
     fontSize: 36,
@@ -212,13 +248,13 @@ const styles = StyleSheet.create({
   brandName: {
     fontSize: 24,
     fontWeight: '700',
-    color: LoginColors.textPrimary,
+    color: Colors.textPrimary,
     letterSpacing: 0.3,
     marginBottom: 4,
   },
   brandTagline: {
     fontSize: 14,
-    color: LoginColors.textSecondary,
+    color: Colors.textSecondary,
     fontWeight: '400',
   },
   formSection: {
@@ -227,12 +263,12 @@ const styles = StyleSheet.create({
   formTitle: {
     fontSize: 26,
     fontWeight: '700',
-    color: LoginColors.textPrimary,
+    color: Colors.textPrimary,
     marginBottom: 6,
   },
   formSubtitle: {
     fontSize: 14,
-    color: LoginColors.textSecondary,
+    color: Colors.textSecondary,
     marginBottom: 28,
   },
   fieldGroup: {
@@ -241,27 +277,27 @@ const styles = StyleSheet.create({
   fieldLabel: {
     fontSize: 11,
     fontWeight: '600',
-    color: LoginColors.label,
+    color: Colors.label,
     letterSpacing: 1.2,
     marginBottom: 8,
     textTransform: 'uppercase',
   },
   input: {
-    backgroundColor: LoginColors.inputBackground,
+    backgroundColor: Colors.inputBackground,
     borderWidth: 1,
-    borderColor: LoginColors.inputBorder,
+    borderColor: Colors.inputBorder,
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 14,
     fontSize: 16,
-    color: LoginColors.textPrimary,
+    color: Colors.textPrimary,
   },
   passwordWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: LoginColors.inputBackground,
+    backgroundColor: Colors.inputBackground,
     borderWidth: 1,
-    borderColor: LoginColors.inputBorder,
+    borderColor: Colors.inputBorder,
     borderRadius: 12,
   },
   passwordInput: {
@@ -269,7 +305,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 14,
     fontSize: 16,
-    color: LoginColors.textPrimary,
+    color: Colors.textPrimary,
   },
   eyeButton: {
     paddingHorizontal: 14,
@@ -303,17 +339,19 @@ const styles = StyleSheet.create({
     transform: [{ rotate: '-35deg' }],
   },
   primaryButton: {
-    backgroundColor: LoginColors.primaryButton,
+    backgroundColor: Colors.accent,
     borderRadius: 12,
     paddingVertical: 16,
     alignItems: 'center',
     marginTop: 8,
     marginBottom: 20,
   },
-  primaryButtonText: {
+  primaryButtonDisabled: {
+    opacity: 0.7,
+  },  primaryButtonText: {
     fontSize: 16,
     fontWeight: '700',
-    color: LoginColors.primaryButtonText,
+    color: Colors.accentText,
   },
   registerRow: {
     flexDirection: 'row',
@@ -323,12 +361,12 @@ const styles = StyleSheet.create({
   },
   registerPrompt: {
     fontSize: 14,
-    color: LoginColors.textSecondary,
+    color: Colors.textSecondary,
   },
   registerLink: {
     fontSize: 14,
     fontWeight: '600',
-    color: LoginColors.accent,
+    color: Colors.accent,
   },
   dividerRow: {
     flexDirection: 'row',
@@ -338,20 +376,20 @@ const styles = StyleSheet.create({
   dividerLine: {
     flex: 1,
     height: 1,
-    backgroundColor: LoginColors.divider,
+    backgroundColor: Colors.divider,
   },
   dividerCircle: {
     width: 10,
     height: 10,
     borderRadius: 5,
     borderWidth: 1.5,
-    borderColor: LoginColors.divider,
-    backgroundColor: LoginColors.background,
+    borderColor: Colors.divider,
+    backgroundColor: Colors.background,
     marginHorizontal: 8,
   },
   outlineButton: {
     borderWidth: 1,
-    borderColor: LoginColors.outlineBorder,
+    borderColor: Colors.outlineBorder,
     borderRadius: 12,
     paddingVertical: 16,
     alignItems: 'center',
@@ -360,6 +398,17 @@ const styles = StyleSheet.create({
   outlineButtonText: {
     fontSize: 16,
     fontWeight: '500',
-    color: LoginColors.textPrimary,
+    color: Colors.textPrimary,
+  },
+  adminDevButton: {
+    marginTop: 16,
+    paddingVertical: 10,
+    alignItems: 'center',
+  },
+  adminDevButtonText: {
+    fontSize: 13,
+    color: Colors.textMuted,
+    fontWeight: '500',
+    textTransform: 'lowercase',
   },
 });

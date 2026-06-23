@@ -1,0 +1,15 @@
+specVersion: "v1"
+serviceId: "sburger-a3265-service"
+location: "southamerica-west1"
+
+schema:
+  source: "./schema"
+  datasource:
+    postgresql:
+      database: "sburger-a3265-database"
+      cloudSql:
+        instanceId: "sburger-a3265-instance"
+        schemaValidation: "COMPATIBLE"
+
+connectorDirs:
+  - "./connector"

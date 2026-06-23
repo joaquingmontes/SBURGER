@@ -1,0 +1,181 @@
+mutation SeedProductos @auth(level: PUBLIC, insecureReason: "Seed productos de prueba") {
+  stackSimple: producto_insert(
+    data: {
+      id: "22222222-2222-2222-2222-222222222201"
+      nombre: "Stack Simple"
+      descripcion: "Medallón de carne 120g, queso cheddar, lechuga, tomate y salsa stack."
+      ingredientes: "1 Medallón de carne de 120g, Queso cheddar, Lechuga, Tomate, Salsa Stack, Pan brioche tostado con manteca."
+      precio: 4500
+      categoria: HAMBURGUESAS
+      imagenUrl: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=600&q=80"
+    }
+  )
+
+  stackBacon: producto_insert(
+    data: {
+      id: "22222222-2222-2222-2222-222222222202"
+      nombre: "Stack Bacon & Cheddar"
+      descripcion: "Doble medallón de carne, abundante panceta crocante y doble cheddar."
+      ingredientes: "2 Medallones de carne de 120g, Doble queso cheddar, Abundante panceta crocante, Salsa Barbacoa ahumada."
+      precio: 5200
+      categoria: HAMBURGUESAS
+      imagenUrl: "https://images.unsplash.com/photo-1553979459-d2229ba7433b?auto=format&fit=crop&w=600&q=80"
+    }
+  )
+
+  stackChicken: producto_insert(
+    data: {
+      id: "22222222-2222-2222-2222-222222222203"
+      nombre: "Stack Crispy Chicken"
+      descripcion: "Pechuga de pollo súper crocante, aderezo alioli, lechuga y pepinillos."
+      ingredientes: "Pechuga de pollo apanada súper crocante, Aderezo Alioli casero, Lechuga iceberg rallada, Pepinillos agridulces."
+      precio: 5500
+      categoria: HAMBURGUESAS
+      imagenUrl: "https://images.unsplash.com/photo-1625813506062-0aeb1d7a094b?auto=format&fit=crop&w=600&q=80"
+    }
+  )
+
+  stackVeggie: producto_insert(
+    data: {
+      id: "22222222-2222-2222-2222-222222222204"
+      nombre: "Stack Veggie Premium"
+      descripcion: "Medallón de garbanzos y quinoa, queso provolone, rúcula y cebollas caramelizadas."
+      ingredientes: "Medallón casero de garbanzos, quinoa y hierbas, Queso provolone fundido, Rúcula fresca, Cebollas caramelizadas al malbec."
+      precio: 4800
+      categoria: HAMBURGUESAS
+      imagenUrl: "https://images.unsplash.com/photo-1586190848861-99aa4a171e90?auto=format&fit=crop&w=600&q=80"
+    }
+  )
+
+  papasClasicas: producto_insert(
+    data: {
+      id: "22222222-2222-2222-2222-222222222205"
+      nombre: "Papas Fritas Clásicas"
+      descripcion: "Papas fritas doradas en su punto justo, con sal marina y aderezo a elección."
+      precio: 1800
+      categoria: PAPAS
+      imagenUrl: "https://images.unsplash.com/photo-1573080496216-bfa0202965e0?auto=format&fit=crop&w=600&q=80"
+    }
+  )
+
+  papasCheddar: producto_insert(
+    data: {
+      id: "22222222-2222-2222-2222-222222222206"
+      nombre: "Papas con Cheddar"
+      descripcion: "Papas fritas bañadas en salsa cheddar extra cremosa."
+      precio: 2400
+      categoria: PAPAS
+      imagenUrl: "https://images.unsplash.com/photo-1630384060420-cb99d8a4f5c8?auto=format&fit=crop&w=600&q=80"
+    }
+  )
+
+  papasBacon: producto_insert(
+    data: {
+      id: "22222222-2222-2222-2222-222222222207"
+      nombre: "Papas con Bacon"
+      descripcion: "Papas fritas con panceta crocante desmenuzada y cebolla de verdeo."
+      precio: 2600
+      categoria: PAPAS
+      imagenUrl: "https://images.unsplash.com/photo-1585238341710-4d34ac0a816c?auto=format&fit=crop&w=600&q=80"
+    }
+  )
+
+  papasCajun: producto_insert(
+    data: {
+      id: "22222222-2222-2222-2222-222222222208"
+      nombre: "Papas Cajún"
+      descripcion: "Papas fritas con condimento cajún artesanal, picantes y crujientes."
+      precio: 2200
+      categoria: PAPAS
+      imagenUrl: "https://images.unsplash.com/photo-1630384060420-cb99d8a4f5c8?auto=format&fit=crop&w=600&q=80"
+    }
+  )
+
+  cocaCola: producto_insert(
+    data: {
+      id: "22222222-2222-2222-2222-222222222209"
+      nombre: "Coca-Cola"
+      descripcion: "Lata de Coca-Cola 354ml bien fría."
+      precio: 1200
+      categoria: BEBIDAS
+      imagenUrl: "https://images.unsplash.com/photo-1629203851122-3726ecdf080e?auto=format&fit=crop&w=600&q=80"
+    }
+  )
+
+  aguaMineral: producto_insert(
+    data: {
+      id: "22222222-2222-2222-2222-222222222210"
+      nombre: "Agua Mineral"
+      descripcion: "Agua mineral sin gas 500ml."
+      precio: 800
+      categoria: BEBIDAS
+      imagenUrl: "https://images.unsplash.com/photo-1548839140-29a7492991a8?auto=format&fit=crop&w=600&q=80"
+    }
+  )
+
+  jugoNaranja: producto_insert(
+    data: {
+      id: "22222222-2222-2222-2222-222222222211"
+      nombre: "Jugo de Naranja"
+      descripcion: "Jugo de naranja exprimido al momento, natural y sin azúcar."
+      precio: 1400
+      categoria: BEBIDAS
+      imagenUrl: "https://images.unsplash.com/photo-1621506289937-a8e4df2404e7?auto=format&fit=crop&w=600&q=80"
+    }
+  )
+
+  limonada: producto_insert(
+    data: {
+      id: "22222222-2222-2222-2222-222222222212"
+      nombre: "Limonada Casera"
+      descripcion: "Limonada fresca con menta, azúcar de caña y hielo."
+      precio: 1500
+      categoria: BEBIDAS
+      imagenUrl: "https://images.unsplash.com/photo-1523677011781-c91b1a091d17?auto=format&fit=crop&w=600&q=80"
+    }
+  )
+
+  brownie: producto_insert(
+    data: {
+      id: "22222222-2222-2222-2222-222222222213"
+      nombre: "Brownie de Chocolate"
+      descripcion: "Brownie tibio con nueces, servido con helado de crema y salsa de chocolate."
+      precio: 2500
+      categoria: POSTRES
+      imagenUrl: "https://images.unsplash.com/photo-1606313564200-e75d5e30476c?auto=format&fit=crop&w=600&q=80"
+    }
+  )
+
+  cheesecake: producto_insert(
+    data: {
+      id: "22222222-2222-2222-2222-222222222214"
+      nombre: "Cheesecake NY"
+      descripcion: "Cheesecake estilo Nueva York con base de galletita y frutos rojos."
+      precio: 2800
+      categoria: POSTRES
+      imagenUrl: "https://images.unsplash.com/photo-1524351199678-941a58a3df50?auto=format&fit=crop&w=600&q=80"
+    }
+  )
+
+  helado: producto_insert(
+    data: {
+      id: "22222222-2222-2222-2222-222222222215"
+      nombre: "Helado Artesanal"
+      descripcion: "Dos bochas de helado artesanal a elección: chocolate, vainilla o frutilla."
+      precio: 2200
+      categoria: POSTRES
+      imagenUrl: "https://images.unsplash.com/photo-1563805042-7684c019e1cb?auto=format&fit=crop&w=600&q=80"
+    }
+  )
+
+  volcan: producto_insert(
+    data: {
+      id: "22222222-2222-2222-2222-222222222216"
+      nombre: "Volcán de Chocolate"
+      descripcion: "Bizcochuelo de chocolate con centro fundido, servido caliente con helado."
+      precio: 3000
+      categoria: POSTRES
+      imagenUrl: "https://images.unsplash.com/photo-1624353365286-3f8ed62f2a70?auto=format&fit=crop&w=600&q=80"
+    }
+  )
+}

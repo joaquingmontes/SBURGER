@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -8,12 +8,14 @@ import {
   StatusBar,
   Platform,
   ScrollView,
+  ActivityIndicator,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
+import { useQueryClient } from '@tanstack/react-query';
+import { useListPedidosByUsuario } from '@dataconnect/generated/react';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import {
-  MOCK_ORDERS,
   ORDER_FILTERS,
   ORDER_STATUS_LABELS,
   Order,
@@ -22,6 +24,14 @@ import {
 } from '../constants/mockOrders';
 import { BottomNav } from '../components/BottomNav';
 import { ScreenSafeArea } from '../components/ScreenSafeArea';
+import { ClientHeaderActions } from '../components/ClientHeaderActions';
+import { Colors } from '../constants/colors';
+import { useAuth } from '../context/AuthContext';
+import { dataConnect } from '../config/firebase';
+import { mapPedidoToOrder } from '../utils/firebaseMappers';
+import { useRefetchOnFocus } from '../hooks/useRefetchOnFocus';
+import { refreshUserOrdersFromServer } from '../utils/orderQueryCache';
+import { resetToLogin, resetToUserHome } from '../navigation/navigationUtils';
 
 type OrdersScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Orders'>;
 
@@ -29,24 +39,10 @@ interface OrdersScreenProps {
   navigation: OrdersScreenNavigationProp;
 }
 
-const ScreenColors = {
-  background: '#0C0C0C',
-  surface: '#1A1A1A',
-  surfaceDark: '#141414',
-  border: '#2A2A2A',
-  textPrimary: '#FFFFFF',
-  textSecondary: '#888888',
-  textMuted: '#666666',
-  accent: '#F39C12',
-  accentText: '#1A1208',
-  success: '#34C759',
-  error: '#FF5252',
-};
-
 const STATUS_COLORS: Record<OrderStatus, string> = {
-  preparing: ScreenColors.accent,
-  completed: ScreenColors.success,
-  cancelled: ScreenColors.error,
+  preparing: Colors.accent,
+  completed: Colors.success,
+  cancelled: Colors.error,
 };
 
 interface OrderCardProps {
@@ -157,24 +153,45 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, expanded, onToggle }) => {
 };
 
 export const OrdersScreen: React.FC<OrdersScreenProps> = ({ navigation }) => {
+  const queryClient = useQueryClient();
+  const { user, logout } = useAuth();
   const [selectedFilter, setSelectedFilter] = useState<OrderFilter>('all');
-  const [expandedOrders, setExpandedOrders] = useState<Record<string, boolean>>({
-    'SB-37827': true,
-  });
+  const [expandedOrders, setExpandedOrders] = useState<Record<string, boolean>>({});
+
+  const { data, isPending, isError, isFetching } = useListPedidosByUsuario(
+    dataConnect,
+    { usuarioId: user?.id ?? '' },
+    { enabled: !!user?.id },
+  );
+
+  const orders = useMemo(
+    () => (data?.pedidos ?? []).map(mapPedidoToOrder),
+    [data?.pedidos],
+  );
+
+  const refreshOrders = useCallback(async () => {
+    if (!user?.id) {
+      return;
+    }
+
+    await refreshUserOrdersFromServer(queryClient, user.id);
+  }, [queryClient, user?.id]);
+
+  useRefetchOnFocus(refreshOrders, !!user?.id);
 
   useFocusEffect(
     useCallback(() => {
-      StatusBar.setBarStyle('light-content');
+      StatusBar.setBarStyle('dark-content');
       if (Platform.OS === 'android') {
-        StatusBar.setBackgroundColor(ScreenColors.background);
+        StatusBar.setBackgroundColor(Colors.background);
       }
     }, []),
   );
 
   const filteredOrders =
     selectedFilter === 'all'
-      ? MOCK_ORDERS
-      : MOCK_ORDERS.filter(order => order.status === selectedFilter);
+      ? orders
+      : orders.filter(order => order.status === selectedFilter);
 
   const toggleOrder = (orderId: string) => {
     setExpandedOrders(prev => ({
@@ -183,11 +200,25 @@ export const OrdersScreen: React.FC<OrdersScreenProps> = ({ navigation }) => {
     }));
   };
 
+  const handleLogout = () => {
+    logout();
+    resetToLogin(navigation);
+  };
+
   return (
     <ScreenSafeArea style={styles.safeArea}>
       <View style={styles.header}>
-        <Text style={styles.title}>Mis pedidos</Text>
-        <Text style={styles.subtitle}>Historial y estado de tus pedidos</Text>
+        <View style={styles.headerTop}>
+          <View style={styles.headerText}>
+            <Text style={styles.title}>Mis pedidos</Text>
+            <Text style={styles.subtitle}>Historial y estado de tus pedidos</Text>
+          </View>
+          <ClientHeaderActions
+            onLogout={handleLogout}
+            userName={user?.nombreCompleto.split(' ')[0] ?? 'Usuario'}
+            userEmail={user?.email ?? ''}
+          />
+        </View>
       </View>
 
       <ScrollView
@@ -218,24 +249,41 @@ export const OrdersScreen: React.FC<OrdersScreenProps> = ({ navigation }) => {
         })}
       </ScrollView>
 
-      <FlatList
-        style={styles.list}
-        data={filteredOrders}
-        keyExtractor={item => item.id}
-        renderItem={({ item }) => (
-          <OrderCard
-            order={item}
-            expanded={!!expandedOrders[item.id]}
-            onToggle={() => toggleOrder(item.id)}
-          />
-        )}
-        contentContainerStyle={styles.listContent}
-        showsVerticalScrollIndicator={false}
-      />
+      {isPending ? (
+        <View style={styles.center}>
+          <ActivityIndicator size="large" color={Colors.accent} />
+        </View>
+      ) : isError ? (
+        <View style={styles.center}>
+          <Text style={styles.errorText}>No se pudieron cargar tus pedidos.</Text>
+        </View>
+      ) : (
+        <FlatList
+          style={styles.list}
+          data={filteredOrders}
+          keyExtractor={item => item.id}
+          renderItem={({ item }) => (
+            <OrderCard
+              order={item}
+              expanded={!!expandedOrders[item.id]}
+              onToggle={() => toggleOrder(item.id)}
+            />
+          )}
+          contentContainerStyle={styles.listContent}
+          showsVerticalScrollIndicator={false}
+          refreshing={isFetching}
+          onRefresh={refreshOrders}
+          ListEmptyComponent={
+            <View style={styles.center}>
+              <Text style={styles.emptyText}>Todavía no tenés pedidos.</Text>
+            </View>
+          }
+        />
+      )}
 
       <BottomNav
         activeTab="orders"
-        onCatalogPress={() => navigation.navigate('Home')}
+        onCatalogPress={() => resetToUserHome(navigation, user)}
         onOrdersPress={() => {}}
       />
     </ScreenSafeArea>
@@ -245,22 +293,37 @@ export const OrdersScreen: React.FC<OrdersScreenProps> = ({ navigation }) => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: ScreenColors.background,
+    backgroundColor: Colors.background,
+  },
+  center: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 24,
   },
   header: {
     paddingHorizontal: 20,
     paddingTop: 16,
     paddingBottom: 20,
   },
+  headerTop: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+  },
+  headerText: {
+    flex: 1,
+    paddingRight: 16,
+  },
   title: {
     fontSize: 26,
     fontWeight: '700',
-    color: ScreenColors.textPrimary,
+    color: Colors.textPrimary,
     marginBottom: 6,
   },
   subtitle: {
     fontSize: 14,
-    color: ScreenColors.textSecondary,
+    color: Colors.textSecondary,
   },
   filtersScroll: {
     maxHeight: 44,
@@ -270,25 +333,25 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   filterPill: {
-    backgroundColor: ScreenColors.surface,
+    backgroundColor: Colors.surface,
     borderRadius: 20,
     paddingHorizontal: 16,
     paddingVertical: 9,
     borderWidth: 1,
-    borderColor: ScreenColors.border,
+    borderColor: Colors.border,
     marginRight: 10,
   },
   filterPillSelected: {
-    backgroundColor: ScreenColors.accent,
-    borderColor: ScreenColors.accent,
+    backgroundColor: Colors.accent,
+    borderColor: Colors.accent,
   },
   filterLabel: {
     fontSize: 13,
     fontWeight: '600',
-    color: ScreenColors.textSecondary,
+    color: Colors.textSecondary,
   },
   filterLabelSelected: {
-    color: ScreenColors.accentText,
+    color: Colors.accentText,
   },
   list: {
     flex: 1,
@@ -298,10 +361,10 @@ const styles = StyleSheet.create({
     paddingBottom: 16,
   },
   orderCard: {
-    backgroundColor: ScreenColors.surface,
+    backgroundColor: Colors.surface,
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: ScreenColors.border,
+    borderColor: Colors.border,
     padding: 16,
     marginBottom: 14,
   },
@@ -322,7 +385,7 @@ const styles = StyleSheet.create({
   orderId: {
     fontSize: 16,
     fontWeight: '700',
-    color: ScreenColors.textPrimary,
+    color: Colors.textPrimary,
   },
   statusBadge: {
     flexDirection: 'row',
@@ -343,7 +406,7 @@ const styles = StyleSheet.create({
   orderTotal: {
     fontSize: 18,
     fontWeight: '700',
-    color: ScreenColors.accent,
+    color: Colors.accent,
   },
   orderMetaRow: {
     flexDirection: 'row',
@@ -358,7 +421,7 @@ const styles = StyleSheet.create({
   },
   orderDate: {
     fontSize: 13,
-    color: ScreenColors.textSecondary,
+    color: Colors.textSecondary,
     flex: 1,
   },
   toggleButton: {
@@ -367,17 +430,17 @@ const styles = StyleSheet.create({
   },
   toggleIcon: {
     fontSize: 10,
-    color: ScreenColors.textMuted,
+    color: Colors.textMuted,
     marginRight: 4,
   },
   toggleText: {
     fontSize: 12,
-    color: ScreenColors.textMuted,
+    color: Colors.textMuted,
     fontWeight: '500',
   },
   orderSummary: {
     fontSize: 13,
-    color: ScreenColors.textSecondary,
+    color: Colors.textSecondary,
     flex: 1,
   },
   expandedContent: {
@@ -385,7 +448,7 @@ const styles = StyleSheet.create({
   },
   divider: {
     height: 1,
-    backgroundColor: ScreenColors.border,
+    backgroundColor: Colors.border,
     marginBottom: 14,
   },
   itemRow: {
@@ -398,16 +461,16 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 14,
     fontWeight: '600',
-    color: ScreenColors.textPrimary,
+    color: Colors.textPrimary,
     paddingRight: 12,
   },
   itemPrice: {
     fontSize: 14,
-    color: ScreenColors.textSecondary,
+    color: Colors.textSecondary,
   },
   itemModifier: {
     fontSize: 12,
-    color: ScreenColors.textMuted,
+    color: Colors.textMuted,
     marginBottom: 10,
     marginLeft: 2,
   },
@@ -420,36 +483,46 @@ const styles = StyleSheet.create({
   },
   totalPaidLabel: {
     fontSize: 14,
-    color: ScreenColors.textSecondary,
+    color: Colors.textSecondary,
   },
   totalPaidValue: {
     fontSize: 16,
     fontWeight: '700',
-    color: ScreenColors.textPrimary,
+    color: Colors.textPrimary,
   },
   deliveryBox: {
-    backgroundColor: ScreenColors.surfaceDark,
+    backgroundColor: Colors.surfaceLight,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: ScreenColors.border,
+    borderColor: Colors.border,
     padding: 14,
   },
   deliveryLabel: {
     fontSize: 10,
     fontWeight: '600',
-    color: ScreenColors.textMuted,
+    color: Colors.textMuted,
     letterSpacing: 1,
     marginBottom: 8,
   },
   deliveryName: {
     fontSize: 14,
     fontWeight: '600',
-    color: ScreenColors.textPrimary,
+    color: Colors.textPrimary,
     marginBottom: 4,
   },
   deliveryDetail: {
     fontSize: 13,
-    color: ScreenColors.textSecondary,
+    color: Colors.textSecondary,
     marginBottom: 2,
+  },
+  errorText: {
+    fontSize: 14,
+    color: Colors.error,
+    textAlign: 'center',
+  },
+  emptyText: {
+    fontSize: 14,
+    color: Colors.textSecondary,
+    textAlign: 'center',
   },
 });
