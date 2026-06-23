@@ -10,7 +10,7 @@ export const invalidateOrdersQueries = async (
   await queryClient.invalidateQueries({
     predicate: query =>
       query.queryKey[0] === 'ListPedidosAdmin' ||
-      query.queryKey[0] === 'ListPedidosByUsuario',
+      query.queryKey[0] === 'ListMyPedidos',
   });
 
   await Promise.all([

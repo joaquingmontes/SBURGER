@@ -19,12 +19,13 @@ You can also follow the instructions from the [Data Connect documentation](https
 - [**Queries**](#queries)
   - [*ListProductosActivos*](#listproductosactivos)
   - [*ListProductosAdmin*](#listproductosadmin)
-  - [*ListPedidosByUsuario*](#listpedidosbyusuario)
+  - [*ListMyPedidos*](#listmypedidos)
   - [*ListPedidosAdmin*](#listpedidosadmin)
-  - [*GetUsuarioByEmail*](#getusuariobyemail)
+  - [*GetMe*](#getme)
   - [*GetProductoById*](#getproductobyid)
 - [**Mutations**](#mutations)
-  - [*CreateUsuario*](#createusuario)
+  - [*CreateUsuarioProfile*](#createusuarioprofile)
+  - [*LinkMyAccount*](#linkmyaccount)
   - [*CreateProducto*](#createproducto)
   - [*UpdateProducto*](#updateproducto)
   - [*DeleteProducto*](#deleteproducto)
@@ -277,33 +278,27 @@ export default function ListProductosAdminComponent() {
 }
 ```
 
-## ListPedidosByUsuario
-You can execute the `ListPedidosByUsuario` Query using the following Query hook function, which is defined in [dataconnect-generated/react/index.d.ts](./index.d.ts):
+## ListMyPedidos
+You can execute the `ListMyPedidos` Query using the following Query hook function, which is defined in [dataconnect-generated/react/index.d.ts](./index.d.ts):
 
 ```javascript
-useListPedidosByUsuario(dc: DataConnect, vars: ListPedidosByUsuarioVariables, options?: useDataConnectQueryOptions<ListPedidosByUsuarioData>): UseDataConnectQueryResult<ListPedidosByUsuarioData, ListPedidosByUsuarioVariables>;
+useListMyPedidos(dc: DataConnect, options?: useDataConnectQueryOptions<ListMyPedidosData>): UseDataConnectQueryResult<ListMyPedidosData, undefined>;
 ```
 You can also pass in a `DataConnect` instance to the Query hook function.
 ```javascript
-useListPedidosByUsuario(vars: ListPedidosByUsuarioVariables, options?: useDataConnectQueryOptions<ListPedidosByUsuarioData>): UseDataConnectQueryResult<ListPedidosByUsuarioData, ListPedidosByUsuarioVariables>;
+useListMyPedidos(options?: useDataConnectQueryOptions<ListMyPedidosData>): UseDataConnectQueryResult<ListMyPedidosData, undefined>;
 ```
 
 ### Variables
-The `ListPedidosByUsuario` Query requires an argument of type `ListPedidosByUsuarioVariables`, which is defined in [dataconnect-generated/index.d.ts](../index.d.ts). It has the following fields:
-
-```javascript
-export interface ListPedidosByUsuarioVariables {
-  usuarioId: UUIDString;
-}
-```
+The `ListMyPedidos` Query has no variables.
 ### Return Type
-Recall that calling the `ListPedidosByUsuario` Query hook function returns a `UseQueryResult` object. This object holds the state of your Query, including whether the Query is loading, has completed, or has succeeded/failed, and any data returned by the Query, among other things.
+Recall that calling the `ListMyPedidos` Query hook function returns a `UseQueryResult` object. This object holds the state of your Query, including whether the Query is loading, has completed, or has succeeded/failed, and any data returned by the Query, among other things.
 
 To check the status of a Query, use the `UseQueryResult.status` field. You can also check for pending / success / error status using the `UseQueryResult.isPending`, `UseQueryResult.isSuccess`, and `UseQueryResult.isError` fields.
 
-To access the data returned by a Query, use the `UseQueryResult.data` field. The data for the `ListPedidosByUsuario` Query is of type `ListPedidosByUsuarioData`, which is defined in [dataconnect-generated/index.d.ts](../index.d.ts). It has the following fields:
+To access the data returned by a Query, use the `UseQueryResult.data` field. The data for the `ListMyPedidos` Query is of type `ListMyPedidosData`, which is defined in [dataconnect-generated/index.d.ts](../index.d.ts). It has the following fields:
 ```javascript
-export interface ListPedidosByUsuarioData {
+export interface ListMyPedidosData {
   pedidos: ({
     id: UUIDString;
     codigo: string;
@@ -334,37 +329,30 @@ export interface ListPedidosByUsuarioData {
 
 To learn more about the `UseQueryResult` object, see the [TanStack React Query documentation](https://tanstack.com/query/v5/docs/framework/react/reference/useQuery).
 
-### Using `ListPedidosByUsuario`'s Query hook function
+### Using `ListMyPedidos`'s Query hook function
 
 ```javascript
 import { getDataConnect } from 'firebase/data-connect';
-import { connectorConfig, ListPedidosByUsuarioVariables } from '@dataconnect/generated';
-import { useListPedidosByUsuario } from '@dataconnect/generated/react'
+import { connectorConfig } from '@dataconnect/generated';
+import { useListMyPedidos } from '@dataconnect/generated/react'
 
-export default function ListPedidosByUsuarioComponent() {
-  // The `useListPedidosByUsuario` Query hook requires an argument of type `ListPedidosByUsuarioVariables`:
-  const listPedidosByUsuarioVars: ListPedidosByUsuarioVariables = {
-    usuarioId: ..., 
-  };
-
+export default function ListMyPedidosComponent() {
   // You don't have to do anything to "execute" the Query.
   // Call the Query hook function to get a `UseQueryResult` object which holds the state of your Query.
-  const query = useListPedidosByUsuario(listPedidosByUsuarioVars);
-  // Variables can be defined inline as well.
-  const query = useListPedidosByUsuario({ usuarioId: ..., });
+  const query = useListMyPedidos();
 
   // You can also pass in a `DataConnect` instance to the Query hook function.
   const dataConnect = getDataConnect(connectorConfig);
-  const query = useListPedidosByUsuario(dataConnect, listPedidosByUsuarioVars);
+  const query = useListMyPedidos(dataConnect);
 
   // You can also pass in a `useDataConnectQueryOptions` object to the Query hook function.
   const options = { staleTime: 5 * 1000 };
-  const query = useListPedidosByUsuario(listPedidosByUsuarioVars, options);
+  const query = useListMyPedidos(options);
 
   // You can also pass both a `DataConnect` instance and a `useDataConnectQueryOptions` object.
   const dataConnect = getDataConnect(connectorConfig);
   const options = { staleTime: 5 * 1000 };
-  const query = useListPedidosByUsuario(dataConnect, listPedidosByUsuarioVars, options);
+  const query = useListMyPedidos(dataConnect, options);
 
   // Then, you can render your component dynamically based on the status of the Query.
   if (query.isPending) {
@@ -476,38 +464,31 @@ export default function ListPedidosAdminComponent() {
 }
 ```
 
-## GetUsuarioByEmail
-You can execute the `GetUsuarioByEmail` Query using the following Query hook function, which is defined in [dataconnect-generated/react/index.d.ts](./index.d.ts):
+## GetMe
+You can execute the `GetMe` Query using the following Query hook function, which is defined in [dataconnect-generated/react/index.d.ts](./index.d.ts):
 
 ```javascript
-useGetUsuarioByEmail(dc: DataConnect, vars: GetUsuarioByEmailVariables, options?: useDataConnectQueryOptions<GetUsuarioByEmailData>): UseDataConnectQueryResult<GetUsuarioByEmailData, GetUsuarioByEmailVariables>;
+useGetMe(dc: DataConnect, options?: useDataConnectQueryOptions<GetMeData>): UseDataConnectQueryResult<GetMeData, undefined>;
 ```
 You can also pass in a `DataConnect` instance to the Query hook function.
 ```javascript
-useGetUsuarioByEmail(vars: GetUsuarioByEmailVariables, options?: useDataConnectQueryOptions<GetUsuarioByEmailData>): UseDataConnectQueryResult<GetUsuarioByEmailData, GetUsuarioByEmailVariables>;
+useGetMe(options?: useDataConnectQueryOptions<GetMeData>): UseDataConnectQueryResult<GetMeData, undefined>;
 ```
 
 ### Variables
-The `GetUsuarioByEmail` Query requires an argument of type `GetUsuarioByEmailVariables`, which is defined in [dataconnect-generated/index.d.ts](../index.d.ts). It has the following fields:
-
-```javascript
-export interface GetUsuarioByEmailVariables {
-  email: string;
-}
-```
+The `GetMe` Query has no variables.
 ### Return Type
-Recall that calling the `GetUsuarioByEmail` Query hook function returns a `UseQueryResult` object. This object holds the state of your Query, including whether the Query is loading, has completed, or has succeeded/failed, and any data returned by the Query, among other things.
+Recall that calling the `GetMe` Query hook function returns a `UseQueryResult` object. This object holds the state of your Query, including whether the Query is loading, has completed, or has succeeded/failed, and any data returned by the Query, among other things.
 
 To check the status of a Query, use the `UseQueryResult.status` field. You can also check for pending / success / error status using the `UseQueryResult.isPending`, `UseQueryResult.isSuccess`, and `UseQueryResult.isError` fields.
 
-To access the data returned by a Query, use the `UseQueryResult.data` field. The data for the `GetUsuarioByEmail` Query is of type `GetUsuarioByEmailData`, which is defined in [dataconnect-generated/index.d.ts](../index.d.ts). It has the following fields:
+To access the data returned by a Query, use the `UseQueryResult.data` field. The data for the `GetMe` Query is of type `GetMeData`, which is defined in [dataconnect-generated/index.d.ts](../index.d.ts). It has the following fields:
 ```javascript
-export interface GetUsuarioByEmailData {
+export interface GetMeData {
   usuarios: ({
     id: UUIDString;
     nombreCompleto: string;
     email: string;
-    passwordHash: string;
     rol: RolUsuario;
   } & Usuario_Key)[];
 }
@@ -515,37 +496,30 @@ export interface GetUsuarioByEmailData {
 
 To learn more about the `UseQueryResult` object, see the [TanStack React Query documentation](https://tanstack.com/query/v5/docs/framework/react/reference/useQuery).
 
-### Using `GetUsuarioByEmail`'s Query hook function
+### Using `GetMe`'s Query hook function
 
 ```javascript
 import { getDataConnect } from 'firebase/data-connect';
-import { connectorConfig, GetUsuarioByEmailVariables } from '@dataconnect/generated';
-import { useGetUsuarioByEmail } from '@dataconnect/generated/react'
+import { connectorConfig } from '@dataconnect/generated';
+import { useGetMe } from '@dataconnect/generated/react'
 
-export default function GetUsuarioByEmailComponent() {
-  // The `useGetUsuarioByEmail` Query hook requires an argument of type `GetUsuarioByEmailVariables`:
-  const getUsuarioByEmailVars: GetUsuarioByEmailVariables = {
-    email: ..., 
-  };
-
+export default function GetMeComponent() {
   // You don't have to do anything to "execute" the Query.
   // Call the Query hook function to get a `UseQueryResult` object which holds the state of your Query.
-  const query = useGetUsuarioByEmail(getUsuarioByEmailVars);
-  // Variables can be defined inline as well.
-  const query = useGetUsuarioByEmail({ email: ..., });
+  const query = useGetMe();
 
   // You can also pass in a `DataConnect` instance to the Query hook function.
   const dataConnect = getDataConnect(connectorConfig);
-  const query = useGetUsuarioByEmail(dataConnect, getUsuarioByEmailVars);
+  const query = useGetMe(dataConnect);
 
   // You can also pass in a `useDataConnectQueryOptions` object to the Query hook function.
   const options = { staleTime: 5 * 1000 };
-  const query = useGetUsuarioByEmail(getUsuarioByEmailVars, options);
+  const query = useGetMe(options);
 
   // You can also pass both a `DataConnect` instance and a `useDataConnectQueryOptions` object.
   const dataConnect = getDataConnect(connectorConfig);
   const options = { staleTime: 5 * 1000 };
-  const query = useGetUsuarioByEmail(dataConnect, getUsuarioByEmailVars, options);
+  const query = useGetMe(dataConnect, options);
 
   // Then, you can render your component dynamically based on the status of the Query.
   if (query.isPending) {
@@ -679,88 +653,86 @@ Here's a general overview of how to use the generated Mutation hooks in your cod
 
 Below are examples of how to use the `default` connector's generated Mutation hook functions to execute each Mutation. You can also follow the examples from the [Data Connect documentation](https://firebase.google.com/docs/data-connect/web-sdk#operations-react-angular).
 
-## CreateUsuario
-You can execute the `CreateUsuario` Mutation using the `UseMutationResult` object returned by the following Mutation hook function (which is defined in [dataconnect-generated/react/index.d.ts](./index.d.ts)):
+## CreateUsuarioProfile
+You can execute the `CreateUsuarioProfile` Mutation using the `UseMutationResult` object returned by the following Mutation hook function (which is defined in [dataconnect-generated/react/index.d.ts](./index.d.ts)):
 ```javascript
-useCreateUsuario(options?: useDataConnectMutationOptions<CreateUsuarioData, FirebaseError, CreateUsuarioVariables>): UseDataConnectMutationResult<CreateUsuarioData, CreateUsuarioVariables>;
+useCreateUsuarioProfile(options?: useDataConnectMutationOptions<CreateUsuarioProfileData, FirebaseError, CreateUsuarioProfileVariables>): UseDataConnectMutationResult<CreateUsuarioProfileData, CreateUsuarioProfileVariables>;
 ```
 You can also pass in a `DataConnect` instance to the Mutation hook function.
 ```javascript
-useCreateUsuario(dc: DataConnect, options?: useDataConnectMutationOptions<CreateUsuarioData, FirebaseError, CreateUsuarioVariables>): UseDataConnectMutationResult<CreateUsuarioData, CreateUsuarioVariables>;
+useCreateUsuarioProfile(dc: DataConnect, options?: useDataConnectMutationOptions<CreateUsuarioProfileData, FirebaseError, CreateUsuarioProfileVariables>): UseDataConnectMutationResult<CreateUsuarioProfileData, CreateUsuarioProfileVariables>;
 ```
 
 ### Variables
-The `CreateUsuario` Mutation requires an argument of type `CreateUsuarioVariables`, which is defined in [dataconnect-generated/index.d.ts](../index.d.ts). It has the following fields:
+The `CreateUsuarioProfile` Mutation requires an argument of type `CreateUsuarioProfileVariables`, which is defined in [dataconnect-generated/index.d.ts](../index.d.ts). It has the following fields:
 
 ```javascript
-export interface CreateUsuarioVariables {
+export interface CreateUsuarioProfileVariables {
   nombreCompleto: string;
   email: string;
-  passwordHash: string;
   rol?: RolUsuario | null;
 }
 ```
 ### Return Type
-Recall that calling the `CreateUsuario` Mutation hook function returns a `UseMutationResult` object. This object holds the state of your Mutation, including whether the Mutation is loading, has completed, or has succeeded/failed, among other things.
+Recall that calling the `CreateUsuarioProfile` Mutation hook function returns a `UseMutationResult` object. This object holds the state of your Mutation, including whether the Mutation is loading, has completed, or has succeeded/failed, among other things.
 
 To check the status of a Mutation, use the `UseMutationResult.status` field. You can also check for pending / success / error status using the `UseMutationResult.isPending`, `UseMutationResult.isSuccess`, and `UseMutationResult.isError` fields.
 
 To execute the Mutation, call `UseMutationResult.mutate()`. This function executes the Mutation, but does not return the data from the Mutation.
 
-To access the data returned by a Mutation, use the `UseMutationResult.data` field. The data for the `CreateUsuario` Mutation is of type `CreateUsuarioData`, which is defined in [dataconnect-generated/index.d.ts](../index.d.ts). It has the following fields:
+To access the data returned by a Mutation, use the `UseMutationResult.data` field. The data for the `CreateUsuarioProfile` Mutation is of type `CreateUsuarioProfileData`, which is defined in [dataconnect-generated/index.d.ts](../index.d.ts). It has the following fields:
 ```javascript
-export interface CreateUsuarioData {
+export interface CreateUsuarioProfileData {
   usuario_insert: Usuario_Key;
 }
 ```
 
 To learn more about the `UseMutationResult` object, see the [TanStack React Query documentation](https://tanstack.com/query/v5/docs/framework/react/reference/useMutation).
 
-### Using `CreateUsuario`'s Mutation hook function
+### Using `CreateUsuarioProfile`'s Mutation hook function
 
 ```javascript
 import { getDataConnect } from 'firebase/data-connect';
-import { connectorConfig, CreateUsuarioVariables } from '@dataconnect/generated';
-import { useCreateUsuario } from '@dataconnect/generated/react'
+import { connectorConfig, CreateUsuarioProfileVariables } from '@dataconnect/generated';
+import { useCreateUsuarioProfile } from '@dataconnect/generated/react'
 
-export default function CreateUsuarioComponent() {
+export default function CreateUsuarioProfileComponent() {
   // Call the Mutation hook function to get a `UseMutationResult` object which holds the state of your Mutation.
-  const mutation = useCreateUsuario();
+  const mutation = useCreateUsuarioProfile();
 
   // You can also pass in a `DataConnect` instance to the Mutation hook function.
   const dataConnect = getDataConnect(connectorConfig);
-  const mutation = useCreateUsuario(dataConnect);
+  const mutation = useCreateUsuarioProfile(dataConnect);
 
   // You can also pass in a `useDataConnectMutationOptions` object to the Mutation hook function.
   const options = {
     onSuccess: () => { console.log('Mutation succeeded!'); }
   };
-  const mutation = useCreateUsuario(options);
+  const mutation = useCreateUsuarioProfile(options);
 
   // You can also pass both a `DataConnect` instance and a `useDataConnectMutationOptions` object.
   const dataConnect = getDataConnect(connectorConfig);
   const options = {
     onSuccess: () => { console.log('Mutation succeeded!'); }
   };
-  const mutation = useCreateUsuario(dataConnect, options);
+  const mutation = useCreateUsuarioProfile(dataConnect, options);
 
   // After calling the Mutation hook function, you must call `UseMutationResult.mutate()` to execute the Mutation.
-  // The `useCreateUsuario` Mutation requires an argument of type `CreateUsuarioVariables`:
-  const createUsuarioVars: CreateUsuarioVariables = {
+  // The `useCreateUsuarioProfile` Mutation requires an argument of type `CreateUsuarioProfileVariables`:
+  const createUsuarioProfileVars: CreateUsuarioProfileVariables = {
     nombreCompleto: ..., 
     email: ..., 
-    passwordHash: ..., 
     rol: ..., // optional
   };
-  mutation.mutate(createUsuarioVars);
+  mutation.mutate(createUsuarioProfileVars);
   // Variables can be defined inline as well.
-  mutation.mutate({ nombreCompleto: ..., email: ..., passwordHash: ..., rol: ..., });
+  mutation.mutate({ nombreCompleto: ..., email: ..., rol: ..., });
 
   // You can also pass in a `useDataConnectMutationOptions` object to `UseMutationResult.mutate()`.
   const options = {
     onSuccess: () => { console.log('Mutation succeeded!'); }
   };
-  mutation.mutate(createUsuarioVars, options);
+  mutation.mutate(createUsuarioProfileVars, options);
 
   // Then, you can render your component dynamically based on the status of the Mutation.
   if (mutation.isPending) {
@@ -774,6 +746,89 @@ export default function CreateUsuarioComponent() {
   // If the Mutation is successful, you can access the data returned using the `UseMutationResult.data` field.
   if (mutation.isSuccess) {
     console.log(mutation.data.usuario_insert);
+  }
+  return <div>Mutation execution {mutation.isSuccess ? 'successful' : 'failed'}!</div>;
+}
+```
+
+## LinkMyAccount
+You can execute the `LinkMyAccount` Mutation using the `UseMutationResult` object returned by the following Mutation hook function (which is defined in [dataconnect-generated/react/index.d.ts](./index.d.ts)):
+```javascript
+useLinkMyAccount(options?: useDataConnectMutationOptions<LinkMyAccountData, FirebaseError, void>): UseDataConnectMutationResult<LinkMyAccountData, undefined>;
+```
+You can also pass in a `DataConnect` instance to the Mutation hook function.
+```javascript
+useLinkMyAccount(dc: DataConnect, options?: useDataConnectMutationOptions<LinkMyAccountData, FirebaseError, void>): UseDataConnectMutationResult<LinkMyAccountData, undefined>;
+```
+
+### Variables
+The `LinkMyAccount` Mutation has no variables.
+### Return Type
+Recall that calling the `LinkMyAccount` Mutation hook function returns a `UseMutationResult` object. This object holds the state of your Mutation, including whether the Mutation is loading, has completed, or has succeeded/failed, among other things.
+
+To check the status of a Mutation, use the `UseMutationResult.status` field. You can also check for pending / success / error status using the `UseMutationResult.isPending`, `UseMutationResult.isSuccess`, and `UseMutationResult.isError` fields.
+
+To execute the Mutation, call `UseMutationResult.mutate()`. This function executes the Mutation, but does not return the data from the Mutation.
+
+To access the data returned by a Mutation, use the `UseMutationResult.data` field. The data for the `LinkMyAccount` Mutation is of type `LinkMyAccountData`, which is defined in [dataconnect-generated/index.d.ts](../index.d.ts). It has the following fields:
+```javascript
+export interface LinkMyAccountData {
+  usuario_update?: Usuario_Key | null;
+}
+```
+
+To learn more about the `UseMutationResult` object, see the [TanStack React Query documentation](https://tanstack.com/query/v5/docs/framework/react/reference/useMutation).
+
+### Using `LinkMyAccount`'s Mutation hook function
+
+```javascript
+import { getDataConnect } from 'firebase/data-connect';
+import { connectorConfig } from '@dataconnect/generated';
+import { useLinkMyAccount } from '@dataconnect/generated/react'
+
+export default function LinkMyAccountComponent() {
+  // Call the Mutation hook function to get a `UseMutationResult` object which holds the state of your Mutation.
+  const mutation = useLinkMyAccount();
+
+  // You can also pass in a `DataConnect` instance to the Mutation hook function.
+  const dataConnect = getDataConnect(connectorConfig);
+  const mutation = useLinkMyAccount(dataConnect);
+
+  // You can also pass in a `useDataConnectMutationOptions` object to the Mutation hook function.
+  const options = {
+    onSuccess: () => { console.log('Mutation succeeded!'); }
+  };
+  const mutation = useLinkMyAccount(options);
+
+  // You can also pass both a `DataConnect` instance and a `useDataConnectMutationOptions` object.
+  const dataConnect = getDataConnect(connectorConfig);
+  const options = {
+    onSuccess: () => { console.log('Mutation succeeded!'); }
+  };
+  const mutation = useLinkMyAccount(dataConnect, options);
+
+  // After calling the Mutation hook function, you must call `UseMutationResult.mutate()` to execute the Mutation.
+  mutation.mutate();
+
+  // You can also pass in a `useDataConnectMutationOptions` object to `UseMutationResult.mutate()`.
+  // Since this Mutation accepts no variables, you must pass `undefined` where you would normally pass the variables.
+  const options = {
+    onSuccess: () => { console.log('Mutation succeeded!'); }
+  };
+  mutation.mutate(undefined, options);
+
+  // Then, you can render your component dynamically based on the status of the Mutation.
+  if (mutation.isPending) {
+    return <div>Loading...</div>;
+  }
+
+  if (mutation.isError) {
+    return <div>Error: {mutation.error.message}</div>;
+  }
+
+  // If the Mutation is successful, you can access the data returned using the `UseMutationResult.data` field.
+  if (mutation.isSuccess) {
+    console.log(mutation.data.usuario_update);
   }
   return <div>Mutation execution {mutation.isSuccess ? 'successful' : 'failed'}!</div>;
 }

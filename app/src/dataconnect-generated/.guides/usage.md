@@ -12,10 +12,12 @@ For each operation, there is a wrapper hook that can be used to call the operati
 
 Here are all of the hooks that get generated:
 ```ts
-import { useCreateUsuario, useCreateProducto, useUpdateProducto, useDeleteProducto, useCreatePedido, useCreatePedidoItem, useUpdatePedidoEstado, useListProductosActivos, useListProductosAdmin, useListPedidosByUsuario } from '@dataconnect/generated/react';
+import { useCreateUsuarioProfile, useLinkMyAccount, useCreateProducto, useUpdateProducto, useDeleteProducto, useCreatePedido, useCreatePedidoItem, useUpdatePedidoEstado, useListProductosActivos, useListProductosAdmin } from '@dataconnect/generated/react';
 // The types of these hooks are available in react/index.d.ts
 
-const { data, isPending, isSuccess, isError, error } = useCreateUsuario(createUsuarioVars);
+const { data, isPending, isSuccess, isError, error } = useCreateUsuarioProfile(createUsuarioProfileVars);
+
+const { data, isPending, isSuccess, isError, error } = useLinkMyAccount();
 
 const { data, isPending, isSuccess, isError, error } = useCreateProducto(createProductoVars);
 
@@ -32,8 +34,6 @@ const { data, isPending, isSuccess, isError, error } = useUpdatePedidoEstado(upd
 const { data, isPending, isSuccess, isError, error } = useListProductosActivos();
 
 const { data, isPending, isSuccess, isError, error } = useListProductosAdmin();
-
-const { data, isPending, isSuccess, isError, error } = useListPedidosByUsuario(listPedidosByUsuarioVars);
 
 ```
 
@@ -72,11 +72,14 @@ If a user is not using a supported framework, they can use the generated SDK dir
 Here's an example of how to use it with the first 5 operations:
 
 ```js
-import { createUsuario, createProducto, updateProducto, deleteProducto, createPedido, createPedidoItem, updatePedidoEstado, listProductosActivos, listProductosAdmin, listPedidosByUsuario } from '@dataconnect/generated';
+import { createUsuarioProfile, linkMyAccount, createProducto, updateProducto, deleteProducto, createPedido, createPedidoItem, updatePedidoEstado, listProductosActivos, listProductosAdmin } from '@dataconnect/generated';
 
 
-// Operation CreateUsuario:  For variables, look at type CreateUsuarioVars in ../index.d.ts
-const { data } = await CreateUsuario(dataConnect, createUsuarioVars);
+// Operation CreateUsuarioProfile:  For variables, look at type CreateUsuarioProfileVars in ../index.d.ts
+const { data } = await CreateUsuarioProfile(dataConnect, createUsuarioProfileVars);
+
+// Operation LinkMyAccount: 
+const { data } = await LinkMyAccount(dataConnect);
 
 // Operation CreateProducto:  For variables, look at type CreateProductoVars in ../index.d.ts
 const { data } = await CreateProducto(dataConnect, createProductoVars);
@@ -101,9 +104,6 @@ const { data } = await ListProductosActivos(dataConnect);
 
 // Operation ListProductosAdmin: 
 const { data } = await ListProductosAdmin(dataConnect);
-
-// Operation ListPedidosByUsuario:  For variables, look at type ListPedidosByUsuarioVars in ../index.d.ts
-const { data } = await ListPedidosByUsuario(dataConnect, listPedidosByUsuarioVars);
 
 
 ```

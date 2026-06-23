@@ -80,14 +80,13 @@ export interface CreateProductoVariables {
   imagenUrl: string;
 }
 
-export interface CreateUsuarioData {
+export interface CreateUsuarioProfileData {
   usuario_insert: Usuario_Key;
 }
 
-export interface CreateUsuarioVariables {
+export interface CreateUsuarioProfileVariables {
   nombreCompleto: string;
   email: string;
-  passwordHash: string;
   rol?: RolUsuario | null;
 }
 
@@ -97,6 +96,15 @@ export interface DeleteProductoData {
 
 export interface DeleteProductoVariables {
   id: UUIDString;
+}
+
+export interface GetMeData {
+  usuarios: ({
+    id: UUIDString;
+    nombreCompleto: string;
+    email: string;
+    rol: RolUsuario;
+  } & Usuario_Key)[];
 }
 
 export interface GetProductoByIdData {
@@ -115,18 +123,36 @@ export interface GetProductoByIdVariables {
   id: UUIDString;
 }
 
-export interface GetUsuarioByEmailData {
-  usuarios: ({
-    id: UUIDString;
-    nombreCompleto: string;
-    email: string;
-    passwordHash: string;
-    rol: RolUsuario;
-  } & Usuario_Key)[];
+export interface LinkMyAccountData {
+  usuario_update?: Usuario_Key | null;
 }
 
-export interface GetUsuarioByEmailVariables {
-  email: string;
+export interface ListMyPedidosData {
+  pedidos: ({
+    id: UUIDString;
+    codigo: string;
+    estado: EstadoPedido;
+    subtotal: number;
+    costoEnvio: number;
+    total: number;
+    modalidadEntrega: ModalidadEntrega;
+    nombreContacto: string;
+    telefonoContacto: string;
+    direccion?: string | null;
+    createdAt: TimestampString;
+    pedidoItems_on_pedido: ({
+      id: UUIDString;
+      nombreProducto: string;
+      cantidad: number;
+      precioUnitario: number;
+      precioTotalLinea: number;
+      extraMedallon: number;
+      extraCheddar: number;
+      extraPanceta: number;
+      extraCebolla: number;
+      notas?: string | null;
+    } & PedidoItem_Key)[];
+  } & Pedido_Key)[];
 }
 
 export interface ListPedidosAdminData {
@@ -155,38 +181,6 @@ export interface ListPedidosAdminData {
       notas?: string | null;
     } & PedidoItem_Key)[];
   } & Pedido_Key)[];
-}
-
-export interface ListPedidosByUsuarioData {
-  pedidos: ({
-    id: UUIDString;
-    codigo: string;
-    estado: EstadoPedido;
-    subtotal: number;
-    costoEnvio: number;
-    total: number;
-    modalidadEntrega: ModalidadEntrega;
-    nombreContacto: string;
-    telefonoContacto: string;
-    direccion?: string | null;
-    createdAt: TimestampString;
-    pedidoItems_on_pedido: ({
-      id: UUIDString;
-      nombreProducto: string;
-      cantidad: number;
-      precioUnitario: number;
-      precioTotalLinea: number;
-      extraMedallon: number;
-      extraCheddar: number;
-      extraPanceta: number;
-      extraCebolla: number;
-      notas?: string | null;
-    } & PedidoItem_Key)[];
-  } & Pedido_Key)[];
-}
-
-export interface ListPedidosByUsuarioVariables {
-  usuarioId: UUIDString;
 }
 
 export interface ListProductosActivosData {
@@ -257,17 +251,29 @@ export interface Usuario_Key {
   __typename?: 'Usuario_Key';
 }
 
-interface CreateUsuarioRef {
+interface CreateUsuarioProfileRef {
   /* Allow users to create refs without passing in DataConnect */
-  (vars: CreateUsuarioVariables): MutationRef<CreateUsuarioData, CreateUsuarioVariables>;
+  (vars: CreateUsuarioProfileVariables): MutationRef<CreateUsuarioProfileData, CreateUsuarioProfileVariables>;
   /* Allow users to pass in custom DataConnect instances */
-  (dc: DataConnect, vars: CreateUsuarioVariables): MutationRef<CreateUsuarioData, CreateUsuarioVariables>;
+  (dc: DataConnect, vars: CreateUsuarioProfileVariables): MutationRef<CreateUsuarioProfileData, CreateUsuarioProfileVariables>;
   operationName: string;
 }
-export const createUsuarioRef: CreateUsuarioRef;
+export const createUsuarioProfileRef: CreateUsuarioProfileRef;
 
-export function createUsuario(vars: CreateUsuarioVariables): MutationPromise<CreateUsuarioData, CreateUsuarioVariables>;
-export function createUsuario(dc: DataConnect, vars: CreateUsuarioVariables): MutationPromise<CreateUsuarioData, CreateUsuarioVariables>;
+export function createUsuarioProfile(vars: CreateUsuarioProfileVariables): MutationPromise<CreateUsuarioProfileData, CreateUsuarioProfileVariables>;
+export function createUsuarioProfile(dc: DataConnect, vars: CreateUsuarioProfileVariables): MutationPromise<CreateUsuarioProfileData, CreateUsuarioProfileVariables>;
+
+interface LinkMyAccountRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (): MutationRef<LinkMyAccountData, undefined>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect): MutationRef<LinkMyAccountData, undefined>;
+  operationName: string;
+}
+export const linkMyAccountRef: LinkMyAccountRef;
+
+export function linkMyAccount(): MutationPromise<LinkMyAccountData, undefined>;
+export function linkMyAccount(dc: DataConnect): MutationPromise<LinkMyAccountData, undefined>;
 
 interface CreateProductoRef {
   /* Allow users to create refs without passing in DataConnect */
@@ -365,17 +371,17 @@ export const listProductosAdminRef: ListProductosAdminRef;
 export function listProductosAdmin(options?: ExecuteQueryOptions): QueryPromise<ListProductosAdminData, undefined>;
 export function listProductosAdmin(dc: DataConnect, options?: ExecuteQueryOptions): QueryPromise<ListProductosAdminData, undefined>;
 
-interface ListPedidosByUsuarioRef {
+interface ListMyPedidosRef {
   /* Allow users to create refs without passing in DataConnect */
-  (vars: ListPedidosByUsuarioVariables): QueryRef<ListPedidosByUsuarioData, ListPedidosByUsuarioVariables>;
+  (): QueryRef<ListMyPedidosData, undefined>;
   /* Allow users to pass in custom DataConnect instances */
-  (dc: DataConnect, vars: ListPedidosByUsuarioVariables): QueryRef<ListPedidosByUsuarioData, ListPedidosByUsuarioVariables>;
+  (dc: DataConnect): QueryRef<ListMyPedidosData, undefined>;
   operationName: string;
 }
-export const listPedidosByUsuarioRef: ListPedidosByUsuarioRef;
+export const listMyPedidosRef: ListMyPedidosRef;
 
-export function listPedidosByUsuario(vars: ListPedidosByUsuarioVariables, options?: ExecuteQueryOptions): QueryPromise<ListPedidosByUsuarioData, ListPedidosByUsuarioVariables>;
-export function listPedidosByUsuario(dc: DataConnect, vars: ListPedidosByUsuarioVariables, options?: ExecuteQueryOptions): QueryPromise<ListPedidosByUsuarioData, ListPedidosByUsuarioVariables>;
+export function listMyPedidos(options?: ExecuteQueryOptions): QueryPromise<ListMyPedidosData, undefined>;
+export function listMyPedidos(dc: DataConnect, options?: ExecuteQueryOptions): QueryPromise<ListMyPedidosData, undefined>;
 
 interface ListPedidosAdminRef {
   /* Allow users to create refs without passing in DataConnect */
@@ -389,17 +395,17 @@ export const listPedidosAdminRef: ListPedidosAdminRef;
 export function listPedidosAdmin(options?: ExecuteQueryOptions): QueryPromise<ListPedidosAdminData, undefined>;
 export function listPedidosAdmin(dc: DataConnect, options?: ExecuteQueryOptions): QueryPromise<ListPedidosAdminData, undefined>;
 
-interface GetUsuarioByEmailRef {
+interface GetMeRef {
   /* Allow users to create refs without passing in DataConnect */
-  (vars: GetUsuarioByEmailVariables): QueryRef<GetUsuarioByEmailData, GetUsuarioByEmailVariables>;
+  (): QueryRef<GetMeData, undefined>;
   /* Allow users to pass in custom DataConnect instances */
-  (dc: DataConnect, vars: GetUsuarioByEmailVariables): QueryRef<GetUsuarioByEmailData, GetUsuarioByEmailVariables>;
+  (dc: DataConnect): QueryRef<GetMeData, undefined>;
   operationName: string;
 }
-export const getUsuarioByEmailRef: GetUsuarioByEmailRef;
+export const getMeRef: GetMeRef;
 
-export function getUsuarioByEmail(vars: GetUsuarioByEmailVariables, options?: ExecuteQueryOptions): QueryPromise<GetUsuarioByEmailData, GetUsuarioByEmailVariables>;
-export function getUsuarioByEmail(dc: DataConnect, vars: GetUsuarioByEmailVariables, options?: ExecuteQueryOptions): QueryPromise<GetUsuarioByEmailData, GetUsuarioByEmailVariables>;
+export function getMe(options?: ExecuteQueryOptions): QueryPromise<GetMeData, undefined>;
+export function getMe(dc: DataConnect, options?: ExecuteQueryOptions): QueryPromise<GetMeData, undefined>;
 
 interface GetProductoByIdRef {
   /* Allow users to create refs without passing in DataConnect */

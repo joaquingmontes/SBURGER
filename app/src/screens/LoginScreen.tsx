@@ -9,7 +9,6 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  Alert,
   ActivityIndicator,
 } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
@@ -22,11 +21,32 @@ import {
   resetAfterAuth,
   resetToGuestHome,
 } from '../navigation/navigationUtils';
+import { AppDialogModal, AppDialogVariant } from '../components/AppDialogModal';
 type LoginScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Login'>;
 
 interface LoginScreenProps {
   navigation: LoginScreenNavigationProp;
 }
+
+const LOGIN_INVALID_CREDENTIALS = 'Email o contraseña incorrecto';
+
+interface LoginDialogState {
+  visible: boolean;
+  title: string;
+  message: string;
+  variant: AppDialogVariant;
+  primaryLabel: string;
+  onPrimary: () => void;
+}
+
+const INITIAL_DIALOG: LoginDialogState = {
+  visible: false,
+  title: '',
+  message: '',
+  variant: 'error',
+  primaryLabel: 'Entendido',
+  onPrimary: () => {},
+};
 
 export const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
   const { login } = useAuth();
@@ -34,6 +54,28 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [dialog, setDialog] = useState<LoginDialogState>(INITIAL_DIALOG);
+
+  const showDialog = (config: Omit<LoginDialogState, 'visible'>) => {
+    setDialog({
+      ...config,
+      visible: true,
+    });
+  };
+
+  const closeDialog = () => {
+    setDialog(current => ({ ...current, visible: false }));
+  };
+
+  const showErrorDialog = (message: string, title = 'Error') => {
+    showDialog({
+      title,
+      message,
+      variant: 'error',
+      primaryLabel: 'Entendido',
+      onPrimary: closeDialog,
+    });
+  };
   useFocusEffect(
     useCallback(() => {
       StatusBar.setBarStyle('dark-content');
@@ -49,7 +91,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
 
   const handleLogin = async () => {
     if (!email.trim() || !password) {
-      Alert.alert('Error', 'Ingresá email y contraseña.');
+      showErrorDialog('Ingresá email y contraseña.');
       return;
     }
 
@@ -57,11 +99,8 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
     try {
       const user = await login(email, password);
       resetAfterAuth(navigation, user);
-    } catch (error) {
-      Alert.alert(
-        'Error',
-        error instanceof Error ? error.message : 'No se pudo iniciar sesión.',
-      );
+    } catch {
+      showErrorDialog(LOGIN_INVALID_CREDENTIALS);
     } finally {
       setLoading(false);
     }
@@ -176,13 +215,8 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
                 try {
                   const adminUser = await login('admin@stackburger.com', 'Admin123!');
                   resetAfterAuth(navigation, adminUser);
-                } catch (error) {
-                  Alert.alert(
-                    'Error',
-                    error instanceof Error
-                      ? error.message
-                      : 'No se pudo iniciar sesión como admin.',
-                  );
+                } catch {
+                  showErrorDialog(LOGIN_INVALID_CREDENTIALS);
                 } finally {
                   setLoading(false);
                 }
@@ -193,6 +227,15 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
+
+      <AppDialogModal
+        visible={dialog.visible}
+        title={dialog.title}
+        message={dialog.message}
+        variant={dialog.variant}
+        primaryLabel={dialog.primaryLabel}
+        onPrimary={dialog.onPrimary}
+      />
     </ScreenSafeArea>
   );
 };

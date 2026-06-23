@@ -6,6 +6,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { CartProvider } from './src/context/CartContext';
 import { AuthProvider } from './src/context/AuthContext';
+import { AuthGate } from './src/components/AuthGate';
 import { AppNavigator } from './src/navigation/AppNavigator';
 import { queryClient } from './src/config/queryClient';
 import './src/config/firebase';
@@ -16,12 +17,14 @@ function App() {
       <SafeAreaProvider>
         <QueryClientProvider client={queryClient}>
           <AuthProvider>
-            <CartProvider>
-              <NavigationContainer>
-                <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
-                <AppNavigator />
-              </NavigationContainer>
-            </CartProvider>
+            <AuthGate>
+              <CartProvider>
+                <NavigationContainer>
+                  <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
+                  <AppNavigator />
+                </NavigationContainer>
+              </CartProvider>
+            </AuthGate>
           </AuthProvider>
         </QueryClientProvider>
       </SafeAreaProvider>

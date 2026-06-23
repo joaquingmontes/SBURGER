@@ -13,7 +13,7 @@ import {
 import { useFocusEffect } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { useQueryClient } from '@tanstack/react-query';
-import { useListPedidosByUsuario } from '@dataconnect/generated/react';
+import { useListMyPedidos } from '@dataconnect/generated/react';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import {
   ORDER_FILTERS,
@@ -158,11 +158,9 @@ export const OrdersScreen: React.FC<OrdersScreenProps> = ({ navigation }) => {
   const [selectedFilter, setSelectedFilter] = useState<OrderFilter>('all');
   const [expandedOrders, setExpandedOrders] = useState<Record<string, boolean>>({});
 
-  const { data, isPending, isError, isFetching } = useListPedidosByUsuario(
-    dataConnect,
-    { usuarioId: user?.id ?? '' },
-    { enabled: !!user?.id },
-  );
+  const { data, isPending, isError, isFetching } = useListMyPedidos(dataConnect, {
+    enabled: !!user?.id,
+  });
 
   const orders = useMemo(
     () => (data?.pedidos ?? []).map(mapPedidoToOrder),
@@ -174,7 +172,7 @@ export const OrdersScreen: React.FC<OrdersScreenProps> = ({ navigation }) => {
       return;
     }
 
-    await refreshUserOrdersFromServer(queryClient, user.id);
+    await refreshUserOrdersFromServer(queryClient);
   }, [queryClient, user?.id]);
 
   useRefetchOnFocus(refreshOrders, !!user?.id);
@@ -201,8 +199,7 @@ export const OrdersScreen: React.FC<OrdersScreenProps> = ({ navigation }) => {
   };
 
   const handleLogout = () => {
-    logout();
-    resetToLogin(navigation);
+    void logout().then(() => resetToLogin(navigation));
   };
 
   return (

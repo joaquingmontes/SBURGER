@@ -34,17 +34,31 @@ const connectorConfig = {
 };
 exports.connectorConfig = connectorConfig;
 
-const createUsuarioRef = (dcOrVars, vars) => {
+const createUsuarioProfileRef = (dcOrVars, vars) => {
   const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
   dcInstance._useGeneratedSdk();
-  return mutationRef(dcInstance, 'CreateUsuario', inputVars);
+  return mutationRef(dcInstance, 'CreateUsuarioProfile', inputVars);
 }
-createUsuarioRef.operationName = 'CreateUsuario';
-exports.createUsuarioRef = createUsuarioRef;
+createUsuarioProfileRef.operationName = 'CreateUsuarioProfile';
+exports.createUsuarioProfileRef = createUsuarioProfileRef;
 
-exports.createUsuario = function createUsuario(dcOrVars, vars) {
+exports.createUsuarioProfile = function createUsuarioProfile(dcOrVars, vars) {
   const { dc: dcInstance, vars: inputVars } = validateArgs(connectorConfig, dcOrVars, vars, true);
-  return executeMutation(createUsuarioRef(dcInstance, inputVars));
+  return executeMutation(createUsuarioProfileRef(dcInstance, inputVars));
+}
+;
+
+const linkMyAccountRef = (dc) => {
+  const { dc: dcInstance} = validateArgs(connectorConfig, dc, undefined);
+  dcInstance._useGeneratedSdk();
+  return mutationRef(dcInstance, 'LinkMyAccount');
+}
+linkMyAccountRef.operationName = 'LinkMyAccount';
+exports.linkMyAccountRef = linkMyAccountRef;
+
+exports.linkMyAccount = function linkMyAccount(dc) {
+  const { dc: dcInstance, vars: inputVars } = validateArgs(connectorConfig, dc, undefined);
+  return executeMutation(linkMyAccountRef(dcInstance, inputVars));
 }
 ;
 
@@ -162,18 +176,18 @@ exports.listProductosAdmin = function listProductosAdmin(dcOrOptions, options) {
 }
 ;
 
-const listPedidosByUsuarioRef = (dcOrVars, vars) => {
-  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+const listMyPedidosRef = (dc) => {
+  const { dc: dcInstance} = validateArgs(connectorConfig, dc, undefined);
   dcInstance._useGeneratedSdk();
-  return queryRef(dcInstance, 'ListPedidosByUsuario', inputVars);
+  return queryRef(dcInstance, 'ListMyPedidos');
 }
-listPedidosByUsuarioRef.operationName = 'ListPedidosByUsuario';
-exports.listPedidosByUsuarioRef = listPedidosByUsuarioRef;
+listMyPedidosRef.operationName = 'ListMyPedidos';
+exports.listMyPedidosRef = listMyPedidosRef;
 
-exports.listPedidosByUsuario = function listPedidosByUsuario(dcOrVars, varsOrOptions, options) {
+exports.listMyPedidos = function listMyPedidos(dcOrOptions, options) {
   
-  const { dc: dcInstance, vars: inputVars, options: inputOpts } = validateArgsWithOptions(connectorConfig, dcOrVars, varsOrOptions, options, true, true);
-  return executeQuery(listPedidosByUsuarioRef(dcInstance, inputVars), inputOpts && { fetchPolicy: inputOpts.fetchPolicy });
+  const { dc: dcInstance, vars: inputVars, options: inputOpts } = validateArgsWithOptions(connectorConfig, dcOrOptions, options, undefined,false, false);
+  return executeQuery(listMyPedidosRef(dcInstance, inputVars), inputOpts && { fetchPolicy: inputOpts.fetchPolicy });
 }
 ;
 
@@ -192,18 +206,18 @@ exports.listPedidosAdmin = function listPedidosAdmin(dcOrOptions, options) {
 }
 ;
 
-const getUsuarioByEmailRef = (dcOrVars, vars) => {
-  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+const getMeRef = (dc) => {
+  const { dc: dcInstance} = validateArgs(connectorConfig, dc, undefined);
   dcInstance._useGeneratedSdk();
-  return queryRef(dcInstance, 'GetUsuarioByEmail', inputVars);
+  return queryRef(dcInstance, 'GetMe');
 }
-getUsuarioByEmailRef.operationName = 'GetUsuarioByEmail';
-exports.getUsuarioByEmailRef = getUsuarioByEmailRef;
+getMeRef.operationName = 'GetMe';
+exports.getMeRef = getMeRef;
 
-exports.getUsuarioByEmail = function getUsuarioByEmail(dcOrVars, varsOrOptions, options) {
+exports.getMe = function getMe(dcOrOptions, options) {
   
-  const { dc: dcInstance, vars: inputVars, options: inputOpts } = validateArgsWithOptions(connectorConfig, dcOrVars, varsOrOptions, options, true, true);
-  return executeQuery(getUsuarioByEmailRef(dcInstance, inputVars), inputOpts && { fetchPolicy: inputOpts.fetchPolicy });
+  const { dc: dcInstance, vars: inputVars, options: inputOpts } = validateArgsWithOptions(connectorConfig, dcOrOptions, options, undefined,false, false);
+  return executeQuery(getMeRef(dcInstance, inputVars), inputOpts && { fetchPolicy: inputOpts.fetchPolicy });
 }
 ;
 

@@ -64,8 +64,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => 
   const totalCartQuantity = items.reduce((acc, item) => acc + item.quantity, 0);
 
   const goToLogin = () => {
-    logout();
-    resetToLogin(navigation);
+    void logout().then(() => resetToLogin(navigation));
   };
 
   const menuItems = useMemo(() => {

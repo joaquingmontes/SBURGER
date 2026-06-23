@@ -1,11 +1,19 @@
-import { createUsuarioRef, createProductoRef, updateProductoRef, deleteProductoRef, createPedidoRef, createPedidoItemRef, updatePedidoEstadoRef, listProductosActivosRef, listProductosAdminRef, listPedidosByUsuarioRef, listPedidosAdminRef, getUsuarioByEmailRef, getProductoByIdRef, connectorConfig } from '../../esm/index.esm.js';
+import { createUsuarioProfileRef, linkMyAccountRef, createProductoRef, updateProductoRef, deleteProductoRef, createPedidoRef, createPedidoItemRef, updatePedidoEstadoRef, listProductosActivosRef, listProductosAdminRef, listMyPedidosRef, listPedidosAdminRef, getMeRef, getProductoByIdRef, connectorConfig } from '../../esm/index.esm.js';
 import { validateArgs, CallerSdkTypeEnum } from 'firebase/data-connect';
 import { useDataConnectQuery, useDataConnectMutation, validateReactArgs } from '@tanstack-query-firebase/react/data-connect';
 
-export function useCreateUsuario(dcOrOptions, options) {
+export function useCreateUsuarioProfile(dcOrOptions, options) {
   const { dc: dcInstance, vars: inputOpts } = validateArgs(connectorConfig, dcOrOptions, options);
   function refFactory(vars) {
-    return createUsuarioRef(dcInstance, vars);
+    return createUsuarioProfileRef(dcInstance, vars);
+  }
+  return useDataConnectMutation(refFactory, inputOpts, CallerSdkTypeEnum.GeneratedReact);
+}
+
+export function useLinkMyAccount(dcOrOptions, options) {
+  const { dc: dcInstance, vars: inputOpts } = validateArgs(connectorConfig, dcOrOptions, options);
+  function refFactory() {
+    return linkMyAccountRef(dcInstance);
   }
   return useDataConnectMutation(refFactory, inputOpts, CallerSdkTypeEnum.GeneratedReact);
 }
@@ -71,9 +79,9 @@ export function useListProductosAdmin(dcOrOptions, options) {
   return useDataConnectQuery(ref, inputOpts, CallerSdkTypeEnum.GeneratedReact);
 }
 
-export function useListPedidosByUsuario(dcOrVars, varsOrOptions, options) {
-  const { dc: dcInstance, vars: inputVars, options: inputOpts } = validateReactArgs(connectorConfig, dcOrVars, varsOrOptions, options, true, true);
-  const ref = listPedidosByUsuarioRef(dcInstance, inputVars);
+export function useListMyPedidos(dcOrOptions, options) {
+  const { dc: dcInstance, options: inputOpts } = validateReactArgs(connectorConfig, dcOrOptions, options);
+  const ref = listMyPedidosRef(dcInstance);
   return useDataConnectQuery(ref, inputOpts, CallerSdkTypeEnum.GeneratedReact);
 }
 
@@ -83,9 +91,9 @@ export function useListPedidosAdmin(dcOrOptions, options) {
   return useDataConnectQuery(ref, inputOpts, CallerSdkTypeEnum.GeneratedReact);
 }
 
-export function useGetUsuarioByEmail(dcOrVars, varsOrOptions, options) {
-  const { dc: dcInstance, vars: inputVars, options: inputOpts } = validateReactArgs(connectorConfig, dcOrVars, varsOrOptions, options, true, true);
-  const ref = getUsuarioByEmailRef(dcInstance, inputVars);
+export function useGetMe(dcOrOptions, options) {
+  const { dc: dcInstance, options: inputOpts } = validateReactArgs(connectorConfig, dcOrOptions, options);
+  const ref = getMeRef(dcInstance);
   return useDataConnectQuery(ref, inputOpts, CallerSdkTypeEnum.GeneratedReact);
 }
 

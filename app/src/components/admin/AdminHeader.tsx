@@ -20,8 +20,7 @@ export const AdminHeader: React.FC<AdminHeaderProps> = ({ navigation }) => {
   const { user, logout } = useAuth();
 
   const handleLogout = () => {
-    logout();
-    resetToLogin(navigation);
+    void logout().then(() => resetToLogin(navigation));
   };
 
   return (

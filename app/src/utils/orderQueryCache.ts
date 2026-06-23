@@ -1,9 +1,10 @@
 import { QueryClient } from '@tanstack/react-query';
 import { QueryFetchPolicy } from 'firebase/data-connect';
 import {
+  listMyPedidos,
+  listMyPedidosRef,
   listPedidosAdmin,
   listPedidosAdminRef,
-  listPedidosByUsuario,
   ListPedidosAdminData,
 } from '@dataconnect/generated';
 import { dataConnect } from '../config/firebase';
@@ -14,6 +15,9 @@ const SERVER_ONLY = { fetchPolicy: QueryFetchPolicy.SERVER_ONLY };
 
 export const getAdminOrdersQueryKey = () =>
   [listPedidosAdminRef(dataConnect).name, null] as const;
+
+export const getMyOrdersQueryKey = () =>
+  [listMyPedidosRef(dataConnect).name, null] as const;
 
 export const patchAdminOrderStatusInCache = (
   queryClient: QueryClient,
@@ -53,38 +57,13 @@ export const refreshAdminOrdersFromServer = async (
 export const refreshCachedUserOrdersFromServer = async (
   queryClient: QueryClient,
 ): Promise<void> => {
-  const cachedQueries = queryClient.getQueriesData({
-    predicate: query => query.queryKey[0] === 'ListPedidosByUsuario',
-  });
-
-  await Promise.all(
-    cachedQueries.map(async ([queryKey]) => {
-      const variables = queryKey[1] as { usuarioId?: string } | null;
-      const usuarioId = variables?.usuarioId;
-
-      if (!usuarioId) {
-        return;
-      }
-
-      const { data } = await listPedidosByUsuario(
-        dataConnect,
-        { usuarioId },
-        SERVER_ONLY,
-      );
-      queryClient.setQueryData(queryKey, data);
-    }),
-  );
+  const { data } = await listMyPedidos(dataConnect, SERVER_ONLY);
+  queryClient.setQueryData(getMyOrdersQueryKey(), data);
 };
 
 export const refreshUserOrdersFromServer = async (
   queryClient: QueryClient,
-  usuarioId: string,
 ): Promise<void> => {
-  const queryKey = ['ListPedidosByUsuario', { usuarioId }] as const;
-  const { data } = await listPedidosByUsuario(
-    dataConnect,
-    { usuarioId },
-    SERVER_ONLY,
-  );
-  queryClient.setQueryData(queryKey, data);
+  const { data } = await listMyPedidos(dataConnect, SERVER_ONLY);
+  queryClient.setQueryData(getMyOrdersQueryKey(), data);
 };

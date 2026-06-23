@@ -28,16 +28,28 @@ export const connectorConfig = {
   service: 'sburger-a3265-service',
   location: 'southamerica-west1'
 };
-export const createUsuarioRef = (dcOrVars, vars) => {
+export const createUsuarioProfileRef = (dcOrVars, vars) => {
   const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
   dcInstance._useGeneratedSdk();
-  return mutationRef(dcInstance, 'CreateUsuario', inputVars);
+  return mutationRef(dcInstance, 'CreateUsuarioProfile', inputVars);
 }
-createUsuarioRef.operationName = 'CreateUsuario';
+createUsuarioProfileRef.operationName = 'CreateUsuarioProfile';
 
-export function createUsuario(dcOrVars, vars) {
+export function createUsuarioProfile(dcOrVars, vars) {
   const { dc: dcInstance, vars: inputVars } = validateArgs(connectorConfig, dcOrVars, vars, true);
-  return executeMutation(createUsuarioRef(dcInstance, inputVars));
+  return executeMutation(createUsuarioProfileRef(dcInstance, inputVars));
+}
+
+export const linkMyAccountRef = (dc) => {
+  const { dc: dcInstance} = validateArgs(connectorConfig, dc, undefined);
+  dcInstance._useGeneratedSdk();
+  return mutationRef(dcInstance, 'LinkMyAccount');
+}
+linkMyAccountRef.operationName = 'LinkMyAccount';
+
+export function linkMyAccount(dc) {
+  const { dc: dcInstance, vars: inputVars } = validateArgs(connectorConfig, dc, undefined);
+  return executeMutation(linkMyAccountRef(dcInstance, inputVars));
 }
 
 export const createProductoRef = (dcOrVars, vars) => {
@@ -138,17 +150,17 @@ export function listProductosAdmin(dcOrOptions, options) {
   return executeQuery(listProductosAdminRef(dcInstance, inputVars), inputOpts && { fetchPolicy: inputOpts.fetchPolicy });
 }
 
-export const listPedidosByUsuarioRef = (dcOrVars, vars) => {
-  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+export const listMyPedidosRef = (dc) => {
+  const { dc: dcInstance} = validateArgs(connectorConfig, dc, undefined);
   dcInstance._useGeneratedSdk();
-  return queryRef(dcInstance, 'ListPedidosByUsuario', inputVars);
+  return queryRef(dcInstance, 'ListMyPedidos');
 }
-listPedidosByUsuarioRef.operationName = 'ListPedidosByUsuario';
+listMyPedidosRef.operationName = 'ListMyPedidos';
 
-export function listPedidosByUsuario(dcOrVars, varsOrOptions, options) {
+export function listMyPedidos(dcOrOptions, options) {
   
-  const { dc: dcInstance, vars: inputVars, options: inputOpts } = validateArgsWithOptions(connectorConfig, dcOrVars, varsOrOptions, options, true, true);
-  return executeQuery(listPedidosByUsuarioRef(dcInstance, inputVars), inputOpts && { fetchPolicy: inputOpts.fetchPolicy });
+  const { dc: dcInstance, vars: inputVars, options: inputOpts } = validateArgsWithOptions(connectorConfig, dcOrOptions, options, undefined,false, false);
+  return executeQuery(listMyPedidosRef(dcInstance, inputVars), inputOpts && { fetchPolicy: inputOpts.fetchPolicy });
 }
 
 export const listPedidosAdminRef = (dc) => {
@@ -164,17 +176,17 @@ export function listPedidosAdmin(dcOrOptions, options) {
   return executeQuery(listPedidosAdminRef(dcInstance, inputVars), inputOpts && { fetchPolicy: inputOpts.fetchPolicy });
 }
 
-export const getUsuarioByEmailRef = (dcOrVars, vars) => {
-  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+export const getMeRef = (dc) => {
+  const { dc: dcInstance} = validateArgs(connectorConfig, dc, undefined);
   dcInstance._useGeneratedSdk();
-  return queryRef(dcInstance, 'GetUsuarioByEmail', inputVars);
+  return queryRef(dcInstance, 'GetMe');
 }
-getUsuarioByEmailRef.operationName = 'GetUsuarioByEmail';
+getMeRef.operationName = 'GetMe';
 
-export function getUsuarioByEmail(dcOrVars, varsOrOptions, options) {
+export function getMe(dcOrOptions, options) {
   
-  const { dc: dcInstance, vars: inputVars, options: inputOpts } = validateArgsWithOptions(connectorConfig, dcOrVars, varsOrOptions, options, true, true);
-  return executeQuery(getUsuarioByEmailRef(dcInstance, inputVars), inputOpts && { fetchPolicy: inputOpts.fetchPolicy });
+  const { dc: dcInstance, vars: inputVars, options: inputOpts } = validateArgsWithOptions(connectorConfig, dcOrOptions, options, undefined,false, false);
+  return executeQuery(getMeRef(dcInstance, inputVars), inputOpts && { fetchPolicy: inputOpts.fetchPolicy });
 }
 
 export const getProductoByIdRef = (dcOrVars, vars) => {
