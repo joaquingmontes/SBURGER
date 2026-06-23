@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -6,16 +6,20 @@ import {
   FlatList,
   ActivityIndicator,
   TouchableOpacity,
-  SafeAreaView,
-  Image,
+  StatusBar,
+  Platform,
+  TextInput,
+  ScrollView,
 } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { BURGER_MENU, Burger } from '../constants/mockData';
-import { Colors } from '../constants/colors';
 import { BurgerCard } from '../components/BurgerCard';
 import { useCart } from '../context/CartContext';
 import { CustomButton } from '../components/CustomButton';
+import { BottomNav } from '../components/BottomNav';
+import { ScreenSafeArea } from '../components/ScreenSafeArea';
 
 type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Home'>;
 
@@ -23,20 +27,43 @@ interface HomeScreenProps {
   navigation: HomeScreenNavigationProp;
 }
 
+const HomeColors = {
+  background: '#0C0C0C',
+  surface: '#1A1A1A',
+  surfaceLight: '#242424',
+  border: '#2A2A2A',
+  textPrimary: '#FFFFFF',
+  textSecondary: '#888888',
+  textMuted: '#666666',
+  placeholder: '#555555',
+  accent: '#F39C12',
+  accentText: '#1A1208',
+  logoTop: '#FFB347',
+  logoBottom: '#FF8C00',
+  tabInactive: '#666666',
+};
+
+const CATEGORIES = [
+  { id: 'burgers', label: 'Hamburguesas', emoji: '🍔' },
+  { id: 'fries', label: 'Papas', emoji: '🍟' },
+  { id: 'drinks', label: 'Bebidas', emoji: '🥤' },
+  { id: 'desserts', label: 'Postres', emoji: '🍰' },
+] as const;
+
 export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const { items } = useCart();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [menuItems, setMenuItems] = useState<Burger[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<string>('burgers');
 
-  // Calcular cantidad total de productos en el carrito para el badge
   const totalCartQuantity = items.reduce((acc, item) => acc + item.quantity, 0);
 
-  // Simular la carga del catálogo con estados (Rendimiento < 2s - RNF)
   const loadMenu = (simulateError = false) => {
     setLoading(true);
     setError(false);
-    
+
     setTimeout(() => {
       if (simulateError) {
         setLoading(false);
@@ -45,83 +72,153 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
         setMenuItems(BURGER_MENU);
         setLoading(false);
       }
-    }, 1200); // 1.2 segundos (cumple con RNF < 2s)
+    }, 1200);
   };
 
   useEffect(() => {
     loadMenu();
   }, []);
 
-  // Renderizar la pantalla de carga (Estado: Carga)
+  useFocusEffect(
+    useCallback(() => {
+      StatusBar.setBarStyle('light-content');
+      if (Platform.OS === 'android') {
+        StatusBar.setBackgroundColor(HomeColors.background);
+      }
+    }, []),
+  );
+
+  const goToLogin = () => {
+    navigation.replace('Login');
+  };
+
   if (loading) {
     return (
-      <SafeAreaView style={[styles.safeArea, styles.center]}>
-        <View style={styles.header}>
-          <Text style={styles.logoText}>🍔 StackBurger</Text>
-        </View>
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={Colors.primary} />
-          <Text style={styles.loadingText}>Cargando delicias...</Text>
-        </View>
-      </SafeAreaView>
+      <ScreenSafeArea style={[styles.safeArea, styles.center]}>
+        <ActivityIndicator size="large" color={HomeColors.accent} />
+        <Text style={styles.loadingText}>Cargando delicias...</Text>
+      </ScreenSafeArea>
     );
   }
 
-  // Renderizar la pantalla de error de conexión (Estado: Error de Conexión)
   if (error) {
     return (
-      <SafeAreaView style={[styles.safeArea, styles.center]}>
+      <ScreenSafeArea style={[styles.safeArea, styles.center]}>
         <View style={styles.errorContainer}>
           <Text style={styles.errorIcon}>⚠️</Text>
           <Text style={styles.errorTitle}>Error de Conexión</Text>
-          <Text style={styles.errorSubtitle}>No se pudo cargar el menú gastronómico.</Text>
+          <Text style={styles.errorSubtitle}>
+            No se pudo cargar el menú gastronómico.
+          </Text>
           <CustomButton
             title="Reintentar"
             onPress={() => loadMenu(false)}
             style={styles.retryButton}
           />
         </View>
-      </SafeAreaView>
+      </ScreenSafeArea>
     );
   }
 
-  // Renderizar catálogo normal
   return (
-    <SafeAreaView style={styles.safeArea}>
-      {/* Cabecera superior según wireframe */}
+    <ScreenSafeArea style={styles.safeArea}>
       <View style={styles.header}>
-        <View style={styles.headerTop}>
+        <View style={styles.headerLeft}>
           <View style={styles.logoContainer}>
-            <Text style={styles.logoIcon}>🍔</Text>
-            <View>
-              <Text style={styles.logoText}>StackBurger</Text>
-              <Text style={styles.logoSubtext}>Hamburguesería</Text>
-            </View>
+            <View style={styles.logoGradientTop} />
+            <View style={styles.logoGradientBottom} />
+            <Text style={styles.logoEmoji}>🍔</Text>
           </View>
-          
-          {/* Ícono de carrito con badge */}
+          <View>
+            <Text style={styles.brandName}>StackBurger</Text>
+            <Text style={styles.greeting}>Hola, Yamil</Text>
+          </View>
+        </View>
+
+        <View style={styles.headerActions}>
           <TouchableOpacity
             activeOpacity={0.7}
             onPress={() => navigation.navigate('Cart')}
-            style={styles.cartButton}
+            style={styles.iconButton}
             accessibilityLabel="Ver carrito"
           >
-            <Text style={styles.cartIconText}>🛒</Text>
+            <Text style={styles.cartIcon}>🛒</Text>
             {totalCartQuantity > 0 && (
               <View style={styles.badge}>
                 <Text style={styles.badgeText}>{totalCartQuantity}</Text>
               </View>
             )}
           </TouchableOpacity>
-        </View>
 
-        <View style={styles.headerTitles}>
-          <Text style={styles.menuTitle}>Menú Principal</Text>
-          <Text style={styles.menuSubtitle}>Seleccioná tu hamburguesa favorita para personalizar</Text>
+          <TouchableOpacity
+            activeOpacity={0.7}
+            onPress={goToLogin}
+            style={styles.iconButton}
+            accessibilityLabel="Cerrar sesión"
+          >
+            <View style={styles.logoutIcon}>
+              <View style={styles.logoutBracket} />
+              <View style={styles.logoutArrowLine} />
+              <View style={styles.logoutArrowHead} />
+            </View>
+          </TouchableOpacity>
         </View>
       </View>
 
+      <View style={styles.searchContainer}>
+        <Text style={styles.searchIcon}>🔍</Text>
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Buscar en el menú..."
+          placeholderTextColor={HomeColors.placeholder}
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+          autoCapitalize="none"
+          autoCorrect={false}
+        />
+      </View>
+
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.categoriesContent}
+        style={styles.categoriesScroll}
+      >
+        {CATEGORIES.map(category => {
+          const isSelected = selectedCategory === category.id;
+          return (
+            <TouchableOpacity
+              key={category.id}
+              activeOpacity={0.8}
+              style={[
+                styles.categoryPill,
+                isSelected && styles.categoryPillSelected,
+              ]}
+              onPress={() => setSelectedCategory(category.id)}
+            >
+              <Text
+                style={[
+                  styles.categoryEmoji,
+                  isSelected && styles.categoryTextSelected,
+                ]}
+              >
+                {category.emoji}
+              </Text>
+              <Text
+                style={[
+                  styles.categoryLabel,
+                  isSelected && styles.categoryTextSelected,
+                ]}
+              >
+                {category.label}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
+      </ScrollView>
+
       <FlatList
+        style={styles.list}
         data={menuItems}
         keyExtractor={item => item.id}
         renderItem={({ item }) => (
@@ -132,121 +229,218 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
         )}
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
-        // Soporta tirar para refrescar y simular recarga
         onRefresh={() => loadMenu(false)}
         refreshing={false}
       />
 
-      {/* Botón flotante secreto para simular un fallo de red para la corrección docente */}
-      <TouchableOpacity
-        style={styles.floatingDebugButton}
-        onPress={() => loadMenu(true)}
-      >
-        <Text style={styles.debugText}>⚠️ Simular Error</Text>
-      </TouchableOpacity>
-    </SafeAreaView>
+      <BottomNav
+        activeTab="catalog"
+        onCatalogPress={() => {}}
+        onOrdersPress={() => navigation.navigate('Orders')}
+      />
+    </ScreenSafeArea>
   );
 };
 
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: HomeColors.background,
   },
   center: {
     justifyContent: 'center',
     alignItems: 'center',
   },
   header: {
-    backgroundColor: '#FFFFFF',
-    paddingTop: 16,
-    paddingHorizontal: 20,
-    paddingBottom: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
-  },
-  headerTop: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingTop: 12,
+    paddingBottom: 16,
   },
-  logoContainer: {
+  headerLeft: {
     flexDirection: 'row',
     alignItems: 'center',
+    flex: 1,
   },
-  logoIcon: {
-    fontSize: 28,
-    marginRight: 10,
-  },
-  logoText: {
-    fontSize: 18,
-    fontWeight: '800',
-    color: Colors.textPrimary,
-    letterSpacing: 0.5,
-  },
-  logoSubtext: {
-    fontSize: 11,
-    color: Colors.textSecondary,
-    fontWeight: '500',
-  },
-  cartButton: {
+  logoContainer: {
     width: 44,
     height: 44,
-    borderRadius: 8,
+    borderRadius: 12,
+    overflow: 'hidden',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
+  logoGradientTop: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: '55%',
+    backgroundColor: HomeColors.logoTop,
+  },
+  logoGradientBottom: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: '55%',
+    backgroundColor: HomeColors.logoBottom,
+  },
+  logoEmoji: {
+    fontSize: 22,
+    zIndex: 1,
+  },
+  brandName: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: HomeColors.textPrimary,
+    letterSpacing: 0.3,
+  },
+  greeting: {
+    fontSize: 13,
+    color: HomeColors.textSecondary,
+    marginTop: 1,
+  },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  iconButton: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    backgroundColor: HomeColors.surface,
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: HomeColors.border,
     justifyContent: 'center',
     alignItems: 'center',
     position: 'relative',
-    backgroundColor: '#FFFFFF',
   },
-  cartIconText: {
+  cartIcon: {
     fontSize: 18,
   },
   badge: {
     position: 'absolute',
-    top: -4,
-    right: -4,
-    backgroundColor: Colors.accent,
-    borderRadius: 10,
-    width: 20,
-    height: 20,
+    top: -2,
+    right: -2,
+    backgroundColor: HomeColors.accent,
+    borderRadius: 9,
+    minWidth: 18,
+    height: 18,
     justifyContent: 'center',
     alignItems: 'center',
+    paddingHorizontal: 4,
     borderWidth: 1.5,
-    borderColor: '#FFFFFF',
+    borderColor: HomeColors.background,
   },
   badgeText: {
-    color: '#FFFFFF',
+    color: HomeColors.accentText,
     fontSize: 10,
     fontWeight: '800',
   },
-  headerTitles: {
-    marginTop: 20,
+  logoutIcon: {
+    width: 22,
+    height: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
   },
-  menuTitle: {
-    fontSize: 22,
-    fontWeight: '800',
-    color: Colors.textPrimary,
+  logoutBracket: {
+    width: 9,
+    height: 14,
+    borderWidth: 1.5,
+    borderColor: HomeColors.textPrimary,
+    borderRightWidth: 0,
+    borderTopLeftRadius: 3,
+    borderBottomLeftRadius: 3,
   },
-  menuSubtitle: {
+  logoutArrowLine: {
+    width: 7,
+    height: 1.5,
+    backgroundColor: HomeColors.textPrimary,
+  },
+  logoutArrowHead: {
+    width: 0,
+    height: 0,
+    borderTopWidth: 4,
+    borderBottomWidth: 4,
+    borderLeftWidth: 5,
+    borderTopColor: 'transparent',
+    borderBottomColor: 'transparent',
+    borderLeftColor: HomeColors.textPrimary,
+    marginLeft: -1,
+  },
+  searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: HomeColors.surface,
+    borderRadius: 24,
+    marginHorizontal: 20,
+    marginBottom: 16,
+    paddingHorizontal: 16,
+    borderWidth: 1,
+    borderColor: HomeColors.border,
+  },
+  searchIcon: {
+    fontSize: 16,
+    marginRight: 10,
+    opacity: 0.6,
+  },
+  searchInput: {
+    flex: 1,
+    paddingVertical: 13,
+    fontSize: 15,
+    color: HomeColors.textPrimary,
+  },
+  categoriesScroll: {
+    maxHeight: 44,
+    marginBottom: 16,
+  },
+  categoriesContent: {
+    paddingHorizontal: 20,
+    gap: 10,
+  },
+  categoryPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: HomeColors.surface,
+    borderRadius: 20,
+    paddingHorizontal: 14,
+    paddingVertical: 9,
+    borderWidth: 1,
+    borderColor: HomeColors.border,
+    marginRight: 10,
+  },
+  categoryPillSelected: {
+    backgroundColor: HomeColors.accent,
+    borderColor: HomeColors.accent,
+  },
+  categoryEmoji: {
+    fontSize: 14,
+    marginRight: 6,
+  },
+  categoryLabel: {
     fontSize: 13,
-    color: Colors.textSecondary,
-    marginTop: 4,
+    fontWeight: '600',
+    color: HomeColors.textPrimary,
+  },
+  categoryTextSelected: {
+    color: HomeColors.accentText,
+  },
+  list: {
+    flex: 1,
   },
   listContent: {
-    paddingVertical: 12,
-    paddingBottom: 80, // Espacio extra para el botón flotante secreto
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    paddingTop: 4,
+    paddingBottom: 90,
   },
   loadingText: {
     marginTop: 16,
     fontSize: 15,
-    color: Colors.textSecondary,
+    color: HomeColors.textSecondary,
     fontWeight: '600',
   },
   errorContainer: {
@@ -260,37 +454,17 @@ const styles = StyleSheet.create({
   errorTitle: {
     fontSize: 20,
     fontWeight: '800',
-    color: Colors.textPrimary,
+    color: HomeColors.textPrimary,
     marginBottom: 8,
   },
   errorSubtitle: {
     fontSize: 14,
-    color: Colors.textSecondary,
+    color: HomeColors.textSecondary,
     textAlign: 'center',
     marginBottom: 24,
     lineHeight: 20,
   },
   retryButton: {
     width: 160,
-  },
-  floatingDebugButton: {
-    position: 'absolute',
-    bottom: 20,
-    right: 20,
-    backgroundColor: '#3a3a3c',
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 20,
-    opacity: 0.85,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 3,
-    elevation: 3,
-  },
-  debugText: {
-    color: '#FFFFFF',
-    fontSize: 11,
-    fontWeight: '700',
   },
 });

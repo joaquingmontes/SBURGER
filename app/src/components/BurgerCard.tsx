@@ -1,98 +1,106 @@
 import React from 'react';
-import { View, Text, Image, StyleSheet, Dimensions } from 'react-native';
+import {
+  View,
+  Text,
+  Image,
+  StyleSheet,
+  TouchableOpacity,
+} from 'react-native';
 import { Burger } from '../constants/mockData';
-import { Colors } from '../constants/colors';
-import { CustomButton } from './CustomButton';
 
 interface BurgerCardProps {
   burger: Burger;
   onPress: () => void;
 }
 
+const CardColors = {
+  cardBackground: '#1A1A1A',
+  cardBorder: '#2A2A2A',
+  textPrimary: '#FFFFFF',
+  textSecondary: '#888888',
+  textMuted: '#666666',
+  accent: '#F39C12',
+  imagePlaceholder: '#2A2A2A',
+};
+
 export const BurgerCard: React.FC<BurgerCardProps> = ({ burger, onPress }) => {
   return (
-    <View style={styles.card}>
-      <View style={styles.topSection}>
-        <Image
-          source={{ uri: burger.image }}
-          style={styles.image}
-          resizeMode="cover"
-        />
-        <View style={styles.infoSection}>
-          <Text style={styles.name} numberOfLines={1}>{burger.name}</Text>
-          <Text style={styles.description} numberOfLines={2}>{burger.description}</Text>
-          <Text style={styles.price}>${burger.price.toLocaleString('es-AR')}</Text>
+    <TouchableOpacity
+      style={styles.card}
+      activeOpacity={0.85}
+      onPress={onPress}
+    >
+      <Image
+        source={{ uri: burger.image }}
+        style={styles.image}
+        resizeMode="cover"
+      />
+      <View style={styles.infoSection}>
+        <Text style={styles.name} numberOfLines={1}>
+          {burger.name}
+        </Text>
+        <Text style={styles.description} numberOfLines={2}>
+          {burger.description}
+        </Text>
+        <View style={styles.footerRow}>
+          <Text style={styles.price}>
+            ${burger.price.toLocaleString('es-AR')}
+          </Text>
+          <Text style={styles.seeMore}>Ver más →</Text>
         </View>
       </View>
-      
-      <CustomButton
-        title="Personalizar"
-        onPress={onPress}
-        style={styles.button}
-        textStyle={styles.buttonText}
-      />
-    </View>
+    </TouchableOpacity>
   );
 };
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: Colors.cardBackground,
-    borderRadius: 12,
-    marginHorizontal: 16,
-    marginVertical: 8,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  topSection: {
     flexDirection: 'row',
-    padding: 16,
-    alignItems: 'center',
+    backgroundColor: CardColors.cardBackground,
+    borderRadius: 18,
+    marginHorizontal: 20,
+    marginBottom: 14,
+    borderWidth: 1,
+    borderColor: CardColors.cardBorder,
+    overflow: 'hidden',
   },
   image: {
-    width: 80,
-    height: 80,
-    borderRadius: 8,
-    backgroundColor: '#E5E5EA',
+    width: 110,
+    height: 110,
+    backgroundColor: CardColors.imagePlaceholder,
   },
   infoSection: {
     flex: 1,
-    marginLeft: 16,
-    justifyContent: 'center',
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    justifyContent: 'space-between',
   },
   name: {
     fontSize: 16,
     fontWeight: '700',
-    color: Colors.textPrimary,
+    color: CardColors.textPrimary,
     marginBottom: 4,
   },
   description: {
-    fontSize: 13,
-    color: Colors.textSecondary,
-    marginBottom: 8,
-    lineHeight: 16,
+    fontSize: 12,
+    color: CardColors.textSecondary,
+    lineHeight: 17,
+    flex: 1,
+  },
+  footerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 8,
   },
   price: {
     fontSize: 16,
-    fontWeight: '800',
-    color: Colors.textPrimary,
+    fontWeight: '700',
+    color: CardColors.accent,
   },
-  button: {
-    borderRadius: 0,
-    minHeight: 44, // Altura más compacta para encajar como pie de tarjeta
-    borderTopWidth: 1,
-    borderTopColor: Colors.border,
-    shadowOpacity: 0, // Desactiva sombra interna
-    elevation: 0,
-  },
-  buttonText: {
-    fontSize: 14,
-    fontWeight: '600',
+  seeMore: {
+    fontSize: 12,
+    color: CardColors.textMuted,
+    fontWeight: '500',
   },
 });

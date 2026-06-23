@@ -4,7 +4,6 @@ import {
   Text,
   StyleSheet,
   FlatList,
-  SafeAreaView,
   TouchableOpacity,
   Alert,
 } from 'react-native';
@@ -15,6 +14,7 @@ import { useCart } from '../context/CartContext';
 import { Colors } from '../constants/colors';
 import { CartItem } from '../components/CartItem';
 import { CustomButton } from '../components/CustomButton';
+import { ScreenSafeArea } from '../components/ScreenSafeArea';
 
 type CartScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Cart'>;
 type CartScreenRouteProp = RouteProp<RootStackParamList, 'Cart'>;
@@ -42,7 +42,7 @@ export const CartScreen: React.FC<CartScreenProps> = ({ navigation, route }) => 
   // Renderizar estado de error (Error al Cargar - Wireframe)
   if (errorSimulated) {
     return (
-      <SafeAreaView style={styles.safeArea}>
+      <ScreenSafeArea edges={['left', 'right', 'bottom']} style={styles.safeArea}>
         <View style={styles.errorContainer}>
           <Text style={styles.errorIcon}>⚠️</Text>
           <Text style={styles.errorTitle}>Error al Cargar</Text>
@@ -53,7 +53,7 @@ export const CartScreen: React.FC<CartScreenProps> = ({ navigation, route }) => 
             style={styles.retryButton}
           />
         </View>
-      </SafeAreaView>
+      </ScreenSafeArea>
     );
   }
 
@@ -61,7 +61,7 @@ export const CartScreen: React.FC<CartScreenProps> = ({ navigation, route }) => 
   const isCartEmpty = items.length === 0;
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <ScreenSafeArea edges={['left', 'right', 'bottom']} style={styles.safeArea}>
       <FlatList
         data={items}
         keyExtractor={item => item.id}
@@ -135,7 +135,7 @@ export const CartScreen: React.FC<CartScreenProps> = ({ navigation, route }) => 
           <Text style={styles.debugText}>⚠️ Simular Error</Text>
         </TouchableOpacity>
       )}
-    </SafeAreaView>
+    </ScreenSafeArea>
   );
 };
 

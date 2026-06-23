@@ -5,7 +5,6 @@ import {
   StyleSheet,
   TextInput,
   ScrollView,
-  SafeAreaView,
   KeyboardAvoidingView,
   Platform,
   Alert,
@@ -16,6 +15,7 @@ import { useCart } from '../context/CartContext';
 import { Colors } from '../constants/colors';
 import { CustomButton } from '../components/CustomButton';
 import { useBusinessHours } from '../hooks/useBusinessHours';
+import { ScreenSafeArea } from '../components/ScreenSafeArea';
 
 type CheckoutScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Checkout'>;
 
@@ -109,7 +109,7 @@ export const CheckoutScreen: React.FC<CheckoutScreenProps> = ({ navigation }) =>
   // 1. Pantalla de Éxito (Estado: Éxito)
   if (orderConfirmed) {
     return (
-      <SafeAreaView style={styles.successSafeArea}>
+      <ScreenSafeArea edges={['left', 'right', 'bottom']} style={styles.successSafeArea}>
         <View style={styles.successContainer}>
           <Text style={styles.successIcon}>🎉</Text>
           <Text style={styles.successTitle}>¡Pedido Confirmado!</Text>
@@ -133,14 +133,14 @@ export const CheckoutScreen: React.FC<CheckoutScreenProps> = ({ navigation }) =>
             style={styles.backMenuButton}
           />
         </View>
-      </SafeAreaView>
+      </ScreenSafeArea>
     );
   }
 
   // 2. Pantalla de Horario Comercial Cerrado (RN-05)
   if (!isOpen) {
     return (
-      <SafeAreaView style={styles.safeArea}>
+      <ScreenSafeArea edges={['left', 'right', 'bottom']} style={styles.safeArea}>
         <View style={styles.closedContainer}>
           <Text style={styles.closedIcon}>🕒</Text>
           <Text style={styles.closedTitle}>Cocina Cerrada</Text>
@@ -157,13 +157,13 @@ export const CheckoutScreen: React.FC<CheckoutScreenProps> = ({ navigation }) =>
             style={styles.retryButton}
           />
         </View>
-      </SafeAreaView>
+      </ScreenSafeArea>
     );
   }
 
   // 3. Formulario Normal
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <ScreenSafeArea edges={['left', 'right', 'bottom']} style={styles.safeArea}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardContainer}
@@ -260,7 +260,7 @@ export const CheckoutScreen: React.FC<CheckoutScreenProps> = ({ navigation }) =>
           />
         </View>
       </KeyboardAvoidingView>
-    </SafeAreaView>
+    </ScreenSafeArea>
   );
 };
 

@@ -1,15 +1,22 @@
 import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { HomeScreen } from '../screens/HomeScreen';
+import { LoginScreen } from '../screens/LoginScreen';
+import { RegisterScreen } from '../screens/RegisterScreen';
 import { DetailScreen } from '../screens/DetailScreen';
 import { CartScreen } from '../screens/CartScreen';
 import { CheckoutScreen } from '../screens/CheckoutScreen';
+import { OrdersScreen } from '../screens/OrdersScreen';
 import { Colors } from '../constants/colors';
 import { Burger } from '../constants/mockData';
 
 // Tipado de rutas para navegación segura
 export type RootStackParamList = {
+  Login: undefined;
+  Register: undefined;
   Home: undefined;
+  Orders: undefined;
   Detail: { burger: Burger };
   Cart: { simulateError?: boolean }; // Soporta simulación de estado de error por rúbrica
   Checkout: undefined;
@@ -18,10 +25,13 @@ export type RootStackParamList = {
 const Stack = createStackNavigator<RootStackParamList>();
 
 export const AppNavigator = () => {
+  const insets = useSafeAreaInsets();
+
   return (
     <Stack.Navigator
-      initialRouteName="Home"
+      initialRouteName="Login"
       screenOptions={{
+        headerStatusBarHeight: insets.top,
         headerStyle: {
           backgroundColor: '#FFFFFF',
           elevation: 0, // Remueve sombra en Android
@@ -39,10 +49,31 @@ export const AppNavigator = () => {
       }}
     >
       <Stack.Screen
+        name="Login"
+        component={LoginScreen}
+        options={{
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="Register"
+        component={RegisterScreen}
+        options={{
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
         name="Home"
         component={HomeScreen}
         options={{
           headerShown: false, // La Home tiene su cabecera personalizada con logo
+        }}
+      />
+      <Stack.Screen
+        name="Orders"
+        component={OrdersScreen}
+        options={{
+          headerShown: false,
         }}
       />
       <Stack.Screen
