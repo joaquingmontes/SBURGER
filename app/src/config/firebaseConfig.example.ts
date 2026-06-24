@@ -5,9 +5,9 @@
  */
 export const firebaseConfig = {
   apiKey: 'REEMPLAZAR_CON_TU_API_KEY',
-  authDomain: 'sburger-a3265.firebaseapp.com',
-  projectId: 'sburger-a3265',
-  storageBucket: 'sburger-a3265.firebasestorage.app',
+  authDomain: 'REEMPLAZAR.firebaseapp.com',
+  projectId: 'REEMPLAZAR_CON_TU_PROJECT_ID',
+  storageBucket: 'REEMPLAZAR.firebasestorage.app',
   messagingSenderId: 'REEMPLAZAR_CON_TU_SENDER_ID',
   appId: 'REEMPLAZAR_CON_TU_APP_ID',
 };

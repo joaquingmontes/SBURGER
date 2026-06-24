@@ -1,4 +1,6 @@
 # Genera el SDK de Data Connect para la app React Native.
+# Copiá este archivo como scripts/generate-dataconnect-sdk.ps1
+
 $ErrorActionPreference = "Stop"
 Set-Location (Split-Path $PSScriptRoot -Parent)
 

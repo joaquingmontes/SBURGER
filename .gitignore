@@ -5,9 +5,21 @@
 .env.*
 !.env.example
 
-# Firebase / credenciales de prueba (no subir a GitHub)
-app/src/config/firebaseConfig.ts
+# Firebase — configuración local (no subir a GitHub)
+.firebaserc
+firebase.json
+storage.rules
+dataconnect/
+app/src/dataconnect-generated/
 credenciales-prueba.txt
+credenciales-prueba.example.txt
+app/src/config/firebaseConfig.ts
+
+# Scripts Firebase locales (copiar desde *.example.*)
+scripts/seed-firebase.ps1
+scripts/generate-dataconnect-sdk.ps1
+scripts/migrate-firebase-auth-users.mjs
+scripts/migrate-firebase-auth-users.ps1
 
 # Firebase CLI
 .firebase/

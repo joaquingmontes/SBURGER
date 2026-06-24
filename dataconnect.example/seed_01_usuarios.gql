@@ -1,0 +1,41 @@
+mutation SeedUsuarios @auth(level: PUBLIC, insecureReason: "Seed usuarios de prueba") {
+  cliente1: usuario_insert(
+    data: {
+      id: "11111111-1111-1111-1111-111111111101"
+      nombreCompleto: "Cliente Uno"
+      email: "cliente1@example.com"
+      passwordHash: "CAMBIAR_PASSWORD"
+      rol: CLIENTE
+    }
+  )
+
+  cliente2: usuario_insert(
+    data: {
+      id: "11111111-1111-1111-1111-111111111102"
+      nombreCompleto: "Cliente Dos"
+      email: "cliente2@example.com"
+      passwordHash: "CAMBIAR_PASSWORD"
+      rol: CLIENTE
+    }
+  )
+
+  cliente3: usuario_insert(
+    data: {
+      id: "11111111-1111-1111-1111-111111111103"
+      nombreCompleto: "Cliente Tres"
+      email: "cliente3@example.com"
+      passwordHash: "CAMBIAR_PASSWORD"
+      rol: CLIENTE
+    }
+  )
+
+  admin: usuario_insert(
+    data: {
+      id: "11111111-1111-1111-1111-111111111104"
+      nombreCompleto: "Admin"
+      email: "admin@example.com"
+      passwordHash: "CAMBIAR_PASSWORD"
+      rol: ADMIN
+    }
+  )
+}

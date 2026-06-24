@@ -1,4 +1,6 @@
 # Migra usuarios de Data Connect a Firebase Authentication
+# Copiá este archivo como scripts/migrate-firebase-auth-users.ps1
+
 $ErrorActionPreference = "Stop"
 Set-Location $PSScriptRoot
 

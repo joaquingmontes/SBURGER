@@ -1,5 +1,7 @@
 # Despliega Data Connect y carga usuarios, productos y pedidos (3 pasos).
 # Requiere: npx firebase-tools login
+#
+# Copiá este archivo como scripts/seed-firebase.ps1
 
 $ErrorActionPreference = "Stop"
 Set-Location (Split-Path $PSScriptRoot -Parent)

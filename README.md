@@ -116,15 +116,33 @@ npm run android
 
 ---
 
-## 🔐 Variables de entorno
+## 🔐 Firebase (configuración local)
 
-El proyecto no usa credenciales hardcodeadas. Copiá el archivo de ejemplo y completá los valores necesarios:
+La configuración de Firebase **no se sube a GitHub**. Después de clonar, copiá las plantillas:
 
-```bash
-cp .env.example .env
+```powershell
+# Desde la raíz del repo (Windows)
+Copy-Item .firebaserc.example .firebaserc
+Copy-Item firebase.json.example firebase.json
+Copy-Item storage.rules.example storage.rules
+Copy-Item -Recurse dataconnect.example dataconnect
+Copy-Item credenciales-prueba.template.txt credenciales-prueba.txt
+Copy-Item app\src\config\firebaseConfig.example.ts app\src\config\firebaseConfig.ts
+Copy-Item scripts\seed-firebase.example.ps1 scripts\seed-firebase.ps1
+Copy-Item scripts\generate-dataconnect-sdk.example.ps1 scripts\generate-dataconnect-sdk.ps1
+Copy-Item scripts\migrate-firebase-auth-users.example.ps1 scripts\migrate-firebase-auth-users.ps1
+Copy-Item scripts\migrate-firebase-auth-users.example.mjs scripts\migrate-firebase-auth-users.mjs
 ```
 
-> ⚠️ **Nunca subas el archivo `.env` al repositorio.**
+Completá `.firebaserc`, `dataconnect/dataconnect.yaml`, `firebaseConfig.ts` y las contraseñas en `dataconnect/seed_01_usuarios.gql` con tus valores de Firebase Console.
+
+Luego generá el SDK (requerido para compilar la app):
+
+```powershell
+powershell -File scripts\generate-dataconnect-sdk.ps1
+```
+
+> ⚠️ **Nunca subas** `firebaseConfig.ts`, `.firebaserc`, `dataconnect/`, `dataconnect-generated/`, seeds ni `credenciales-prueba.txt`.
 
 ---
 
