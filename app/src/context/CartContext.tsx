@@ -1,4 +1,10 @@
-import React, { createContext, useContext, useReducer, useEffect } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useReducer,
+  useCallback,
+  useMemo,
+} from 'react';
 import { Burger } from '../constants/mockData';
 
 // Costo fijo de cada ingrediente extra
@@ -172,32 +178,46 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     total: 0,
   });
 
-  const addToCart = (burger: Burger, quantity: number, customizations: Customizations, notes: string) => {
-    dispatch({ type: 'ADD_TO_CART', payload: { burger, quantity, customizations, notes } });
-  };
+  const addToCart = useCallback(
+    (
+      burger: Burger,
+      quantity: number,
+      customizations: Customizations,
+      notes: string,
+    ) => {
+      dispatch({
+        type: 'ADD_TO_CART',
+        payload: { burger, quantity, customizations, notes },
+      });
+    },
+    [],
+  );
 
-  const removeFromCart = (id: string) => {
+  const removeFromCart = useCallback((id: string) => {
     dispatch({ type: 'REMOVE_FROM_CART', payload: { id } });
-  };
+  }, []);
 
-  const updateQuantity = (id: string, quantity: number) => {
+  const updateQuantity = useCallback((id: string, quantity: number) => {
     dispatch({ type: 'UPDATE_QUANTITY', payload: { id, quantity } });
-  };
+  }, []);
 
-  const clearCart = () => {
+  const clearCart = useCallback(() => {
     dispatch({ type: 'CLEAR_CART' });
-  };
+  }, []);
+
+  const value = useMemo(
+    () => ({
+      ...state,
+      addToCart,
+      removeFromCart,
+      updateQuantity,
+      clearCart,
+    }),
+    [state, addToCart, removeFromCart, updateQuantity, clearCart],
+  );
 
   return (
-    <CartContext.Provider
-      value={{
-        ...state,
-        addToCart,
-        removeFromCart,
-        updateQuantity,
-        clearCart,
-      }}
-    >
+    <CartContext.Provider value={value}>
       {children}
     </CartContext.Provider>
   );
@@ -209,4 +229,12 @@ export const useCart = () => {
     throw new Error('useCart debe utilizarse dentro de un CartProvider');
   }
   return context;
+};
+
+export const useCartItemCount = (): number => {
+  const { items } = useCart();
+  return useMemo(
+    () => items.reduce((acc, item) => acc + item.quantity, 0),
+    [items],
+  );
 };

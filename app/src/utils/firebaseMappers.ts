@@ -5,6 +5,7 @@ import {
 } from '@dataconnect/generated';
 import { Burger, MenuCategory } from '../constants/mockData';
 import { AdminProduct, ProductCategory } from '../constants/adminProducts';
+import { DEFAULT_PRODUCT_IMAGE } from '../constants/productImages';
 import { Order, OrderItem, OrderStatus } from '../constants/mockOrders';
 import { AdminClientOrder, AdminOrderStatus } from '../constants/mockAdminOrders';
 
@@ -103,7 +104,7 @@ export const mapAdminProductToFirebase = (product: AdminProduct) => ({
   ingredientes: product.category === 'Hamburguesas' ? product.description : null,
   precio: product.price,
   categoria: ADMIN_CATEGORY_TO_FIREBASE[product.category],
-  imagenUrl: product.image,
+  imagenUrl: product.image.trim() || DEFAULT_PRODUCT_IMAGE,
 });
 
 export const matchesMenuCategory = (

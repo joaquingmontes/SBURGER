@@ -206,24 +206,6 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
             >
               <Text style={styles.outlineButtonText}>Ver menú sin registrarse</Text>
             </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.adminDevButton}
-              activeOpacity={0.85}
-              onPress={async () => {
-                setLoading(true);
-                try {
-                  const adminUser = await login('admin@stackburger.com', 'Admin123!');
-                  resetAfterAuth(navigation, adminUser);
-                } catch {
-                  showErrorDialog(LOGIN_INVALID_CREDENTIALS);
-                } finally {
-                  setLoading(false);
-                }
-              }}
-            >
-              <Text style={styles.adminDevButtonText}>entrar como admin</Text>
-            </TouchableOpacity>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -442,16 +424,5 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '500',
     color: Colors.textPrimary,
-  },
-  adminDevButton: {
-    marginTop: 16,
-    paddingVertical: 10,
-    alignItems: 'center',
-  },
-  adminDevButtonText: {
-    fontSize: 13,
-    color: Colors.textMuted,
-    fontWeight: '500',
-    textTransform: 'lowercase',
   },
 });

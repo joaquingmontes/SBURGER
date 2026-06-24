@@ -1,15 +1,28 @@
-mutation CreateUsuario(
+mutation CreateUsuarioProfile(
   $nombreCompleto: String!
   $email: String!
-  $passwordHash: String!
   $rol: RolUsuario
-) @auth(level: PUBLIC, insecureReason: "Registro publico pendiente de Auth") {
+) @auth(level: USER) {
   usuario_insert(
     data: {
       nombreCompleto: $nombreCompleto
       email: $email
-      passwordHash: $passwordHash
+      authUid_expr: "auth.uid"
       rol: $rol
+    }
+  )
+}
+
+mutation LinkMyAccount @auth(level: USER) {
+  usuario_update(
+    first: {
+      where: {
+        email: { eq_expr: "auth.token.email" }
+        authUid: { eq: null }
+      }
+    }
+    data: {
+      authUid_expr: "auth.uid"
     }
   )
 }
@@ -21,7 +34,7 @@ mutation CreateProducto(
   $precio: Int!
   $categoria: CategoriaProducto!
   $imagenUrl: String!
-) @auth(level: PUBLIC, insecureReason: "Pendiente restringir acceso admin") {
+) @auth(level: USER) {
   producto_insert(
     data: {
       nombre: $nombre
@@ -42,7 +55,7 @@ mutation UpdateProducto(
   $precio: Int!
   $categoria: CategoriaProducto!
   $imagenUrl: String!
-) @auth(level: PUBLIC, insecureReason: "Pendiente restringir acceso admin") {
+) @auth(level: USER) {
   producto_update(
     id: $id
     data: {
@@ -56,7 +69,7 @@ mutation UpdateProducto(
   )
 }
 
-mutation DeleteProducto($id: UUID!) @auth(level: PUBLIC, insecureReason: "Pendiente restringir acceso admin") {
+mutation DeleteProducto($id: UUID!) @auth(level: USER) {
   producto_update(id: $id, data: { activo: false })
 }
 
@@ -70,7 +83,7 @@ mutation CreatePedido(
   $nombreContacto: String!
   $telefonoContacto: String!
   $direccion: String
-) @auth(level: PUBLIC, insecureReason: "Requiere usuario logueado; pendiente integrar Firebase Auth") {
+) @auth(level: USER) {
   pedido_insert(
     data: {
       codigo: $codigo
@@ -98,7 +111,7 @@ mutation CreatePedidoItem(
   $extraPanceta: Int
   $extraCebolla: Int
   $notas: String
-) @auth(level: PUBLIC, insecureReason: "Checkout publico") {
+) @auth(level: USER) {
   pedidoItem_insert(
     data: {
       pedidoId: $pedidoId
@@ -116,6 +129,6 @@ mutation CreatePedidoItem(
   )
 }
 
-mutation UpdatePedidoEstado($id: UUID!, $estado: EstadoPedido!) @auth(level: PUBLIC, insecureReason: "Pendiente restringir acceso admin") {
+mutation UpdatePedidoEstado($id: UUID!, $estado: EstadoPedido!) @auth(level: USER) {
   pedido_update(id: $id, data: { estado: $estado })
 }

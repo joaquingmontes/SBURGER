@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, memo } from 'react';
 import {
   View,
   Text,
@@ -9,6 +9,7 @@ import {
   Platform,
   ScrollView,
   ActivityIndicator,
+  ListRenderItem,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
@@ -26,10 +27,10 @@ import { BottomNav } from '../components/BottomNav';
 import { ScreenSafeArea } from '../components/ScreenSafeArea';
 import { ClientHeaderActions } from '../components/ClientHeaderActions';
 import { Colors } from '../constants/colors';
+import { FLAT_LIST_PERF_PROPS } from '../constants/listPerformance';
 import { useAuth } from '../context/AuthContext';
 import { dataConnect } from '../config/firebase';
 import { mapPedidoToOrder } from '../utils/firebaseMappers';
-import { useRefetchOnFocus } from '../hooks/useRefetchOnFocus';
 import { refreshUserOrdersFromServer } from '../utils/orderQueryCache';
 import { resetToLogin, resetToUserHome } from '../navigation/navigationUtils';
 
@@ -51,7 +52,11 @@ interface OrderCardProps {
   onToggle: () => void;
 }
 
-const OrderCard: React.FC<OrderCardProps> = ({ order, expanded, onToggle }) => {
+const OrderCard = memo<OrderCardProps>(function OrderCard({
+  order,
+  expanded,
+  onToggle,
+}) {
   const statusColor = STATUS_COLORS[order.status];
   const statusLabel = ORDER_STATUS_LABELS[order.status];
 
@@ -150,7 +155,7 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, expanded, onToggle }) => {
       )}
     </View>
   );
-};
+});
 
 export const OrdersScreen: React.FC<OrdersScreenProps> = ({ navigation }) => {
   const queryClient = useQueryClient();
@@ -175,8 +180,6 @@ export const OrdersScreen: React.FC<OrdersScreenProps> = ({ navigation }) => {
     await refreshUserOrdersFromServer(queryClient);
   }, [queryClient, user?.id]);
 
-  useRefetchOnFocus(refreshOrders, !!user?.id);
-
   useFocusEffect(
     useCallback(() => {
       StatusBar.setBarStyle('dark-content');
@@ -186,21 +189,35 @@ export const OrdersScreen: React.FC<OrdersScreenProps> = ({ navigation }) => {
     }, []),
   );
 
-  const filteredOrders =
-    selectedFilter === 'all'
-      ? orders
-      : orders.filter(order => order.status === selectedFilter);
+  const filteredOrders = useMemo(
+    () =>
+      selectedFilter === 'all'
+        ? orders
+        : orders.filter(order => order.status === selectedFilter),
+    [orders, selectedFilter],
+  );
 
-  const toggleOrder = (orderId: string) => {
+  const toggleOrder = useCallback((orderId: string) => {
     setExpandedOrders(prev => ({
       ...prev,
       [orderId]: !prev[orderId],
     }));
-  };
+  }, []);
 
-  const handleLogout = () => {
+  const renderOrderItem = useCallback<ListRenderItem<Order>>(
+    ({ item }) => (
+      <OrderCard
+        order={item}
+        expanded={!!expandedOrders[item.id]}
+        onToggle={() => toggleOrder(item.id)}
+      />
+    ),
+    [expandedOrders, toggleOrder],
+  );
+
+  const handleLogout = useCallback(() => {
     void logout().then(() => resetToLogin(navigation));
-  };
+  }, [logout, navigation]);
 
   return (
     <ScreenSafeArea style={styles.safeArea}>
@@ -259,13 +276,9 @@ export const OrdersScreen: React.FC<OrdersScreenProps> = ({ navigation }) => {
           style={styles.list}
           data={filteredOrders}
           keyExtractor={item => item.id}
-          renderItem={({ item }) => (
-            <OrderCard
-              order={item}
-              expanded={!!expandedOrders[item.id]}
-              onToggle={() => toggleOrder(item.id)}
-            />
-          )}
+          renderItem={renderOrderItem}
+          extraData={expandedOrders}
+          {...FLAT_LIST_PERF_PROPS}
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
           refreshing={isFetching}

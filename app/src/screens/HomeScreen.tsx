@@ -1,4 +1,4 @@
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback, memo } from 'react';
 import {
   View,
   Text,
@@ -10,6 +10,7 @@ import {
   Platform,
   TextInput,
   ScrollView,
+  ListRenderItem,
 } from 'react-native';
 import { useFocusEffect, RouteProp } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
@@ -17,17 +18,17 @@ import { useListProductosActivos } from '@dataconnect/generated/react';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { Burger } from '../constants/mockData';
 import { BurgerCard } from '../components/BurgerCard';
-import { useCart } from '../context/CartContext';
+import { useCartItemCount } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { CustomButton } from '../components/CustomButton';
 import { BottomNav } from '../components/BottomNav';
 import { ScreenSafeArea } from '../components/ScreenSafeArea';
 import { ClientHeaderActions } from '../components/ClientHeaderActions';
 import { Colors } from '../constants/colors';
+import { FLAT_LIST_PERF_PROPS } from '../constants/listPerformance';
 import { dataConnect } from '../config/firebase';
 import { mapProductoToBurger } from '../utils/firebaseMappers';
-import { useRefetchOnFocus } from '../hooks/useRefetchOnFocus';
-import { resetToLogin, resetToUserHome } from '../navigation/navigationUtils';
+import { resetToLogin } from '../navigation/navigationUtils';
 
 type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Home'>;
 type HomeScreenRouteProp = RouteProp<RootStackParamList, 'Home'>;
@@ -44,8 +45,68 @@ const CATEGORIES = [
   { id: 'desserts', label: 'Postres', emoji: '🍰' },
 ] as const;
 
+interface HomeHeaderProps {
+  guestMode: boolean;
+  firstName: string;
+  userName: string;
+  userEmail: string;
+  onLogin: () => void;
+  onCartPress: () => void;
+}
+
+const HomeHeader = memo<HomeHeaderProps>(function HomeHeader({
+  guestMode,
+  firstName,
+  userName,
+  userEmail,
+  onLogin,
+  onCartPress,
+}) {
+  const totalCartQuantity = useCartItemCount();
+
+  return (
+    <View style={styles.header}>
+      <View style={styles.headerLeft}>
+        <View style={styles.logoContainer}>
+          <View style={styles.logoGradientTop} />
+          <View style={styles.logoGradientBottom} />
+          <Text style={styles.logoEmoji}>🍔</Text>
+        </View>
+        <View>
+          <Text style={styles.brandName}>StackBurger</Text>
+          <Text style={styles.greeting}>
+            {guestMode ? 'Modo invitado' : `Hola, ${firstName}`}
+          </Text>
+        </View>
+      </View>
+
+      {guestMode ? (
+        <TouchableOpacity
+          style={styles.loginHeaderButton}
+          activeOpacity={0.85}
+          onPress={onLogin}
+        >
+          <Text style={styles.loginHeaderButtonText}>Iniciar sesión</Text>
+        </TouchableOpacity>
+      ) : (
+        <ClientHeaderActions
+          showCart
+          cartQuantity={totalCartQuantity}
+          onCartPress={onCartPress}
+          onLogout={onLogin}
+          userName={userName}
+          userEmail={userEmail}
+        />
+      )}
+    </View>
+  );
+});
+
+const renderBurgerItem: ListRenderItem<Burger> = ({ item }) => (
+  <BurgerCard burger={item} />
+);
+
 export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
-  const { items } = useCart();
   const { user, logout } = useAuth();
   const guestMode = route.params?.guestMode ?? false;
   const [searchQuery, setSearchQuery] = React.useState('');
@@ -59,13 +120,17 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => 
     isRefetching,
   } = useListProductosActivos(dataConnect);
 
-  useRefetchOnFocus(refetch);
-
-  const totalCartQuantity = items.reduce((acc, item) => acc + item.quantity, 0);
-
-  const goToLogin = () => {
+  const goToLogin = useCallback(() => {
     void logout().then(() => resetToLogin(navigation));
-  };
+  }, [logout, navigation]);
+
+  const goToCart = useCallback(() => {
+    navigation.navigate('Cart', {});
+  }, [navigation]);
+
+  const goToOrders = useCallback(() => {
+    navigation.navigate('Orders');
+  }, [navigation]);
 
   const menuItems = useMemo(() => {
     const products = data?.productos ?? [];
@@ -124,40 +189,14 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => 
 
   return (
     <ScreenSafeArea style={styles.safeArea}>
-      <View style={styles.header}>
-        <View style={styles.headerLeft}>
-          <View style={styles.logoContainer}>
-            <View style={styles.logoGradientTop} />
-            <View style={styles.logoGradientBottom} />
-            <Text style={styles.logoEmoji}>🍔</Text>
-          </View>
-          <View>
-            <Text style={styles.brandName}>StackBurger</Text>
-            <Text style={styles.greeting}>
-              {guestMode ? 'Modo invitado' : `Hola, ${firstName}`}
-            </Text>
-          </View>
-        </View>
-
-        {guestMode ? (
-          <TouchableOpacity
-            style={styles.loginHeaderButton}
-            activeOpacity={0.85}
-            onPress={goToLogin}
-          >
-            <Text style={styles.loginHeaderButtonText}>Iniciar sesión</Text>
-          </TouchableOpacity>
-        ) : (
-          <ClientHeaderActions
-            showCart
-            cartQuantity={totalCartQuantity}
-            onCartPress={() => navigation.navigate('Cart', {})}
-            onLogout={goToLogin}
-            userName={user?.nombreCompleto.split(' ')[0] ?? 'Usuario'}
-            userEmail={user?.email ?? ''}
-          />
-        )}
-      </View>
+      <HomeHeader
+        guestMode={guestMode}
+        firstName={firstName}
+        userName={user?.nombreCompleto.split(' ')[0] ?? 'Usuario'}
+        userEmail={user?.email ?? ''}
+        onLogin={goToLogin}
+        onCartPress={goToCart}
+      />
 
       <View style={styles.searchContainer}>
         <Text style={styles.searchIcon}>🔍</Text>
@@ -226,18 +265,12 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => 
         style={styles.list}
         data={menuItems}
         keyExtractor={item => item.id}
-        renderItem={({ item }) => (
-          <BurgerCard
-            burger={item}
-            onPress={() =>
-              navigation.navigate('Detail', {
-                burger: item,
-                guestMode,
-              })
-            }
-          />
-        )}
-        contentContainerStyle={styles.listContent}
+        renderItem={renderBurgerItem}
+        {...FLAT_LIST_PERF_PROPS}
+        contentContainerStyle={[
+          styles.listContent,
+          guestMode && styles.listContentGuest,
+        ]}
         showsVerticalScrollIndicator={false}
         onRefresh={() => refetch()}
         refreshing={isRefetching}
@@ -248,13 +281,13 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => 
         }
       />
 
-      <BottomNav
-        activeTab="catalog"
-        onCatalogPress={() => {}}
-        onOrdersPress={() =>
-          guestMode ? goToLogin() : navigation.navigate('Orders')
-        }
-      />
+      {!guestMode && (
+        <BottomNav
+          activeTab="catalog"
+          onCatalogPress={() => {}}
+          onOrdersPress={goToOrders}
+        />
+      )}
     </ScreenSafeArea>
   );
 };
@@ -420,6 +453,9 @@ const styles = StyleSheet.create({
   listContent: {
     paddingTop: 4,
     paddingBottom: 90,
+  },
+  listContentGuest: {
+    paddingBottom: 24,
   },
   emptyContainer: {
     paddingHorizontal: 20,

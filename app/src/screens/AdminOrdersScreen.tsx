@@ -14,15 +14,15 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { useQueryClient } from '@tanstack/react-query';
 import { useListPedidosAdmin } from '@dataconnect/generated/react';
 import { RootStackParamList } from '../navigation/AppNavigator';
-import { AdminOrderStatus } from '../constants/mockAdminOrders';
+import { AdminOrderStatus, AdminClientOrder } from '../constants/mockAdminOrders';
 import { Colors } from '../constants/colors';
+import { FLAT_LIST_PERF_PROPS } from '../constants/listPerformance';
 import { ScreenSafeArea } from '../components/ScreenSafeArea';
 import { AdminHeader } from '../components/admin/AdminHeader';
 import { AdminTabs } from '../components/admin/AdminTabs';
 import { AdminOrderCard } from '../components/admin/AdminOrderCard';
 import { dataConnect } from '../config/firebase';
 import { mapPedidoToAdminOrder } from '../utils/firebaseMappers';
-import { useRefetchOnFocus } from '../hooks/useRefetchOnFocus';
 import {
   patchAdminOrderStatusInCache,
   refreshAdminOrdersFromServer,
@@ -64,8 +64,6 @@ export const AdminOrdersScreen: React.FC<AdminOrdersScreenProps> = ({
     [data?.pedidos],
   );
 
-  useRefetchOnFocus(refreshOrders);
-
   useFocusEffect(
     useCallback(() => {
       StatusBar.setBarStyle('dark-content');
@@ -75,7 +73,7 @@ export const AdminOrdersScreen: React.FC<AdminOrdersScreenProps> = ({
     }, []),
   );
 
-  const handleStatusChange = async (
+  const handleStatusChange = useCallback(async (
     orderId: string,
     status: AdminOrderStatus,
   ) => {
@@ -107,7 +105,26 @@ export const AdminOrdersScreen: React.FC<AdminOrdersScreenProps> = ({
     } finally {
       setUpdatingOrderId(null);
     }
-  };
+  }, [queryClient, updatingOrderId]);
+
+  const handleOrderPress = useCallback(
+    (selectedOrder: AdminClientOrder) => {
+      navigation.navigate('AdminOrderDetail', { order: selectedOrder });
+    },
+    [navigation],
+  );
+
+  const renderOrderItem = useCallback(
+    ({ item }: { item: (typeof orders)[number] }) => (
+      <AdminOrderCard
+        order={item}
+        isUpdating={updatingOrderId === item.id}
+        onPress={handleOrderPress}
+        onStatusChange={handleStatusChange}
+      />
+    ),
+    [handleOrderPress, handleStatusChange, updatingOrderId],
+  );
 
   return (
     <ScreenSafeArea style={styles.safeArea}>
@@ -126,17 +143,9 @@ export const AdminOrdersScreen: React.FC<AdminOrdersScreenProps> = ({
         <FlatList
           data={orders}
           keyExtractor={item => item.id}
-          extraData={orders}
-          renderItem={({ item }) => (
-            <AdminOrderCard
-              order={item}
-              isUpdating={updatingOrderId === item.id}
-              onPress={selectedOrder =>
-                navigation.navigate('AdminOrderDetail', { order: selectedOrder })
-              }
-              onStatusChange={handleStatusChange}
-            />
-          )}
+          extraData={updatingOrderId}
+          renderItem={renderOrderItem}
+          {...FLAT_LIST_PERF_PROPS}
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
           refreshing={isFetching}

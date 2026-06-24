@@ -8,7 +8,7 @@ export const PRODUCT_CATEGORIES = [
 export type ProductCategory = (typeof PRODUCT_CATEGORIES)[number];
 
 export interface AdminProduct {
-  id: string;
+  id?: string;
   name: string;
   description: string;
   price: number;

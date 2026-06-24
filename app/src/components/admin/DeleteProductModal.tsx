@@ -11,12 +11,14 @@ import { Colors } from '../../constants/colors';
 
 interface DeleteProductModalProps {
   visible: boolean;
+  isDeleting?: boolean;
   onCancel: () => void;
   onConfirm: () => void;
 }
 
 export const DeleteProductModal: React.FC<DeleteProductModalProps> = ({
   visible,
+  isDeleting = false,
   onCancel,
   onConfirm,
 }) => {
@@ -44,15 +46,19 @@ export const DeleteProductModal: React.FC<DeleteProductModalProps> = ({
               style={styles.cancelButton}
               activeOpacity={0.85}
               onPress={onCancel}
+              disabled={isDeleting}
             >
               <Text style={styles.cancelButtonText}>Cancelar</Text>
             </TouchableOpacity>
             <TouchableOpacity
-              style={styles.deleteButton}
+              style={[styles.deleteButton, isDeleting && styles.deleteButtonDisabled]}
               activeOpacity={0.85}
               onPress={onConfirm}
+              disabled={isDeleting}
             >
-              <Text style={styles.deleteButtonText}>Eliminar</Text>
+              <Text style={styles.deleteButtonText}>
+                {isDeleting ? 'Eliminando...' : 'Eliminar'}
+              </Text>
             </TouchableOpacity>
           </View>
         </Pressable>
@@ -137,6 +143,9 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     paddingVertical: 14,
     alignItems: 'center',
+  },
+  deleteButtonDisabled: {
+    opacity: 0.7,
   },
   deleteButtonText: {
     fontSize: 15,

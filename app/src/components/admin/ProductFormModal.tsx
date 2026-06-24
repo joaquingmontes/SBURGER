@@ -22,7 +22,7 @@ interface ProductFormModalProps {
   mode: ProductFormMode;
   product?: AdminProduct;
   onClose: () => void;
-  onSubmit: (product: AdminProduct) => void;
+  onSubmit: (product: AdminProduct) => void | Promise<void>;
 }
 
 const emptyForm = {
@@ -45,6 +45,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
   const [price, setPrice] = useState('');
   const [category, setCategory] = useState<ProductCategory>('Hamburguesas');
   const [image, setImage] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     if (!visible) {
@@ -66,21 +67,26 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
     }
   }, [visible, mode, product]);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const parsedPrice = Number(price.replace(/\D/g, ''));
     if (!name.trim() || !description.trim() || !parsedPrice) {
       return;
     }
 
-    onSubmit({
-      id: product?.id ?? String(Date.now()),
-      name: name.trim(),
-      description: description.trim(),
-      price: parsedPrice,
-      category,
-      image: image.trim(),
-    });
-    onClose();
+    setSubmitting(true);
+
+    try {
+      await onSubmit({
+        id: product?.id,
+        name: name.trim(),
+        description: description.trim(),
+        price: parsedPrice,
+        category,
+        image: image.trim(),
+      });
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const title = mode === 'edit' ? 'Editar producto' : 'Agregar producto';
@@ -154,7 +160,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
             <CategoryPicker value={category} onChange={setCategory} />
 
             <View style={styles.fieldGroup}>
-              <Text style={styles.fieldLabel}>URL DE IMAGEN (OPCIONAL)</Text>
+              <Text style={styles.fieldLabel}>URL DE IMAGEN</Text>
               <TextInput
                 style={styles.input}
                 placeholder="https://images.unsplash.com/..."
@@ -172,15 +178,19 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
               style={styles.cancelButton}
               activeOpacity={0.85}
               onPress={onClose}
+              disabled={submitting}
             >
               <Text style={styles.cancelButtonText}>Cancelar</Text>
             </TouchableOpacity>
             <TouchableOpacity
-              style={styles.submitButton}
+              style={[styles.submitButton, submitting && styles.submitButtonDisabled]}
               activeOpacity={0.85}
               onPress={handleSubmit}
+              disabled={submitting}
             >
-              <Text style={styles.submitButtonText}>{submitLabel}</Text>
+              <Text style={styles.submitButtonText}>
+                {submitting ? 'Guardando...' : submitLabel}
+              </Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -292,6 +302,9 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     paddingVertical: 16,
     alignItems: 'center',
+  },
+  submitButtonDisabled: {
+    opacity: 0.7,
   },
   submitButtonText: {
     fontSize: 16,

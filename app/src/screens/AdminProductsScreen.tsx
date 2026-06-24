@@ -10,6 +10,7 @@ import {
   Platform,
   ActivityIndicator,
   Alert,
+  ListRenderItem,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
@@ -23,6 +24,7 @@ import {
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { AdminProduct } from '../constants/adminProducts';
 import { Colors } from '../constants/colors';
+import { FLAT_LIST_PERF_PROPS } from '../constants/listPerformance';
 import { ScreenSafeArea } from '../components/ScreenSafeArea';
 import { AdminProductCard } from '../components/admin/AdminProductCard';
 import { ProductFormModal } from '../components/admin/ProductFormModal';
@@ -34,8 +36,13 @@ import {
   mapAdminProductToFirebase,
   mapProductoToAdminProduct,
 } from '../utils/firebaseMappers';
-import { useRefetchOnFocus } from '../hooks/useRefetchOnFocus';
-import { invalidateProductsQueries } from '../utils/queryInvalidation';
+import { isValidProductId } from '../utils/productIds';
+import {
+  fetchAdminProductsFromServer,
+  findProductIdOnServer,
+  reloadProductsFromServer,
+  syncProductCachesAfterEdit,
+} from '../utils/productQueryCache';
 import { useRequireAdmin } from '../navigation/useRoleGuard';
 
 type AdminProductsScreenNavigationProp = StackNavigationProp<
@@ -52,6 +59,8 @@ export const AdminProductsScreen: React.FC<AdminProductsScreenProps> = ({
 }) => {
   const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState('');
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   useRequireAdmin(navigation);
 
@@ -60,12 +69,11 @@ export const AdminProductsScreen: React.FC<AdminProductsScreenProps> = ({
   const [selectedProduct, setSelectedProduct] = useState<AdminProduct | undefined>();
   const [productToDelete, setProductToDelete] = useState<AdminProduct | undefined>();
 
-  const { data, isPending, isError, refetch } = useListProductosAdmin(dataConnect);
+  const { data, isPending, isError, refetch, isRefetching } =
+    useListProductosAdmin(dataConnect);
   const createProducto = useCreateProducto(dataConnect);
   const updateProducto = useUpdateProducto(dataConnect);
   const deleteProducto = useDeleteProducto(dataConnect);
-
-  useRefetchOnFocus(refetch);
 
   const products = useMemo(
     () => (data?.productos ?? []).filter(item => item.activo).map(mapProductoToAdminProduct),
@@ -91,54 +99,111 @@ export const AdminProductsScreen: React.FC<AdminProductsScreenProps> = ({
     );
   }, [products, searchQuery]);
 
-  const openCreateForm = () => {
+  const reloadProducts = useCallback(async () => {
+    await reloadProductsFromServer(queryClient, refetch);
+  }, [queryClient, refetch]);
+
+  const resolveProductId = useCallback(
+    async (target: AdminProduct): Promise<string | undefined> => {
+      if (isValidProductId(target.id)) {
+        return target.id;
+      }
+
+      const freshData = await fetchAdminProductsFromServer();
+      return findProductIdOnServer(freshData, target);
+    },
+    [],
+  );
+
+  const openCreateForm = useCallback(() => {
     setFormMode('create');
     setSelectedProduct(undefined);
     setFormVisible(true);
-  };
+  }, []);
 
-  const openEditForm = (product: AdminProduct) => {
+  const openEditForm = useCallback((product: AdminProduct) => {
     setFormMode('edit');
     setSelectedProduct(product);
     setFormVisible(true);
-  };
+  }, []);
 
-  const handleDelete = (product: AdminProduct) => {
+  const handleDeleteProduct = useCallback((product: AdminProduct) => {
     setProductToDelete(product);
-  };
+  }, []);
 
-  const confirmDelete = async () => {
-    if (!productToDelete) {
+  const confirmDelete = useCallback(async () => {
+    if (!productToDelete || isDeleting) {
       return;
     }
 
+    setIsDeleting(true);
+
     try {
-      await deleteProducto.mutateAsync({ id: productToDelete.id });
-      await invalidateProductsQueries(queryClient);
+      const productId = await resolveProductId(productToDelete);
+
+      if (!productId) {
+        Alert.alert('Error', 'No se encontró el producto. Actualizá la lista e intentá de nuevo.');
+        await reloadProducts();
+        return;
+      }
+
+      await deleteProducto.mutateAsync({ id: productId });
+      await reloadProducts();
       setProductToDelete(undefined);
     } catch {
       Alert.alert('Error', 'No se pudo eliminar el producto.');
+      await reloadProducts();
+    } finally {
+      setIsDeleting(false);
     }
-  };
+  }, [deleteProducto, isDeleting, productToDelete, reloadProducts, resolveProductId]);
 
   const handleSubmitProduct = async (product: AdminProduct) => {
     const payload = mapAdminProductToFirebase(product);
+    setIsSaving(true);
 
     try {
       if (formMode === 'edit') {
+        const lookupProduct = selectedProduct ?? product;
+        let productId = isValidProductId(product.id)
+          ? product.id
+          : await resolveProductId(lookupProduct);
+
+        if (!productId) {
+          Alert.alert('Error', 'No se pudo identificar el producto. Actualizá la lista e intentá de nuevo.');
+          await reloadProducts();
+          return;
+        }
+
         await updateProducto.mutateAsync({
-          id: product.id,
+          id: productId,
           ...payload,
         });
+
+        syncProductCachesAfterEdit(queryClient, { ...product, id: productId });
       } else {
         await createProducto.mutateAsync(payload);
+        await reloadProducts();
       }
-      await invalidateProductsQueries(queryClient);
+
       setFormVisible(false);
     } catch {
       Alert.alert('Error', 'No se pudo guardar el producto.');
+    } finally {
+      setIsSaving(false);
     }
   };
+
+  const renderProductItem = useCallback<ListRenderItem<AdminProduct>>(
+    ({ item }) => (
+      <AdminProductCard
+        product={item}
+        onEdit={openEditForm}
+        onDelete={handleDeleteProduct}
+      />
+    ),
+    [handleDeleteProduct, openEditForm],
+  );
 
   return (
     <ScreenSafeArea style={styles.safeArea}>
@@ -175,20 +240,29 @@ export const AdminProductsScreen: React.FC<AdminProductsScreenProps> = ({
       ) : isError ? (
         <View style={styles.center}>
           <Text style={styles.errorText}>No se pudieron cargar los productos.</Text>
+          <TouchableOpacity style={styles.retryButton} onPress={reloadProducts}>
+            <Text style={styles.retryButtonText}>Reintentar</Text>
+          </TouchableOpacity>
         </View>
       ) : (
         <FlatList
           data={filteredProducts}
-          keyExtractor={item => item.id}
-          renderItem={({ item }) => (
-            <AdminProductCard
-              product={item}
-              onEdit={() => openEditForm(item)}
-              onDelete={() => handleDelete(item)}
-            />
-          )}
-          contentContainerStyle={styles.listContent}
+          keyExtractor={item => item.id ?? `${item.name}-${item.price}`}
+          renderItem={renderProductItem}
+          {...FLAT_LIST_PERF_PROPS}
+          removeClippedSubviews={false}
+          contentContainerStyle={[
+            styles.listContent,
+            filteredProducts.length === 0 && styles.listContentEmpty,
+          ]}
           showsVerticalScrollIndicator={false}
+          refreshing={isRefetching || isSaving}
+          onRefresh={reloadProducts}
+          ListEmptyComponent={
+            <View style={styles.center}>
+              <Text style={styles.emptyText}>No hay productos activos.</Text>
+            </View>
+          }
         />
       )}
 
@@ -202,7 +276,12 @@ export const AdminProductsScreen: React.FC<AdminProductsScreenProps> = ({
 
       <DeleteProductModal
         visible={!!productToDelete}
-        onCancel={() => setProductToDelete(undefined)}
+        isDeleting={isDeleting}
+        onCancel={() => {
+          if (!isDeleting) {
+            setProductToDelete(undefined);
+          }
+        }}
         onConfirm={confirmDelete}
       />
     </ScreenSafeArea>
@@ -266,9 +345,28 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingBottom: 24,
   },
+  listContentEmpty: {
+    flexGrow: 1,
+  },
   errorText: {
     fontSize: 14,
     color: Colors.error,
     textAlign: 'center',
+    marginBottom: 12,
+  },
+  emptyText: {
+    fontSize: 14,
+    color: Colors.textSecondary,
+    textAlign: 'center',
+  },
+  retryButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 10,
+    backgroundColor: Colors.accent,
+  },
+  retryButtonText: {
+    color: Colors.accentText,
+    fontWeight: '700',
   },
 });

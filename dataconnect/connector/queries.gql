@@ -10,7 +10,7 @@ query ListProductosActivos @auth(level: PUBLIC, insecureReason: "Catalogo public
   }
 }
 
-query ListProductosAdmin @auth(level: PUBLIC, insecureReason: "Pendiente restringir acceso admin") {
+query ListProductosAdmin @auth(level: USER) {
   productos(orderBy: { createdAt: DESC }) {
     id
     nombre
@@ -23,8 +23,11 @@ query ListProductosAdmin @auth(level: PUBLIC, insecureReason: "Pendiente restrin
   }
 }
 
-query ListPedidosByUsuario($usuarioId: UUID!) @auth(level: PUBLIC, insecureReason: "Pendiente integrar Firebase Auth") {
-  pedidos(where: { usuario: { id: { eq: $usuarioId } } }, orderBy: { createdAt: DESC }) {
+query ListMyPedidos @auth(level: USER) {
+  pedidos(
+    where: { usuario: { authUid: { eq_expr: "auth.uid" } } }
+    orderBy: { createdAt: DESC }
+  ) {
     id
     codigo
     estado
@@ -51,7 +54,7 @@ query ListPedidosByUsuario($usuarioId: UUID!) @auth(level: PUBLIC, insecureReaso
   }
 }
 
-query ListPedidosAdmin @auth(level: PUBLIC, insecureReason: "Pendiente restringir acceso admin") {
+query ListPedidosAdmin @auth(level: USER) {
   pedidos(orderBy: { createdAt: DESC }) {
     id
     codigo
@@ -79,12 +82,11 @@ query ListPedidosAdmin @auth(level: PUBLIC, insecureReason: "Pendiente restringi
   }
 }
 
-query GetUsuarioByEmail($email: String!) @auth(level: PUBLIC, insecureReason: "Login custom pendiente de Auth") {
-  usuarios(where: { email: { eq: $email } }, limit: 1) {
+query GetMe @auth(level: USER) {
+  usuarios(where: { authUid: { eq_expr: "auth.uid" } }, limit: 1) {
     id
     nombreCompleto
     email
-    passwordHash
     rol
   }
 }

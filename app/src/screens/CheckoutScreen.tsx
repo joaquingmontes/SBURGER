@@ -26,7 +26,7 @@ import {
   createOrderInFirebase,
   generateOrderCode,
 } from '../services/orderService';
-import { invalidateOrdersQueries } from '../utils/queryInvalidation';
+import { invalidateUserOrdersQueries } from '../utils/queryInvalidation';
 import { resetToLogin, resetToUserHome } from '../navigation/navigationUtils';
 type CheckoutScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Checkout'>;
 
@@ -45,11 +45,9 @@ export const CheckoutScreen: React.FC<CheckoutScreenProps> = ({ navigation }) =>
   const { subtotal, items, clearCart } = useCart();
   const { isOpen, businessHoursText } = useBusinessHours();
   const [deliveryMethod, setDeliveryMethod] = useState<DeliveryMethod>('delivery');
-  const [nombre, setNombre] = useState('');
   const [telefono, setTelefono] = useState('');
   const [direccion, setDireccion] = useState('');
 
-  const [nombreErr, setNombreErr] = useState(false);
   const [telefonoErr, setTelefonoErr] = useState(false);
   const [direccionErr, setDireccionErr] = useState(false);
 
@@ -59,6 +57,7 @@ export const CheckoutScreen: React.FC<CheckoutScreenProps> = ({ navigation }) =>
   const itemCount = items.reduce((acc, item) => acc + item.quantity, 0);
   const shippingCost = deliveryMethod === 'delivery' ? DELIVERY_FEE : 0;
   const orderTotal = subtotal + shippingCost;
+  const customerName = user?.nombreCompleto.trim() || 'Cliente';
 
   useFocusEffect(
     useCallback(() => {
@@ -71,13 +70,6 @@ export const CheckoutScreen: React.FC<CheckoutScreenProps> = ({ navigation }) =>
 
   const validateForm = (): boolean => {
     let isValid = true;
-
-    if (nombre.trim().length < 3) {
-      setNombreErr(true);
-      isValid = false;
-    } else {
-      setNombreErr(false);
-    }
 
     const cleanPhone = telefono.replace(/\D/g, '');
     if (cleanPhone.length < 8) {
@@ -137,13 +129,13 @@ export const CheckoutScreen: React.FC<CheckoutScreenProps> = ({ navigation }) =>
           deliveryMethod === 'delivery'
             ? ModalidadEntrega.DELIVERY
             : ModalidadEntrega.TAKEAWAY,
-        nombreContacto: nombre.trim(),
+        nombreContacto: customerName,
         telefonoContacto: telefono.trim(),
         direccion: deliveryMethod === 'delivery' ? direccion.trim() : null,
         items,
       });
 
-      await invalidateOrdersQueries(queryClient);
+      await invalidateUserOrdersQueries(queryClient);
       setConfirmedOrderCode(codigo);
       setOrderConfirmed(true);
     } catch {
@@ -161,7 +153,6 @@ export const CheckoutScreen: React.FC<CheckoutScreenProps> = ({ navigation }) =>
   };
 
   const isFormFilled =
-    nombre.trim() !== '' &&
     telefono.trim() !== '' &&
     (deliveryMethod === 'takeaway' || direccion.trim() !== '');
 
@@ -184,7 +175,7 @@ export const CheckoutScreen: React.FC<CheckoutScreenProps> = ({ navigation }) =>
             <Text style={styles.ticketText}>
               <Text style={styles.ticketBold}>ID Pedido:</Text> #{confirmedOrderCode}            </Text>
             <Text style={styles.ticketText}>
-              <Text style={styles.ticketBold}>Cliente:</Text> {nombre}
+              <Text style={styles.ticketBold}>Cliente:</Text> {customerName}
             </Text>
             <Text style={styles.ticketText}>
               <Text style={styles.ticketBold}>Teléfono:</Text> {telefono}
@@ -357,25 +348,10 @@ export const CheckoutScreen: React.FC<CheckoutScreenProps> = ({ navigation }) =>
           </Text>
 
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>
-              Nombre y apellido <Text style={styles.required}>*</Text>
-            </Text>
-            <TextInput
-              style={[styles.input, nombreErr && styles.inputError]}
-              placeholder="Yamil"
-              placeholderTextColor={Colors.placeholder}
-              value={nombre}
-              onChangeText={text => {
-                setNombre(text);
-                if (text.trim().length >= 3) setNombreErr(false);
-              }}
-              autoCapitalize="words"
-            />
-            {nombreErr && (
-              <Text style={styles.errorHelper}>
-                Ingresá tu nombre y apellido (mín. 3 letras).
-              </Text>
-            )}
+            <Text style={styles.label}>Nombre</Text>
+            <View style={styles.readOnlyField}>
+              <Text style={styles.readOnlyFieldText}>{customerName}</Text>
+            </View>
           </View>
 
           <View style={styles.inputGroup}>
@@ -626,6 +602,19 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     fontSize: 15,
     color: Colors.textPrimary,
+  },
+  readOnlyField: {
+    backgroundColor: Colors.surface,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+  },
+  readOnlyFieldText: {
+    fontSize: 15,
+    color: Colors.textPrimary,
+    fontWeight: '600',
   },
   textArea: {
     minHeight: 72,

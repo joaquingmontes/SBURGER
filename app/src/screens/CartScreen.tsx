@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import {
   View,
   Text,
@@ -6,12 +6,14 @@ import {
   FlatList,
   TouchableOpacity,
   Alert,
+  ListRenderItem,
 } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../navigation/AppNavigator';
-import { useCart } from '../context/CartContext';
+import { useCart, CartItem as CartItemType } from '../context/CartContext';
 import { Colors } from '../constants/colors';
+import { FLAT_LIST_PERF_PROPS } from '../constants/listPerformance';
 import { CartItem } from '../components/CartItem';
 import { CustomButton } from '../components/CustomButton';
 import { ScreenSafeArea } from '../components/ScreenSafeArea';
@@ -26,20 +28,35 @@ interface CartScreenProps {
 
 export const CartScreen: React.FC<CartScreenProps> = ({ navigation, route }) => {
   const { items, subtotal, shipping, total, updateQuantity, removeFromCart } = useCart();
-  
-  // Soporte de simulación de error para cumplimiento de rúbrica / wireframes
+  const cartActionsRef = useRef({ updateQuantity, removeFromCart });
+  cartActionsRef.current = { updateQuantity, removeFromCart };
+
   const [errorSimulated, setErrorSimulated] = useState(route.params?.simulateError || false);
 
-  const handleCheckout = () => {
-    // RN-01: Validar que el carrito no esté vacío o sea $0
+  const handleCheckout = useCallback(() => {
     if (items.length === 0 || total === 0) {
       Alert.alert('Carrito Vacío', 'No puedes realizar un pedido sin productos en tu carrito.');
       return;
     }
     navigation.navigate('Checkout');
-  };
+  }, [items.length, total, navigation]);
 
-  // Renderizar estado de error (Error al Cargar - Wireframe)
+  const renderCartItem = useCallback<ListRenderItem<CartItemType>>(
+    ({ item }) => (
+      <CartItem
+        item={item}
+        onIncrement={() =>
+          cartActionsRef.current.updateQuantity(item.id, item.quantity + 1)
+        }
+        onDecrement={() =>
+          cartActionsRef.current.updateQuantity(item.id, item.quantity - 1)
+        }
+        onRemove={() => cartActionsRef.current.removeFromCart(item.id)}
+      />
+    ),
+    [],
+  );
+
   if (errorSimulated) {
     return (
       <ScreenSafeArea edges={['left', 'right', 'bottom']} style={styles.safeArea}>
@@ -57,7 +74,6 @@ export const CartScreen: React.FC<CartScreenProps> = ({ navigation, route }) => 
     );
   }
 
-  // Renderizar estado vacío (HU-03 / RN-01)
   const isCartEmpty = items.length === 0;
 
   return (
@@ -65,19 +81,15 @@ export const CartScreen: React.FC<CartScreenProps> = ({ navigation, route }) => 
       <FlatList
         data={items}
         keyExtractor={item => item.id}
-        renderItem={({ item }) => (
-          <CartItem
-            item={item}
-            onIncrement={() => updateQuantity(item.id, item.quantity + 1)}
-            onDecrement={() => updateQuantity(item.id, item.quantity - 1)}
-            onRemove={() => removeFromCart(item.id)}
-          />
-        )}
+        renderItem={renderCartItem}
+        {...FLAT_LIST_PERF_PROPS}
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
             <Text style={styles.emptyIcon}>🛒</Text>
             <Text style={styles.emptyTitle}>Tu carrito está vacío</Text>
-            <Text style={styles.emptySubtitle}>Volvé al menú principal y agregá tus hamburguesas preferidas.</Text>
+            <Text style={styles.emptySubtitle}>
+              Volvé al menú principal y agregá tus hamburguesas preferidas.
+            </Text>
             <CustomButton
               title="Ver el Menú"
               onPress={() => navigation.navigate('Home')}
@@ -89,12 +101,11 @@ export const CartScreen: React.FC<CartScreenProps> = ({ navigation, route }) => 
         showsVerticalScrollIndicator={false}
       />
 
-      {/* Caja de resumen de totales al pie si hay elementos en el carrito */}
       {!isCartEmpty && (
         <View style={styles.resumenContainer}>
           <View style={styles.resumenCard}>
             <Text style={styles.resumenTitle}>RESUMEN</Text>
-            
+
             <View style={styles.resumenRow}>
               <Text style={styles.resumenLabel}>Subtotal</Text>
               <Text style={styles.resumenValue}>${subtotal.toLocaleString('es-AR')}</Text>
@@ -115,7 +126,6 @@ export const CartScreen: React.FC<CartScreenProps> = ({ navigation, route }) => 
         </View>
       )}
 
-      {/* Botón inferior de compra (RN-01 / HU-03) */}
       <View style={styles.footer}>
         <CustomButton
           title={isCartEmpty ? 'Carrito Vacío' : 'Realizar Pedido'}
@@ -126,7 +136,6 @@ export const CartScreen: React.FC<CartScreenProps> = ({ navigation, route }) => 
         />
       </View>
 
-      {/* Botón flotante debug para la corrección docente para alternar estado de error */}
       {!isCartEmpty && (
         <TouchableOpacity
           style={styles.floatingDebugButton}
@@ -146,7 +155,7 @@ const styles = StyleSheet.create({
   },
   listContent: {
     paddingVertical: 12,
-    paddingBottom: 220, // Espacio suficiente para no pisar el resumen de totales
+    paddingBottom: 220,
   },
   emptyContainer: {
     paddingVertical: 80,
@@ -204,7 +213,7 @@ const styles = StyleSheet.create({
   },
   resumenContainer: {
     position: 'absolute',
-    bottom: 84, // Sitúa el resumen encima del botón final
+    bottom: 84,
     left: 0,
     right: 0,
     backgroundColor: 'transparent',
@@ -215,7 +224,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: Colors.border,
     borderRadius: 8,
-    borderStyle: 'dashed', // Estilo de borde del wireframe
+    borderStyle: 'dashed',
     padding: 16,
   },
   resumenTitle: {

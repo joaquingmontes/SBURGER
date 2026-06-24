@@ -20,6 +20,8 @@ pglite-debug.log
 # Google services (Android / iOS)
 **/google-services.json
 **/GoogleService-Info.plist
+**/*serviceAccount*.json
+**/firebase-adminsdk*.json
 
 # Keystores de release (debug.keystore puede quedar trackeado si hace falta)
 *.jks

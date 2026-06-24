@@ -14,6 +14,7 @@ import { RouteProp } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { MenuCategory } from '../constants/mockData';
+import { resolveProductImageUri } from '../constants/productImages';
 import { Colors } from '../constants/colors';
 import { CustomButton } from '../components/CustomButton';
 import { ExtraOption } from '../components/ExtraOption';
@@ -155,7 +156,13 @@ export const DetailScreen: React.FC<DetailScreenProps> = ({ route, navigation })
       keyboardVerticalOffset={Platform.OS === 'ios' ? 88 : 0}
     >
       <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-        <Image source={{ uri: burger.image }} style={styles.image} resizeMode="cover" />
+        <Image
+          key={burger.image || burger.id}
+          source={{ uri: resolveProductImageUri(burger.image) }}
+          style={styles.image}
+          resizeMode="cover"
+          fadeDuration={0}
+        />
 
         <View style={styles.content}>
           <Text style={styles.name}>{burger.name}</Text>

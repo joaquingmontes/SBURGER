@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import {
   View,
   Text,
@@ -25,12 +25,12 @@ interface AdminOrderCardProps {
   onStatusChange: (orderId: string, status: AdminOrderStatus) => void;
 }
 
-export const AdminOrderCard: React.FC<AdminOrderCardProps> = ({
+export const AdminOrderCard = memo(function AdminOrderCard({
   order,
   isUpdating = false,
   onPress,
   onStatusChange,
-}) => {
+}: AdminOrderCardProps) {
   const canChangeStatus = order.status === 'preparing';
   const statusColor = STATUS_COLORS[order.status];
 
@@ -114,7 +114,7 @@ export const AdminOrderCard: React.FC<AdminOrderCardProps> = ({
       )}
     </View>
   );
-};
+});
 
 const styles = StyleSheet.create({
   card: {

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import {
   View,
   Text,
@@ -7,15 +7,16 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { AdminProduct } from '../../constants/adminProducts';
+import { resolveProductImageUri } from '../../constants/productImages';
 import { Colors } from '../../constants/colors';
 
 interface AdminProductCardProps {
   product: AdminProduct;
-  onEdit: () => void;
-  onDelete: () => void;
+  onEdit: (product: AdminProduct) => void;
+  onDelete: (product: AdminProduct) => void;
 }
 
-export const AdminProductCard: React.FC<AdminProductCardProps> = ({
+const AdminProductCardComponent: React.FC<AdminProductCardProps> = ({
   product,
   onEdit,
   onDelete,
@@ -23,13 +24,10 @@ export const AdminProductCard: React.FC<AdminProductCardProps> = ({
   return (
     <View style={styles.card}>
       <Image
-        source={{
-          uri:
-            product.image ||
-            'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=600&q=80',
-        }}
+        source={{ uri: resolveProductImageUri(product.image, 'thumb') }}
         style={styles.image}
         resizeMode="cover"
+        fadeDuration={0}
       />
       <View style={styles.info}>
         <Text style={styles.name} numberOfLines={1}>
@@ -44,7 +42,8 @@ export const AdminProductCard: React.FC<AdminProductCardProps> = ({
         <TouchableOpacity
           style={styles.actionButton}
           activeOpacity={0.7}
-          onPress={onEdit}
+          onPress={() => onEdit(product)}
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           accessibilityLabel={`Editar ${product.name}`}
         >
           <Text style={styles.editIcon}>✎</Text>
@@ -52,7 +51,8 @@ export const AdminProductCard: React.FC<AdminProductCardProps> = ({
         <TouchableOpacity
           style={styles.actionButton}
           activeOpacity={0.7}
-          onPress={onDelete}
+          onPress={() => onDelete(product)}
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           accessibilityLabel={`Eliminar ${product.name}`}
         >
           <Text style={styles.deleteIcon}>🗑</Text>
@@ -61,6 +61,8 @@ export const AdminProductCard: React.FC<AdminProductCardProps> = ({
     </View>
   );
 };
+
+export const AdminProductCard = memo(AdminProductCardComponent);
 
 const styles = StyleSheet.create({
   card: {
@@ -107,6 +109,7 @@ const styles = StyleSheet.create({
   },
   actions: {
     gap: 8,
+    zIndex: 2,
   },
   actionButton: {
     width: 38,
