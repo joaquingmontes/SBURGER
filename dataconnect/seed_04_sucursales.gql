@@ -1,0 +1,41 @@
+mutation SeedSucursales @auth(level: PUBLIC, insecureReason: "Seed sucursales de prueba") {
+  centroLaPlata: sucursal_insert(
+    data: {
+      id: "44444444-4444-4444-4444-444444444401"
+      nombre: "Centro La Plata"
+      direccion: "Av 1 y 60"
+    }
+  )
+
+  beriso: sucursal_insert(
+    data: {
+      id: "44444444-4444-4444-4444-444444444402"
+      nombre: "Beriso"
+      direccion: "Av 4 490"
+    }
+  )
+
+  quilmes: sucursal_insert(
+    data: {
+      id: "44444444-4444-4444-4444-444444444403"
+      nombre: "Quilmes"
+      direccion: "Av Mitre 20190"
+    }
+  )
+
+  berazategui: sucursal_insert(
+    data: {
+      id: "44444444-4444-4444-4444-444444444404"
+      nombre: "Berazategui"
+      direccion: "Calle 14 y 5"
+    }
+  )
+
+  palermo: sucursal_insert(
+    data: {
+      id: "44444444-4444-4444-4444-444444444405"
+      nombre: "Palermo"
+      direccion: "Av Libertador 122"
+    }
+  )
+}
