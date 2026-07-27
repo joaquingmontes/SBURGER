@@ -13,6 +13,8 @@ export interface DeliveryInfo {
   name: string;
   phone: string;
   method: string;
+  branchName?: string | null;
+  branchAddress?: string | null;
 }
 
 export interface Order {

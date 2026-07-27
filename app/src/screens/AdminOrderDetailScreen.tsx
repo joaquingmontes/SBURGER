@@ -126,6 +126,16 @@ export const AdminOrderDetailScreen: React.FC<AdminOrderDetailScreenProps> = ({
         </View>
 
         <View style={styles.sectionCard}>
+          <Text style={styles.sectionLabel}>SUCURSAL</Text>
+          <Text style={styles.sectionValue}>
+            {order.sucursalName ?? 'Sin sucursal asignada'}
+          </Text>
+          {order.sucursalAddress ? (
+            <Text style={styles.sectionSecondary}>{order.sucursalAddress}</Text>
+          ) : null}
+        </View>
+
+        <View style={styles.sectionCard}>
           <Text style={styles.sectionLabel}>ENTREGA</Text>
           <Text style={styles.sectionValue}>{order.deliveryMethod}</Text>
           {order.address ? (

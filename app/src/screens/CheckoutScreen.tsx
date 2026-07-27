@@ -17,6 +17,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { ModalidadEntrega } from '@dataconnect/generated';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { useCart } from '../context/CartContext';
+import { useSucursal } from '../context/SucursalContext';
 import { useAuth } from '../context/AuthContext';
 import { Colors } from '../constants/colors';
 import { CustomButton } from '../components/CustomButton';
@@ -37,11 +38,11 @@ interface CheckoutScreenProps {
 type DeliveryMethod = 'delivery' | 'takeaway';
 
 const DELIVERY_FEE = 1000;
-const PICKUP_ADDRESS = 'Av. Corrientes 1850, CABA · Lun–Dom 12:00–00:00';
 
 export const CheckoutScreen: React.FC<CheckoutScreenProps> = ({ navigation }) => {
   const queryClient = useQueryClient();
   const { user } = useAuth();
+  const { selectedSucursal, effectiveSucursalId } = useSucursal();
   const { subtotal, items, clearCart } = useCart();
   const { isOpen, businessHoursText } = useBusinessHours();
   const [deliveryMethod, setDeliveryMethod] = useState<DeliveryMethod>('delivery');
@@ -58,6 +59,9 @@ export const CheckoutScreen: React.FC<CheckoutScreenProps> = ({ navigation }) =>
   const shippingCost = deliveryMethod === 'delivery' ? DELIVERY_FEE : 0;
   const orderTotal = subtotal + shippingCost;
   const customerName = user?.nombreCompleto.trim() || 'Cliente';
+  const pickupAddress = selectedSucursal
+    ? `${selectedSucursal.nombre} · ${selectedSucursal.direccion}`
+    : 'Retiro en local';
 
   useFocusEffect(
     useCallback(() => {
@@ -121,6 +125,7 @@ export const CheckoutScreen: React.FC<CheckoutScreenProps> = ({ navigation }) =>
       const codigo = generateOrderCode();
       await createOrderInFirebase({
         usuarioId: user.id,
+        sucursalId: effectiveSucursalId,
         codigo,
         subtotal,
         costoEnvio: shippingCost,
@@ -181,6 +186,10 @@ export const CheckoutScreen: React.FC<CheckoutScreenProps> = ({ navigation }) =>
               <Text style={styles.ticketBold}>Teléfono:</Text> {telefono}
             </Text>
             <Text style={styles.ticketText}>
+              <Text style={styles.ticketBold}>Sucursal:</Text>{' '}
+              {selectedSucursal?.nombre ?? 'StackBurger'}
+            </Text>
+            <Text style={styles.ticketText}>
               <Text style={styles.ticketBold}>Modalidad:</Text> {deliveryMethodLabel}
             </Text>
             {deliveryMethod === 'delivery' ? (
@@ -189,7 +198,7 @@ export const CheckoutScreen: React.FC<CheckoutScreenProps> = ({ navigation }) =>
               </Text>
             ) : (
               <Text style={styles.ticketText}>
-                <Text style={styles.ticketBold}>Retiro:</Text> {PICKUP_ADDRESS}
+                <Text style={styles.ticketBold}>Retiro:</Text> {pickupAddress}
               </Text>
             )}
             <View style={styles.ticketDivider} />
@@ -339,9 +348,21 @@ export const CheckoutScreen: React.FC<CheckoutScreenProps> = ({ navigation }) =>
           {deliveryMethod === 'takeaway' && (
             <View style={styles.pickupCard}>
               <Text style={styles.pickupTitle}>📍 Retirá en el local</Text>
-              <Text style={styles.pickupAddress}>{PICKUP_ADDRESS}</Text>
+              <Text style={styles.pickupAddress}>{pickupAddress}</Text>
             </View>
           )}
+
+          <View style={styles.branchSummaryCard}>
+            <Text style={styles.branchSummaryLabel}>SUCURSAL DEL PEDIDO</Text>
+            <Text style={styles.branchSummaryName}>
+              {selectedSucursal?.nombre ?? 'Centro La Plata'}
+            </Text>
+            {selectedSucursal?.direccion ? (
+              <Text style={styles.branchSummaryAddress}>
+                {selectedSucursal.direccion}
+              </Text>
+            ) : null}
+          </View>
 
           <Text style={[styles.sectionLabel, styles.sectionLabelSpaced]}>
             TUS DATOS
@@ -577,6 +598,32 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   pickupAddress: {
+    fontSize: 13,
+    color: Colors.textSecondary,
+    lineHeight: 19,
+  },
+  branchSummaryCard: {
+    backgroundColor: Colors.surface,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    padding: 16,
+    marginBottom: 8,
+  },
+  branchSummaryLabel: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: Colors.textSecondary,
+    letterSpacing: 1,
+    marginBottom: 8,
+  },
+  branchSummaryName: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: Colors.textPrimary,
+    marginBottom: 4,
+  },
+  branchSummaryAddress: {
     fontSize: 13,
     color: Colors.textSecondary,
     lineHeight: 19,

@@ -82,6 +82,33 @@ export const mapProductoToBurger = (producto: {
   category: CATEGORY_TO_MENU[producto.categoria],
 });
 
+export const resolvePrecioProductoSucursal = (
+  precioBase: number,
+  preciosSucursal?: Array<{ precio: number }> | null,
+): number => preciosSucursal?.[0]?.precio ?? precioBase;
+
+export const mapProductoPorSucursalToBurger = (producto: {
+  id: string;
+  nombre: string;
+  descripcion: string;
+  ingredientes?: string | null;
+  precio: number;
+  categoria: CategoriaProducto;
+  imagenUrl: string;
+  productoSucursals_on_producto?: Array<{ precio: number }> | null;
+}): Burger => ({
+  id: producto.id,
+  name: producto.nombre,
+  description: producto.descripcion,
+  ingredients: producto.ingredientes ?? producto.descripcion,
+  price: resolvePrecioProductoSucursal(
+    producto.precio,
+    producto.productoSucursals_on_producto,
+  ),
+  image: producto.imagenUrl,
+  category: CATEGORY_TO_MENU[producto.categoria],
+});
+
 export const mapProductoToAdminProduct = (producto: {
   id: string;
   nombre: string;
@@ -185,6 +212,10 @@ export const mapPedidoToOrder = (pedido: {
   telefonoContacto: string;
   direccion?: string | null;
   createdAt: string;
+  sucursal?: {
+    nombre: string;
+    direccion: string;
+  } | null;
   pedidoItems_on_pedido: Array<{
     nombreProducto: string;
     cantidad: number;
@@ -221,6 +252,8 @@ export const mapPedidoToOrder = (pedido: {
         pedido.modalidadEntrega === ModalidadEntrega.DELIVERY
           ? 'Delivery'
           : 'Retiro en local',
+      branchName: pedido.sucursal?.nombre ?? null,
+      branchAddress: pedido.sucursal?.direccion ?? null,
     },
   };
 };
@@ -237,6 +270,11 @@ export const mapPedidoToAdminOrder = (pedido: {
   telefonoContacto: string;
   direccion?: string | null;
   createdAt: string;
+  sucursal?: {
+    id: string;
+    nombre: string;
+    direccion: string;
+  } | null;
   pedidoItems_on_pedido: Array<{
     id: string;
     nombreProducto: string;
@@ -259,6 +297,8 @@ export const mapPedidoToAdminOrder = (pedido: {
       ? 'Delivery'
       : 'Retiro en local',
   address: pedido.direccion,
+  sucursalName: pedido.sucursal?.nombre ?? null,
+  sucursalAddress: pedido.sucursal?.direccion ?? null,
   date: formatFirebaseDate(pedido.createdAt),
   time: formatFirebaseTime(pedido.createdAt),
   items: pedido.pedidoItems_on_pedido.map(item => ({

@@ -20,6 +20,7 @@ import { useAuth } from '../context/AuthContext';
 import {
   resetAfterAuth,
   resetToGuestHome,
+  resetToUserHome,
 } from '../navigation/navigationUtils';
 import { AppDialogModal, AppDialogVariant } from '../components/AppDialogModal';
 type LoginScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Login'>;
@@ -49,7 +50,7 @@ const INITIAL_DIALOG: LoginDialogState = {
 };
 
 export const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
-  const { login } = useAuth();
+  const { login, user, initializing } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -83,6 +84,16 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
         StatusBar.setBackgroundColor(Colors.background);
       }
     }, []),
+  );
+
+  useFocusEffect(
+    useCallback(() => {
+      if (initializing || !user) {
+        return;
+      }
+
+      resetToUserHome(navigation, user);
+    }, [initializing, navigation, user]),
   );
 
   const goToGuestHome = () => {

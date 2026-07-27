@@ -76,6 +76,7 @@ mutation DeleteProducto($id: UUID!) @auth(level: USER) {
 mutation CreatePedido(
   $codigo: String!
   $usuarioId: UUID!
+  $sucursalId: UUID!
   $subtotal: Int!
   $costoEnvio: Int!
   $total: Int!
@@ -88,6 +89,7 @@ mutation CreatePedido(
     data: {
       codigo: $codigo
       usuarioId: $usuarioId
+      sucursalId: $sucursalId
       subtotal: $subtotal
       costoEnvio: $costoEnvio
       total: $total
@@ -135,4 +137,22 @@ mutation UpdatePedidoEstado($id: UUID!, $estado: EstadoPedido!) @auth(level: USE
 
 mutation CreateSucursal($nombre: String!, $direccion: String!) @auth(level: USER) {
   sucursal_insert(data: { nombre: $nombre, direccion: $direccion })
+}
+
+mutation CreateProductoSucursal(
+  $productoId: UUID!
+  $sucursalId: UUID!
+  $precio: Int!
+) @auth(level: USER) {
+  productoSucursal_insert(
+    data: {
+      productoId: $productoId
+      sucursalId: $sucursalId
+      precio: $precio
+    }
+  )
+}
+
+mutation UpdateProductoSucursal($id: UUID!, $precio: Int!) @auth(level: USER) {
+  productoSucursal_update(id: $id, data: { precio: $precio })
 }

@@ -24,7 +24,9 @@ export const invalidateProductsQueries = async (
   await queryClient.invalidateQueries({
     predicate: query =>
       query.queryKey[0] === 'ListProductosActivos' ||
+      query.queryKey[0] === 'ListProductosPorSucursal' ||
       query.queryKey[0] === 'ListProductosAdmin' ||
+      query.queryKey[0] === 'ListProductoSucursalByProducto' ||
       query.queryKey[0] === 'GetProductoById',
   });
 };

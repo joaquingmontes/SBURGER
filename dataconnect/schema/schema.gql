@@ -84,11 +84,25 @@ type Producto @table {
 
 
 
+type ProductoSucursal @table {
+
+  producto: Producto!
+
+  sucursal: Sucursal!
+
+  precio: Int!
+
+}
+
+
+
 type Pedido @table {
 
   codigo: String! @unique
 
   usuario: Usuario!
+
+  sucursal: Sucursal
 
   estado: EstadoPedido! @default(value: PREPARING)
 

@@ -14,11 +14,12 @@ import {
 } from 'react-native';
 import { useFocusEffect, RouteProp } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { useListProductosActivos } from '@dataconnect/generated/react';
+import { useListProductosPorSucursal } from '@dataconnect/generated/react';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { Burger } from '../constants/mockData';
 import { BurgerCard } from '../components/BurgerCard';
 import { useCartItemCount } from '../context/CartContext';
+import { useSucursal } from '../context/SucursalContext';
 import { useAuth } from '../context/AuthContext';
 import { CustomButton } from '../components/CustomButton';
 import { BottomNav } from '../components/BottomNav';
@@ -27,8 +28,9 @@ import { ClientHeaderActions } from '../components/ClientHeaderActions';
 import { Colors } from '../constants/colors';
 import { FLAT_LIST_PERF_PROPS } from '../constants/listPerformance';
 import { dataConnect } from '../config/firebase';
-import { mapProductoToBurger } from '../utils/firebaseMappers';
+import { mapProductoPorSucursalToBurger } from '../utils/firebaseMappers';
 import { resetToLogin } from '../navigation/navigationUtils';
+import { SucursalSelectionModal } from '../components/SucursalSelectionModal';
 
 type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Home'>;
 type HomeScreenRouteProp = RouteProp<RootStackParamList, 'Home'>;
@@ -108,7 +110,19 @@ const renderBurgerItem: ListRenderItem<Burger> = ({ item }) => (
 
 export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => {
   const { user, logout } = useAuth();
+  const {
+    sucursales,
+    selectedSucursal,
+    effectiveSucursalId,
+    selectSucursal,
+    confirmSucursal,
+    needsSucursalSelection,
+    isLoading: isLoadingSucursales,
+    isError: isSucursalesError,
+    refetchSucursales,
+  } = useSucursal();
   const guestMode = route.params?.guestMode ?? false;
+  const showSucursalModal = !guestMode && needsSucursalSelection;
   const [searchQuery, setSearchQuery] = React.useState('');
   const [selectedCategory, setSelectedCategory] = React.useState<string>('burgers');
 
@@ -118,15 +132,20 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => 
     isError,
     refetch,
     isRefetching,
-  } = useListProductosActivos(dataConnect);
+  } = useListProductosPorSucursal(dataConnect, {
+    sucursalId: effectiveSucursalId,
+  });
 
   const goToLogin = useCallback(() => {
     void logout().then(() => resetToLogin(navigation));
   }, [logout, navigation]);
 
   const goToCart = useCallback(() => {
+    if (needsSucursalSelection) {
+      return;
+    }
     navigation.navigate('Cart', {});
-  }, [navigation]);
+  }, [navigation, needsSucursalSelection]);
 
   const goToOrders = useCallback(() => {
     navigation.navigate('Orders');
@@ -134,7 +153,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => 
 
   const menuItems = useMemo(() => {
     const products = data?.productos ?? [];
-    const mapped = products.map(mapProductoToBurger);
+    const mapped = products.map(mapProductoPorSucursalToBurger);
     const query = searchQuery.trim().toLowerCase();
 
     return mapped.filter(item => {
@@ -159,7 +178,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => 
 
   const firstName = user?.nombreCompleto.split(' ')[0] ?? 'Usuario';
 
-  if (isPending) {
+  if (isPending || isLoadingSucursales) {
     return (
       <ScreenSafeArea style={[styles.safeArea, styles.center]}>
         <ActivityIndicator size="large" color={Colors.accent} />
@@ -208,8 +227,47 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => 
           onChangeText={setSearchQuery}
           autoCapitalize="none"
           autoCorrect={false}
+          editable={!showSucursalModal}
         />
       </View>
+
+      {!showSucursalModal && (
+        <View style={styles.sucursalSection}>
+        <Text style={styles.sucursalLabel}>SUCURSAL</Text>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.sucursalesContent}
+        >
+          {sucursales.map(sucursal => {
+            const isSelected = sucursal.id === effectiveSucursalId;
+            return (
+              <TouchableOpacity
+                key={sucursal.id}
+                activeOpacity={0.85}
+                style={[
+                  styles.sucursalPill,
+                  isSelected && styles.sucursalPillSelected,
+                ]}
+                onPress={() => selectSucursal(sucursal.id)}
+              >
+                <Text
+                  style={[
+                    styles.sucursalPillText,
+                    isSelected && styles.sucursalPillTextSelected,
+                  ]}
+                >
+                  {sucursal.nombre}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+        </ScrollView>
+        {selectedSucursal ? (
+          <Text style={styles.sucursalAddress}>{selectedSucursal.direccion}</Text>
+        ) : null}
+        </View>
+      )}
 
       {guestMode && (
         <View style={styles.guestBanner}>
@@ -267,6 +325,8 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => 
         keyExtractor={item => item.id}
         renderItem={renderBurgerItem}
         {...FLAT_LIST_PERF_PROPS}
+        scrollEnabled={!showSucursalModal}
+        pointerEvents={showSucursalModal ? 'none' : 'auto'}
         contentContainerStyle={[
           styles.listContent,
           guestMode && styles.listContentGuest,
@@ -288,6 +348,16 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => 
           onOrdersPress={goToOrders}
         />
       )}
+
+      <SucursalSelectionModal
+        visible={showSucursalModal}
+        sucursales={sucursales}
+        isLoading={isLoadingSucursales}
+        isError={isSucursalesError}
+        onConfirm={confirmSucursal}
+        onRetry={() => refetchSucursales()}
+        onLogout={goToLogin}
+      />
     </ScreenSafeArea>
   );
 };
@@ -411,6 +481,47 @@ const styles = StyleSheet.create({
     paddingVertical: 13,
     fontSize: 15,
     color: Colors.textPrimary,
+  },
+  sucursalSection: {
+    marginHorizontal: 20,
+    marginBottom: 16,
+  },
+  sucursalLabel: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: Colors.textSecondary,
+    letterSpacing: 1,
+    marginBottom: 8,
+  },
+  sucursalesContent: {
+    gap: 8,
+    paddingBottom: 4,
+  },
+  sucursalPill: {
+    backgroundColor: Colors.surface,
+    borderRadius: 20,
+    paddingHorizontal: 14,
+    paddingVertical: 9,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    marginRight: 8,
+  },
+  sucursalPillSelected: {
+    backgroundColor: Colors.accent,
+    borderColor: Colors.accent,
+  },
+  sucursalPillText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: Colors.textPrimary,
+  },
+  sucursalPillTextSelected: {
+    color: Colors.accentText,
+  },
+  sucursalAddress: {
+    marginTop: 8,
+    fontSize: 12,
+    color: Colors.textSecondary,
   },
   categoriesScroll: {
     maxHeight: 44,

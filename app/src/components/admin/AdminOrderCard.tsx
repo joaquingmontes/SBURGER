@@ -48,6 +48,9 @@ export const AdminOrderCard = memo(function AdminOrderCard({
               <Text style={styles.metaText}>
                 {order.customerName} · {order.date} · {order.time}
               </Text>
+              {order.sucursalName ? (
+                <Text style={styles.branchText}>{order.sucursalName}</Text>
+              ) : null}
             </View>
             <View style={[styles.statusBadge, { borderColor: statusColor }]}>
               <Text style={[styles.statusText, { color: statusColor }]}>
@@ -153,6 +156,12 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: Colors.textSecondary,
     lineHeight: 18,
+  },
+  branchText: {
+    marginTop: 4,
+    fontSize: 12,
+    fontWeight: '600',
+    color: Colors.textPrimary,
   },
   statusBadge: {
     borderWidth: 1,

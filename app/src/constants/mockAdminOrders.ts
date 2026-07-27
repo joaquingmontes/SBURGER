@@ -17,6 +17,8 @@ export interface AdminClientOrder {
   phone: string;
   deliveryMethod: string;
   address?: string | null;
+  sucursalName?: string | null;
+  sucursalAddress?: string | null;
   date: string;
   time: string;
   items: AdminOrderItem[];

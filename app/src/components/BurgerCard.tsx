@@ -115,17 +115,11 @@ const BurgerCardComponent: React.FC<BurgerCardProps> = ({ burger }) => {
 
 
 const areEqual = (prev: BurgerCardProps, next: BurgerCardProps) =>
-
   prev.burger.id === next.burger.id &&
-
   prev.burger.name === next.burger.name &&
-
   prev.burger.description === next.burger.description &&
-
   prev.burger.price === next.burger.price &&
-
   prev.burger.image === next.burger.image &&
-
   prev.burger.category === next.burger.category;
 
 

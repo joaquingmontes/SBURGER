@@ -21,4 +21,7 @@ Invoke-Expression "$firebase dataconnect:execute dataconnect/seed_03_pedidos.gql
 Write-Host "Cargando sucursales..." -ForegroundColor Cyan
 Invoke-Expression "$firebase dataconnect:execute dataconnect/seed_04_sucursales.gql"
 
+Write-Host "Migrando precios por sucursal y pedidos existentes..." -ForegroundColor Cyan
+Invoke-Expression "$firebase dataconnect:execute dataconnect/seed_05_migracion_sucursales.gql"
+
 Write-Host "Seed completo. Credenciales en credenciales-prueba.txt" -ForegroundColor Green

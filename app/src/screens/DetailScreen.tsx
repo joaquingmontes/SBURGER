@@ -20,6 +20,7 @@ import { CustomButton } from '../components/CustomButton';
 import { ExtraOption } from '../components/ExtraOption';
 import { LoginRequiredModal } from '../components/LoginRequiredModal';
 import { useCart, Customizations, calculateItemPrice } from '../context/CartContext';
+import { useSucursal } from '../context/SucursalContext';
 import { resetToLogin } from '../navigation/navigationUtils';
 
 type DetailScreenRouteProp = RouteProp<RootStackParamList, 'Detail'>;
@@ -43,6 +44,7 @@ const isSimpleProductCategory = (category: MenuCategory): boolean =>
 export const DetailScreen: React.FC<DetailScreenProps> = ({ route, navigation }) => {
   const { burger, guestMode = false } = route.params;
   const { addToCart } = useCart();
+  const { selectedSucursal } = useSucursal();
   const isSimpleProduct = isSimpleProductCategory(burger.category);
 
   const [customizations, setCustomizations] = useState<Customizations>(EMPTY_CUSTOMIZATIONS);
@@ -166,13 +168,18 @@ export const DetailScreen: React.FC<DetailScreenProps> = ({ route, navigation })
 
         <View style={styles.content}>
           <Text style={styles.name}>{burger.name}</Text>
+          {selectedSucursal ? (
+            <Text style={styles.branchHint}>
+              Precio en {selectedSucursal.nombre}
+            </Text>
+          ) : null}
 
           {isSimpleProduct ? (
             <>
               <Text style={styles.description}>{burger.description}</Text>
 
               <View style={styles.priceBox}>
-                <Text style={styles.priceBoxLabel}>Precio base</Text>
+                <Text style={styles.priceBoxLabel}>Precio</Text>
                 <Text style={styles.priceBoxValue}>
                   ${burger.price.toLocaleString('es-AR')}
                 </Text>
@@ -186,7 +193,7 @@ export const DetailScreen: React.FC<DetailScreenProps> = ({ route, navigation })
               <Text style={styles.ingredients}>{burger.ingredients}</Text>
 
               <Text style={styles.basePriceText}>
-                Precio Base:{' '}
+                Precio base:{' '}
                 <Text style={styles.basePrice}>
                   ${burger.price.toLocaleString('es-AR')}
                 </Text>
@@ -313,6 +320,13 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: '800',
     color: Colors.textPrimary,
+    marginBottom: 12,
+  },
+  branchHint: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: Colors.textSecondary,
+    marginTop: -4,
     marginBottom: 12,
   },
   description: {

@@ -29,6 +29,7 @@ import { ScreenSafeArea } from '../components/ScreenSafeArea';
 import { AdminProductCard } from '../components/admin/AdminProductCard';
 import { ProductFormModal } from '../components/admin/ProductFormModal';
 import { DeleteProductModal } from '../components/admin/DeleteProductModal';
+import { SucursalPricesModal } from '../components/admin/SucursalPricesModal';
 import { AdminHeader } from '../components/admin/AdminHeader';
 import { AdminTabs } from '../components/admin/AdminTabs';
 import { dataConnect } from '../config/firebase';
@@ -43,6 +44,7 @@ import {
   reloadProductsFromServer,
   syncProductCachesAfterEdit,
 } from '../utils/productQueryCache';
+import { createProductoSucursalPricesForAllBranches } from '../services/productoSucursalService';
 import { useRequireAdmin } from '../navigation/useRoleGuard';
 
 type AdminProductsScreenNavigationProp = StackNavigationProp<
@@ -68,6 +70,7 @@ export const AdminProductsScreen: React.FC<AdminProductsScreenProps> = ({
   const [formMode, setFormMode] = useState<'create' | 'edit'>('create');
   const [selectedProduct, setSelectedProduct] = useState<AdminProduct | undefined>();
   const [productToDelete, setProductToDelete] = useState<AdminProduct | undefined>();
+  const [productForPrices, setProductForPrices] = useState<AdminProduct | undefined>();
 
   const { data, isPending, isError, refetch, isRefetching } =
     useListProductosAdmin(dataConnect);
@@ -127,6 +130,10 @@ export const AdminProductsScreen: React.FC<AdminProductsScreenProps> = ({
     setFormVisible(true);
   }, []);
 
+  const openPricesModal = useCallback((product: AdminProduct) => {
+    setProductForPrices(product);
+  }, []);
+
   const handleDeleteProduct = useCallback((product: AdminProduct) => {
     setProductToDelete(product);
   }, []);
@@ -182,7 +189,9 @@ export const AdminProductsScreen: React.FC<AdminProductsScreenProps> = ({
 
         syncProductCachesAfterEdit(queryClient, { ...product, id: productId });
       } else {
-        await createProducto.mutateAsync(payload);
+        const result = await createProducto.mutateAsync(payload);
+        const productoId = result.producto_insert.id;
+        await createProductoSucursalPricesForAllBranches(productoId, payload.precio);
         await reloadProducts();
       }
 
@@ -199,10 +208,11 @@ export const AdminProductsScreen: React.FC<AdminProductsScreenProps> = ({
       <AdminProductCard
         product={item}
         onEdit={openEditForm}
+        onEditPrices={openPricesModal}
         onDelete={handleDeleteProduct}
       />
     ),
-    [handleDeleteProduct, openEditForm],
+    [handleDeleteProduct, openEditForm, openPricesModal],
   );
 
   return (
@@ -272,6 +282,12 @@ export const AdminProductsScreen: React.FC<AdminProductsScreenProps> = ({
         product={selectedProduct}
         onClose={() => setFormVisible(false)}
         onSubmit={handleSubmitProduct}
+      />
+
+      <SucursalPricesModal
+        visible={!!productForPrices}
+        product={productForPrices}
+        onClose={() => setProductForPrices(undefined)}
       />
 
       <DeleteProductModal

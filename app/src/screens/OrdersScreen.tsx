@@ -150,6 +150,11 @@ const OrderCard = memo<OrderCardProps>(function OrderCard({
             <Text style={styles.deliveryName}>{order.delivery.name}</Text>
             <Text style={styles.deliveryDetail}>{order.delivery.phone}</Text>
             <Text style={styles.deliveryDetail}>{order.delivery.method}</Text>
+            {order.delivery.branchName ? (
+              <Text style={styles.deliveryDetail}>
+                Sucursal: {order.delivery.branchName}
+              </Text>
+            ) : null}
           </View>
         </View>
       )}

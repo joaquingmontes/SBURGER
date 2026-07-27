@@ -11,6 +11,7 @@ import { mapAdminStatusToFirebase } from '../utils/firebaseMappers';
 
 export interface CreateOrderInput {
   usuarioId: string;
+  sucursalId: string;
   codigo: string;
   subtotal: number;
   costoEnvio: number;
@@ -28,6 +29,7 @@ export const createOrderInFirebase = async (
   const pedidoResult = await createPedido(dataConnect, {
     codigo: input.codigo,
     usuarioId: input.usuarioId,
+    sucursalId: input.sucursalId,
     subtotal: input.subtotal,
     costoEnvio: input.costoEnvio,
     total: input.total,

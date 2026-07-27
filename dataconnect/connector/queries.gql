@@ -10,6 +10,21 @@ query ListProductosActivos @auth(level: PUBLIC, insecureReason: "Catalogo public
   }
 }
 
+query ListProductosPorSucursal($sucursalId: UUID!) @auth(level: PUBLIC, insecureReason: "Catalogo publico del menu") {
+  productos(where: { activo: { eq: true } }) {
+    id
+    nombre
+    descripcion
+    ingredientes
+    precio
+    categoria
+    imagenUrl
+    productoSucursals_on_producto(where: { sucursalId: { eq: $sucursalId } }, limit: 1) {
+      precio
+    }
+  }
+}
+
 query ListProductosAdmin @auth(level: USER) {
   productos(orderBy: { createdAt: DESC }) {
     id
@@ -20,6 +35,18 @@ query ListProductosAdmin @auth(level: USER) {
     categoria
     imagenUrl
     activo
+  }
+}
+
+query ListProductoSucursalByProducto($productoId: UUID!) @auth(level: USER) {
+  productoSucursals(where: { productoId: { eq: $productoId } }) {
+    id
+    precio
+    sucursal {
+      id
+      nombre
+      direccion
+    }
   }
 }
 
@@ -39,6 +66,11 @@ query ListMyPedidos @auth(level: USER) {
     telefonoContacto
     direccion
     createdAt
+    sucursal {
+      id
+      nombre
+      direccion
+    }
     pedidoItems_on_pedido {
       id
       nombreProducto
@@ -67,6 +99,11 @@ query ListPedidosAdmin @auth(level: USER) {
     telefonoContacto
     direccion
     createdAt
+    sucursal {
+      id
+      nombre
+      direccion
+    }
     pedidoItems_on_pedido {
       id
       nombreProducto

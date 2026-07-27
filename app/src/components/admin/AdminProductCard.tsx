@@ -13,12 +13,14 @@ import { Colors } from '../../constants/colors';
 interface AdminProductCardProps {
   product: AdminProduct;
   onEdit: (product: AdminProduct) => void;
+  onEditPrices: (product: AdminProduct) => void;
   onDelete: (product: AdminProduct) => void;
 }
 
 const AdminProductCardComponent: React.FC<AdminProductCardProps> = ({
   product,
   onEdit,
+  onEditPrices,
   onDelete,
 }) => {
   return (
@@ -47,6 +49,15 @@ const AdminProductCardComponent: React.FC<AdminProductCardProps> = ({
           accessibilityLabel={`Editar ${product.name}`}
         >
           <Text style={styles.editIcon}>✎</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.actionButton}
+          activeOpacity={0.7}
+          onPress={() => onEditPrices(product)}
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          accessibilityLabel={`Precios por sucursal de ${product.name}`}
+        >
+          <Text style={styles.pricesIcon}>$</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.actionButton}
@@ -124,6 +135,11 @@ const styles = StyleSheet.create({
   editIcon: {
     fontSize: 16,
     color: Colors.textPrimary,
+  },
+  pricesIcon: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: Colors.accent,
   },
   deleteIcon: {
     fontSize: 16,

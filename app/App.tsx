@@ -5,6 +5,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { NavigationContainer } from '@react-navigation/native';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { CartProvider } from './src/context/CartContext';
+import { SucursalProvider } from './src/context/SucursalContext';
 import { AuthProvider } from './src/context/AuthContext';
 import { AuthGate } from './src/components/AuthGate';
 import { AppNavigator } from './src/navigation/AppNavigator';
@@ -19,10 +20,12 @@ function App() {
           <AuthProvider>
             <AuthGate>
               <CartProvider>
-                <NavigationContainer>
-                  <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
-                  <AppNavigator />
-                </NavigationContainer>
+                <SucursalProvider>
+                  <NavigationContainer>
+                    <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
+                    <AppNavigator />
+                  </NavigationContainer>
+                </SucursalProvider>
               </CartProvider>
             </AuthGate>
           </AuthProvider>
