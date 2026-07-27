@@ -297,6 +297,7 @@ export const mapPedidoToAdminOrder = (pedido: {
       ? 'Delivery'
       : 'Retiro en local',
   address: pedido.direccion,
+  sucursalId: pedido.sucursal?.id ?? null,
   sucursalName: pedido.sucursal?.nombre ?? null,
   sucursalAddress: pedido.sucursal?.direccion ?? null,
   date: formatFirebaseDate(pedido.createdAt),

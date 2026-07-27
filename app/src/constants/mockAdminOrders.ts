@@ -17,6 +17,7 @@ export interface AdminClientOrder {
   phone: string;
   deliveryMethod: string;
   address?: string | null;
+  sucursalId?: string | null;
   sucursalName?: string | null;
   sucursalAddress?: string | null;
   date: string;
@@ -33,3 +34,17 @@ export const ADMIN_ORDER_STATUS_LABELS: Record<AdminOrderStatus, string> = {
   completed: 'Finalizado',
   cancelled: 'Cancelado',
 };
+
+export type AdminOrderStatusFilter = 'all' | AdminOrderStatus;
+
+export type AdminSucursalFilter = 'all' | string;
+
+export const ADMIN_ORDER_STATUS_FILTERS: {
+  id: AdminOrderStatusFilter;
+  label: string;
+}[] = [
+  { id: 'all', label: 'Todos' },
+  { id: 'preparing', label: 'En proceso' },
+  { id: 'completed', label: 'Finalizado' },
+  { id: 'cancelled', label: 'Cancelado' },
+];
