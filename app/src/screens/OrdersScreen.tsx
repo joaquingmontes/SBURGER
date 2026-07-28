@@ -24,6 +24,7 @@ import {
   OrderStatus,
 } from '../constants/mockOrders';
 import { BottomNav } from '../components/BottomNav';
+import { HorizontalFilterBar } from '../components/HorizontalFilterBar';
 import { ScreenSafeArea } from '../components/ScreenSafeArea';
 import { ClientHeaderActions } from '../components/ClientHeaderActions';
 import { Colors } from '../constants/colors';
@@ -240,33 +241,17 @@ export const OrdersScreen: React.FC<OrdersScreenProps> = ({ navigation }) => {
         </View>
       </View>
 
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.filtersContent}
-        style={styles.filtersScroll}
-      >
-        {ORDER_FILTERS.map(filter => {
-          const isSelected = selectedFilter === filter.id;
-          return (
-            <TouchableOpacity
-              key={filter.id}
-              activeOpacity={0.8}
-              style={[styles.filterPill, isSelected && styles.filterPillSelected]}
-              onPress={() => setSelectedFilter(filter.id)}
-            >
-              <Text
-                style={[
-                  styles.filterLabel,
-                  isSelected && styles.filterLabelSelected,
-                ]}
-              >
-                {filter.label}
-              </Text>
-            </TouchableOpacity>
-          );
-        })}
-      </ScrollView>
+      <HorizontalFilterBar
+        items={ORDER_FILTERS.map(filter => ({
+          id: filter.id,
+          label: filter.label,
+        }))}
+        selectedId={selectedFilter}
+        onSelect={id => setSelectedFilter(id as OrderFilter)}
+        tone="client"
+        containerStyle={styles.filtersContainer}
+        scrollStyle={styles.filtersScroll}
+      />
 
       {isPending ? (
         <View style={styles.center}>
@@ -340,33 +325,13 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: Colors.textSecondary,
   },
+  filtersContainer: {
+    paddingHorizontal: 20,
+    marginBottom: 12,
+  },
   filtersScroll: {
     maxHeight: 44,
     marginBottom: 16,
-  },
-  filtersContent: {
-    paddingHorizontal: 20,
-  },
-  filterPill: {
-    backgroundColor: Colors.surface,
-    borderRadius: 20,
-    paddingHorizontal: 16,
-    paddingVertical: 9,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    marginRight: 10,
-  },
-  filterPillSelected: {
-    backgroundColor: Colors.accent,
-    borderColor: Colors.accent,
-  },
-  filterLabel: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: Colors.textSecondary,
-  },
-  filterLabelSelected: {
-    color: Colors.accentText,
   },
   list: {
     flex: 1,

@@ -8,8 +8,6 @@ import {
   Text,
   View,
   Alert,
-  ScrollView,
-  TouchableOpacity,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
@@ -32,6 +30,7 @@ import { ScreenSafeArea } from '../components/ScreenSafeArea';
 import { AdminHeader } from '../components/admin/AdminHeader';
 import { AdminTabs } from '../components/admin/AdminTabs';
 import { AdminOrderCard } from '../components/admin/AdminOrderCard';
+import { HorizontalFilterBar } from '../components/HorizontalFilterBar';
 import { dataConnect } from '../config/firebase';
 import { mapPedidoToAdminOrder } from '../utils/firebaseMappers';
 import {
@@ -156,84 +155,46 @@ export const AdminOrdersScreen: React.FC<AdminOrdersScreenProps> = ({
     [handleOrderPress, handleStatusChange, updatingOrderId],
   );
 
+  const sucursalFilterItems = useMemo(
+    () => [
+      { id: 'all', label: 'Todas' },
+      ...sucursales.map(sucursal => ({
+        id: sucursal.id,
+        label: sucursal.nombre,
+      })),
+    ],
+    [sucursales],
+  );
+
+  const statusFilterItems = useMemo(
+    () =>
+      ADMIN_ORDER_STATUS_FILTERS.map(filter => ({
+        id: filter.id,
+        label: filter.label,
+      })),
+    [],
+  );
+
   const renderFilters = () => (
     <View style={styles.filtersContainer}>
-      <Text style={styles.filterGroupLabel}>SUCURSAL</Text>
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.filtersContent}
-        style={styles.filtersScroll}
-      >
-        <TouchableOpacity
-          activeOpacity={0.8}
-          style={[
-            styles.filterPill,
-            sucursalFilter === 'all' && styles.filterPillSelected,
-          ]}
-          onPress={() => setSucursalFilter('all')}
-        >
-          <Text
-            style={[
-              styles.filterLabel,
-              sucursalFilter === 'all' && styles.filterLabelSelected,
-            ]}
-          >
-            Todas
-          </Text>
-        </TouchableOpacity>
-        {sucursales.map(sucursal => {
-          const isSelected = sucursalFilter === sucursal.id;
-          return (
-            <TouchableOpacity
-              key={sucursal.id}
-              activeOpacity={0.8}
-              style={[styles.filterPill, isSelected && styles.filterPillSelected]}
-              onPress={() => setSucursalFilter(sucursal.id)}
-            >
-              <Text
-                style={[
-                  styles.filterLabel,
-                  isSelected && styles.filterLabelSelected,
-                ]}
-              >
-                {sucursal.nombre}
-              </Text>
-            </TouchableOpacity>
-          );
-        })}
-      </ScrollView>
+      <HorizontalFilterBar
+        groupLabel="SUCURSAL"
+        items={sucursalFilterItems}
+        selectedId={sucursalFilter}
+        onSelect={id => setSucursalFilter(id)}
+        tone="admin"
+        scrollStyle={styles.filtersScroll}
+      />
 
-      <Text style={[styles.filterGroupLabel, styles.filterGroupLabelSpaced]}>
-        ESTADO
-      </Text>
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.filtersContent}
-        style={styles.filtersScroll}
-      >
-        {ADMIN_ORDER_STATUS_FILTERS.map(filter => {
-          const isSelected = statusFilter === filter.id;
-          return (
-            <TouchableOpacity
-              key={filter.id}
-              activeOpacity={0.8}
-              style={[styles.filterPill, isSelected && styles.filterPillSelected]}
-              onPress={() => setStatusFilter(filter.id)}
-            >
-              <Text
-                style={[
-                  styles.filterLabel,
-                  isSelected && styles.filterLabelSelected,
-                ]}
-              >
-                {filter.label}
-              </Text>
-            </TouchableOpacity>
-          );
-        })}
-      </ScrollView>
+      <HorizontalFilterBar
+        groupLabel="ESTADO"
+        items={statusFilterItems}
+        selectedId={statusFilter}
+        onSelect={id => setStatusFilter(id as AdminOrderStatusFilter)}
+        tone="admin"
+        containerStyle={styles.statusFilterGroup}
+        scrollStyle={styles.filtersScroll}
+      />
     </View>
   );
 
@@ -289,44 +250,12 @@ const styles = StyleSheet.create({
   filtersContainer: {
     paddingBottom: 8,
   },
-  filterGroupLabel: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: Colors.textSecondary,
-    letterSpacing: 1,
-    marginBottom: 8,
-  },
-  filterGroupLabelSpaced: {
+  statusFilterGroup: {
     marginTop: 4,
   },
   filtersScroll: {
     maxHeight: 44,
     marginBottom: 12,
-  },
-  filtersContent: {
-    gap: 8,
-    paddingRight: 4,
-  },
-  filterPill: {
-    backgroundColor: Colors.surface,
-    borderRadius: 20,
-    paddingHorizontal: 14,
-    paddingVertical: 9,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    marginRight: 8,
-  },
-  filterPillSelected: {
-    backgroundColor: Colors.accent,
-    borderColor: Colors.accent,
-  },
-  filterLabel: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: Colors.textPrimary,
-  },
-  filterLabelSelected: {
-    color: Colors.accentText,
   },
   listContent: {
     paddingHorizontal: 20,

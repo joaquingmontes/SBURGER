@@ -22,6 +22,7 @@ import {
 import { AdminProduct } from '../../constants/adminProducts';
 import { AdminColors } from '../../constants/adminTheme';
 import { dataConnect } from '../../config/firebase';
+import { parsePositiveInteger } from '../../utils/formValidation';
 
 interface SucursalPricesModalProps {
   visible: boolean;
@@ -101,9 +102,9 @@ export const SucursalPricesModal: React.FC<SucursalPricesModalProps> = ({
 
     try {
       for (const row of rows) {
-        const parsedPrice = Number(row.precio.replace(/\D/g, ''));
-        if (!parsedPrice) {
-          Alert.alert('Error', `Ingresá un precio válido para ${row.sucursalNombre}.`);
+        const parsedPrice = parsePositiveInteger(row.precio);
+        if (parsedPrice === null) {
+          Alert.alert('Error', `Ingresá un precio numérico válido mayor a 0 para ${row.sucursalNombre}.`);
           return;
         }
 

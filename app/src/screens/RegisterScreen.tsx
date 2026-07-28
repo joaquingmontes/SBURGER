@@ -16,6 +16,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { ScreenSafeArea } from '../components/ScreenSafeArea';
 import { Colors } from '../constants/colors';
+import { hasMinimumLength, isValidEmail } from '../utils/formValidation';
 import { useAuth, AuthUser } from '../context/AuthContext';
 import { resetAfterAuth } from '../navigation/navigationUtils';
 import { AppDialogModal, AppDialogVariant } from '../components/AppDialogModal';
@@ -100,12 +101,17 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) =>
   };
 
   const handleRegister = async () => {
-    if (fullName.trim().length < 3) {
-      showErrorDialog('Ingresá tu nombre completo.');
+    if (!hasMinimumLength(fullName, 3)) {
+      showErrorDialog('Ingresá tu nombre completo (mínimo 3 caracteres).');
       return;
     }
 
     if (!email.trim()) {
+      showErrorDialog('Ingresá un email.');
+      return;
+    }
+
+    if (!isValidEmail(email)) {
       showErrorDialog('Ingresá un email válido.');
       return;
     }

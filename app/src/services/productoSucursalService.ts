@@ -21,3 +21,17 @@ export const createProductoSucursalPricesForAllBranches = async (
     });
   }
 };
+
+export const createProductoSucursalForNewBranch = async (
+  sucursalId: string,
+  productos: Array<{ id: string; precio: number }>,
+): Promise<void> => {
+  for (const producto of productos) {
+    await createProductoSucursal(dataConnect, {
+      productoId: producto.id,
+      sucursalId,
+      precio: producto.precio,
+      estado: EstadoProductoSucursal.ACTIVO,
+    });
+  }
+};

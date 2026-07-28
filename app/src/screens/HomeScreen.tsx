@@ -31,6 +31,7 @@ import { dataConnect } from '../config/firebase';
 import { mapProductoPorSucursalToBurger, isProductVisibleForSucursal } from '../utils/firebaseMappers';
 import { resetToLogin } from '../navigation/navigationUtils';
 import { SucursalSelectionModal } from '../components/SucursalSelectionModal';
+import { HorizontalFilterBar } from '../components/HorizontalFilterBar';
 
 type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Home'>;
 type HomeScreenRouteProp = RouteProp<RootStackParamList, 'Home'>;
@@ -175,7 +176,9 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => 
       if (Platform.OS === 'android') {
         StatusBar.setBackgroundColor(Colors.background);
       }
-    }, []),
+
+      void refetchSucursales();
+    }, [refetchSucursales]),
   );
 
   const firstName = user?.nombreCompleto.split(' ')[0] ?? 'Usuario';
@@ -234,42 +237,22 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => 
       </View>
 
       {!showSucursalModal && (
-        <View style={styles.sucursalSection}>
-        <Text style={styles.sucursalLabel}>SUCURSAL</Text>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.sucursalesContent}
-        >
-          {sucursales.map(sucursal => {
-            const isSelected = sucursal.id === effectiveSucursalId;
-            return (
-              <TouchableOpacity
-                key={sucursal.id}
-                activeOpacity={0.85}
-                style={[
-                  styles.sucursalPill,
-                  isSelected && styles.sucursalPillSelected,
-                ]}
-                onPress={() => selectSucursal(sucursal.id)}
-              >
-                <Text
-                  style={[
-                    styles.sucursalPillText,
-                    isSelected && styles.sucursalPillTextSelected,
-                  ]}
-                >
-                  {sucursal.nombre}
-                </Text>
-              </TouchableOpacity>
-            );
-          })}
-        </ScrollView>
-        {selectedSucursal ? (
-          <Text style={styles.sucursalAddress}>{selectedSucursal.direccion}</Text>
-        ) : null}
-        </View>
+        <HorizontalFilterBar
+          groupLabel="SUCURSAL"
+          items={sucursales.map(sucursal => ({
+            id: sucursal.id,
+            label: sucursal.nombre,
+          }))}
+          selectedId={effectiveSucursalId}
+          onSelect={selectSucursal}
+          tone="client"
+          containerStyle={styles.sucursalSection}
+        />
       )}
+
+      {!showSucursalModal && selectedSucursal ? (
+        <Text style={styles.sucursalAddress}>{selectedSucursal.direccion}</Text>
+      ) : null}
 
       {guestMode && (
         <View style={styles.guestBanner}>
@@ -282,44 +265,17 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => 
         </View>
       )}
 
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.categoriesContent}
-        style={styles.categoriesScroll}
-      >
-        {CATEGORIES.map(category => {
-          const isSelected = selectedCategory === category.id;
-          return (
-            <TouchableOpacity
-              key={category.id}
-              activeOpacity={0.8}
-              style={[
-                styles.categoryPill,
-                isSelected && styles.categoryPillSelected,
-              ]}
-              onPress={() => setSelectedCategory(category.id)}
-            >
-              <Text
-                style={[
-                  styles.categoryEmoji,
-                  isSelected && styles.categoryTextSelected,
-                ]}
-              >
-                {category.emoji}
-              </Text>
-              <Text
-                style={[
-                  styles.categoryLabel,
-                  isSelected && styles.categoryTextSelected,
-                ]}
-              >
-                {category.label}
-              </Text>
-            </TouchableOpacity>
-          );
-        })}
-      </ScrollView>
+      <HorizontalFilterBar
+        items={CATEGORIES.map(category => ({
+          id: category.id,
+          label: category.label,
+          emoji: category.emoji,
+        }))}
+        selectedId={selectedCategory}
+        onSelect={setSelectedCategory}
+        tone="category"
+        scrollStyle={styles.categoriesScroll}
+      />
 
       <FlatList
         style={styles.list}
@@ -357,7 +313,9 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => 
         isLoading={isLoadingSucursales}
         isError={isSucursalesError}
         onConfirm={confirmSucursal}
-        onRetry={() => refetchSucursales()}
+        onRetry={() => {
+          void refetchSucursales();
+        }}
         onLogout={goToLogin}
       />
     </ScreenSafeArea>
@@ -486,79 +444,17 @@ const styles = StyleSheet.create({
   },
   sucursalSection: {
     marginHorizontal: 20,
-    marginBottom: 16,
-  },
-  sucursalLabel: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: Colors.textSecondary,
-    letterSpacing: 1,
     marginBottom: 8,
   },
-  sucursalesContent: {
-    gap: 8,
-    paddingBottom: 4,
-  },
-  sucursalPill: {
-    backgroundColor: Colors.surface,
-    borderRadius: 20,
-    paddingHorizontal: 14,
-    paddingVertical: 9,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    marginRight: 8,
-  },
-  sucursalPillSelected: {
-    backgroundColor: Colors.accent,
-    borderColor: Colors.accent,
-  },
-  sucursalPillText: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: Colors.textPrimary,
-  },
-  sucursalPillTextSelected: {
-    color: Colors.accentText,
-  },
   sucursalAddress: {
-    marginTop: 8,
+    marginHorizontal: 20,
+    marginBottom: 16,
     fontSize: 12,
     color: Colors.textSecondary,
   },
   categoriesScroll: {
     maxHeight: 44,
     marginBottom: 16,
-  },
-  categoriesContent: {
-    paddingHorizontal: 20,
-    gap: 10,
-  },
-  categoryPill: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: Colors.surface,
-    borderRadius: 20,
-    paddingHorizontal: 14,
-    paddingVertical: 9,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    marginRight: 10,
-  },
-  categoryPillSelected: {
-    backgroundColor: Colors.accent,
-    borderColor: Colors.accent,
-  },
-  categoryEmoji: {
-    fontSize: 14,
-    marginRight: 6,
-  },
-  categoryLabel: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: Colors.textPrimary,
-  },
-  categoryTextSelected: {
-    color: Colors.accentText,
   },
   list: {
     flex: 1,

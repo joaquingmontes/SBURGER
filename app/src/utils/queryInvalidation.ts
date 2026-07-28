@@ -31,6 +31,14 @@ export const invalidateProductsQueries = async (
   });
 };
 
+export const invalidateSucursalesQueries = async (
+  queryClient: QueryClient,
+): Promise<void> => {
+  await queryClient.invalidateQueries({
+    predicate: query => query.queryKey[0] === 'ListSucursales',
+  });
+};
+
 export const invalidateAllFirebaseQueries = async (
   queryClient: QueryClient,
 ): Promise<void> => {

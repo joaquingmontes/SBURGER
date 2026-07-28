@@ -16,6 +16,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { ScreenSafeArea } from '../components/ScreenSafeArea';
 import { Colors } from '../constants/colors';
+import { isValidEmail } from '../utils/formValidation';
 import { useAuth } from '../context/AuthContext';
 import {
   resetAfterAuth,
@@ -103,6 +104,11 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
   const handleLogin = async () => {
     if (!email.trim() || !password) {
       showErrorDialog('Ingresá email y contraseña.');
+      return;
+    }
+
+    if (!isValidEmail(email)) {
+      showErrorDialog('Ingresá un email válido.');
       return;
     }
 

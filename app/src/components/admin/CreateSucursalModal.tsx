@@ -12,118 +12,66 @@ import {
   Pressable,
   Alert,
 } from 'react-native';
-import { AdminProduct, ProductCategory } from '../../constants/adminProducts';
 import { AdminColors } from '../../constants/adminTheme';
-import { CategoryPicker } from './CategoryPicker';
-import {
-  isNonEmptyString,
-  isValidHttpUrl,
-  parsePositiveInteger,
-} from '../../utils/formValidation';
+import { isNonEmptyString } from '../../utils/formValidation';
 
-export type ProductFormMode = 'create' | 'edit';
-
-interface ProductFormModalProps {
-  visible: boolean;
-  mode: ProductFormMode;
-  product?: AdminProduct;
-  onClose: () => void;
-  onSubmit: (product: AdminProduct) => void | Promise<void>;
+export interface CreateSucursalPayload {
+  nombre: string;
+  direccion: string;
 }
 
-const emptyForm = {
-  name: '',
-  description: '',
-  price: '',
-  category: 'Hamburguesas' as ProductCategory,
-  image: '',
-};
+interface CreateSucursalModalProps {
+  visible: boolean;
+  onClose: () => void;
+  onSubmit: (payload: CreateSucursalPayload) => Promise<void>;
+}
 
-export const ProductFormModal: React.FC<ProductFormModalProps> = ({
+export const CreateSucursalModal: React.FC<CreateSucursalModalProps> = ({
   visible,
-  mode,
-  product,
   onClose,
   onSubmit,
 }) => {
-  const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
-  const [price, setPrice] = useState('');
-  const [category, setCategory] = useState<ProductCategory>('Hamburguesas');
-  const [image, setImage] = useState('');
+  const [nombre, setNombre] = useState('');
+  const [direccion, setDireccion] = useState('');
   const [submitting, setSubmitting] = useState(false);
-  const [errors, setErrors] = useState({
-    name: false,
-    description: false,
-    price: false,
-    image: false,
-  });
+  const [errors, setErrors] = useState({ nombre: false, direccion: false });
 
   useEffect(() => {
     if (!visible) {
       return;
     }
 
-    setErrors({
-      name: false,
-      description: false,
-      price: false,
-      image: false,
-    });
-
-    if (mode === 'edit' && product) {
-      setName(product.name);
-      setDescription(product.description);
-      setPrice(String(product.price));
-      setCategory(product.category);
-      setImage(product.image);
-    } else {
-      setName(emptyForm.name);
-      setDescription(emptyForm.description);
-      setPrice(emptyForm.price);
-      setCategory(emptyForm.category);
-      setImage(emptyForm.image);
-    }
-  }, [visible, mode, product]);
+    setNombre('');
+    setDireccion('');
+    setErrors({ nombre: false, direccion: false });
+  }, [visible]);
 
   const handleSubmit = async () => {
+    const trimmedNombre = nombre.trim();
+    const trimmedDireccion = direccion.trim();
     const nextErrors = {
-      name: !isNonEmptyString(name),
-      description: !isNonEmptyString(description),
-      price: parsePositiveInteger(price) === null,
-      image: !isValidHttpUrl(image),
+      nombre: !isNonEmptyString(trimmedNombre),
+      direccion: !isNonEmptyString(trimmedDireccion),
     };
 
     setErrors(nextErrors);
 
-    if (Object.values(nextErrors).some(Boolean)) {
-      Alert.alert(
-        'Datos incompletos',
-        'Revisá los campos obligatorios. El precio debe ser un número mayor a 0 y la URL de imagen debe ser válida si la completás.',
-      );
+    if (nextErrors.nombre || nextErrors.direccion) {
+      Alert.alert('Datos incompletos', 'Ingresá el nombre y la dirección de la sucursal.');
       return;
     }
-
-    const parsedPrice = parsePositiveInteger(price)!;
 
     setSubmitting(true);
 
     try {
       await onSubmit({
-        id: product?.id,
-        name: name.trim(),
-        description: description.trim(),
-        price: parsedPrice,
-        category,
-        image: image.trim(),
+        nombre: trimmedNombre,
+        direccion: trimmedDireccion,
       });
     } finally {
       setSubmitting(false);
     }
   };
-
-  const title = mode === 'edit' ? 'Editar producto' : 'Agregar producto';
-  const submitLabel = mode === 'edit' ? 'Guardar' : 'Agregar';
 
   return (
     <Modal
@@ -139,7 +87,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
         <Pressable style={styles.backdrop} onPress={onClose} />
         <View style={styles.sheet}>
           <View style={styles.sheetHeader}>
-            <Text style={styles.sheetTitle}>{title}</Text>
+            <Text style={styles.sheetTitle}>Crear sucursal</Text>
             <TouchableOpacity
               style={styles.closeButton}
               activeOpacity={0.7}
@@ -154,54 +102,31 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
             keyboardShouldPersistTaps="handled"
             contentContainerStyle={styles.formContent}
           >
+            <Text style={styles.helperText}>
+              Al crear la sucursal, todos los productos se cargarán con su precio base y estado Activo.
+            </Text>
+
             <View style={styles.fieldGroup}>
               <Text style={styles.fieldLabel}>NOMBRE</Text>
               <TextInput
-                style={[styles.input, errors.name && styles.inputError]}
-                placeholder="Ej: Stack Doble Smash"
+                style={[styles.input, errors.nombre && styles.inputError]}
+                placeholder="Ej: StackBurger Palermo"
                 placeholderTextColor={AdminColors.placeholder}
-                value={name}
-                onChangeText={setName}
+                value={nombre}
+                onChangeText={setNombre}
               />
             </View>
 
             <View style={styles.fieldGroup}>
-              <Text style={styles.fieldLabel}>DESCRIPCIÓN</Text>
+              <Text style={styles.fieldLabel}>DIRECCIÓN</Text>
               <TextInput
-                style={[styles.input, styles.textArea, errors.description && styles.inputError]}
-                placeholder="Describí el producto..."
+                style={[styles.input, styles.textArea, errors.direccion && styles.inputError]}
+                placeholder="Ej: Av. Santa Fe 3200, CABA"
                 placeholderTextColor={AdminColors.placeholder}
-                value={description}
-                onChangeText={setDescription}
+                value={direccion}
+                onChangeText={setDireccion}
                 multiline
                 textAlignVertical="top"
-              />
-            </View>
-
-            <View style={styles.fieldGroup}>
-              <Text style={styles.fieldLabel}>PRECIO BASE ($)</Text>
-              <TextInput
-                style={[styles.input, errors.price && styles.inputError]}
-                placeholder="Ej: 4500"
-                placeholderTextColor={AdminColors.placeholder}
-                value={price}
-                onChangeText={setPrice}
-                keyboardType="numeric"
-              />
-            </View>
-
-            <CategoryPicker value={category} onChange={setCategory} />
-
-            <View style={styles.fieldGroup}>
-              <Text style={styles.fieldLabel}>URL DE IMAGEN</Text>
-              <TextInput
-                style={[styles.input, errors.image && styles.inputError]}
-                placeholder="https://images.unsplash.com/..."
-                placeholderTextColor={AdminColors.placeholder}
-                value={image}
-                onChangeText={setImage}
-                autoCapitalize="none"
-                autoCorrect={false}
               />
             </View>
           </ScrollView>
@@ -222,7 +147,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
               disabled={submitting}
             >
               <Text style={styles.submitButtonText}>
-                {submitting ? 'Guardando...' : submitLabel}
+                {submitting ? 'Creando...' : 'Crear sucursal'}
               </Text>
             </TouchableOpacity>
           </View>
@@ -238,11 +163,11 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   backdrop: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     backgroundColor: AdminColors.modalOverlay,
   },
   sheet: {
-    maxHeight: '92%',
+    maxHeight: '85%',
     backgroundColor: AdminColors.background,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
@@ -285,6 +210,12 @@ const styles = StyleSheet.create({
     paddingTop: 20,
     paddingBottom: 12,
   },
+  helperText: {
+    fontSize: 13,
+    lineHeight: 20,
+    color: AdminColors.textSecondary,
+    marginBottom: 18,
+  },
   fieldGroup: {
     marginBottom: 20,
   },
@@ -309,7 +240,7 @@ const styles = StyleSheet.create({
     borderColor: AdminColors.error,
   },
   textArea: {
-    minHeight: 100,
+    minHeight: 88,
     paddingTop: 14,
   },
   footer: {

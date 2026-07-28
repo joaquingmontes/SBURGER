@@ -17,6 +17,7 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { useQueryClient } from '@tanstack/react-query';
 import {
   useCreateProducto,
+  useCreateSucursal,
   useDeleteProducto,
   useListProductosAdmin,
   useUpdateProducto,
@@ -31,6 +32,7 @@ import { ProductFormModal } from '../components/admin/ProductFormModal';
 import { DeleteProductModal } from '../components/admin/DeleteProductModal';
 import { SucursalPricesModal } from '../components/admin/SucursalPricesModal';
 import { SucursalAvailabilityModal } from '../components/admin/SucursalAvailabilityModal';
+import { CreateSucursalModal, CreateSucursalPayload } from '../components/admin/CreateSucursalModal';
 import { AdminHeader } from '../components/admin/AdminHeader';
 import { AdminTabs } from '../components/admin/AdminTabs';
 import { dataConnect } from '../config/firebase';
@@ -45,7 +47,9 @@ import {
   reloadProductsFromServer,
   syncProductCachesAfterEdit,
 } from '../utils/productQueryCache';
-import { createProductoSucursalPricesForAllBranches } from '../services/productoSucursalService';
+import { createProductoSucursalForNewBranch, createProductoSucursalPricesForAllBranches } from '../services/productoSucursalService';
+import { invalidateProductsQueries } from '../utils/queryInvalidation';
+import { refreshSucursalesFromServer } from '../utils/sucursalQueryCache';
 import { useRequireAdmin } from '../navigation/useRoleGuard';
 
 type AdminProductsScreenNavigationProp = StackNavigationProp<
@@ -64,10 +68,12 @@ export const AdminProductsScreen: React.FC<AdminProductsScreenProps> = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [isDeleting, setIsDeleting] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isCreatingSucursal, setIsCreatingSucursal] = useState(false);
 
   useRequireAdmin(navigation);
 
   const [formVisible, setFormVisible] = useState(false);
+  const [sucursalFormVisible, setSucursalFormVisible] = useState(false);
   const [formMode, setFormMode] = useState<'create' | 'edit'>('create');
   const [selectedProduct, setSelectedProduct] = useState<AdminProduct | undefined>();
   const [productToDelete, setProductToDelete] = useState<AdminProduct | undefined>();
@@ -77,6 +83,7 @@ export const AdminProductsScreen: React.FC<AdminProductsScreenProps> = ({
   const { data, isPending, isError, refetch, isRefetching } =
     useListProductosAdmin(dataConnect);
   const createProducto = useCreateProducto(dataConnect);
+  const createSucursal = useCreateSucursal(dataConnect);
   const updateProducto = useUpdateProducto(dataConnect);
   const deleteProducto = useDeleteProducto(dataConnect);
 
@@ -143,6 +150,48 @@ export const AdminProductsScreen: React.FC<AdminProductsScreenProps> = ({
   const handleDeleteProduct = useCallback((product: AdminProduct) => {
     setProductToDelete(product);
   }, []);
+
+  const handleCreateSucursal = useCallback(
+    async ({ nombre, direccion }: CreateSucursalPayload) => {
+      const productos = data?.productos ?? [];
+
+      if (productos.length === 0) {
+        Alert.alert('Error', 'No hay productos cargados para asociar a la nueva sucursal.');
+        return;
+      }
+
+      setIsCreatingSucursal(true);
+
+      try {
+        const result = await createSucursal.mutateAsync({ nombre, direccion });
+        const sucursalId = result.sucursal_insert.id;
+
+        await createProductoSucursalForNewBranch(
+          sucursalId,
+          productos.map(producto => ({
+            id: producto.id,
+            precio: producto.precio,
+          })),
+        );
+
+        await Promise.all([
+          refreshSucursalesFromServer(queryClient),
+          invalidateProductsQueries(queryClient),
+        ]);
+
+        setSucursalFormVisible(false);
+        Alert.alert(
+          'Sucursal creada',
+          `${nombre} fue creada con ${productos.length} productos en estado Activo y precio base.`,
+        );
+      } catch {
+        Alert.alert('Error', 'No se pudo crear la sucursal.');
+      } finally {
+        setIsCreatingSucursal(false);
+      }
+    },
+    [createSucursal, data?.productos, queryClient],
+  );
 
   const confirmDelete = useCallback(async () => {
     if (!productToDelete || isDeleting) {
@@ -226,6 +275,17 @@ export const AdminProductsScreen: React.FC<AdminProductsScreenProps> = ({
     <ScreenSafeArea style={styles.safeArea}>
       <AdminHeader navigation={navigation} />
       <AdminTabs activeTab="products" navigation={navigation} />
+
+      <View style={styles.createSucursalContainer}>
+        <TouchableOpacity
+          style={styles.createSucursalButton}
+          activeOpacity={0.85}
+          onPress={() => setSucursalFormVisible(true)}
+          disabled={isCreatingSucursal}
+        >
+          <Text style={styles.createSucursalButtonText}>Crear Sucursal</Text>
+        </TouchableOpacity>
+      </View>
 
       <View style={styles.toolbar}>
         <View style={styles.searchContainer}>
@@ -313,6 +373,16 @@ export const AdminProductsScreen: React.FC<AdminProductsScreenProps> = ({
         }}
         onConfirm={confirmDelete}
       />
+
+      <CreateSucursalModal
+        visible={sucursalFormVisible}
+        onClose={() => {
+          if (!isCreatingSucursal) {
+            setSucursalFormVisible(false);
+          }
+        }}
+        onSubmit={handleCreateSucursal}
+      />
     </ScreenSafeArea>
   );
 };
@@ -327,6 +397,23 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 24,
+  },
+  createSucursalContainer: {
+    paddingHorizontal: 20,
+    marginBottom: 12,
+  },
+  createSucursalButton: {
+    backgroundColor: Colors.surface,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    borderRadius: 14,
+    paddingVertical: 13,
+    alignItems: 'center',
+  },
+  createSucursalButtonText: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: Colors.textPrimary,
   },
   toolbar: {
     flexDirection: 'row',

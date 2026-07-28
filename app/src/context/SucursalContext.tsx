@@ -7,10 +7,12 @@ import React, {
   useState,
 } from 'react';
 import { Alert } from 'react-native';
+import { useQueryClient } from '@tanstack/react-query';
 import { RolUsuario } from '@dataconnect/generated';
 import { useListSucursales } from '@dataconnect/generated/react';
 import { dataConnect } from '../config/firebase';
 import { DEFAULT_SUCURSAL_ID, SucursalInfo } from '../constants/sucursales';
+import { refreshSucursalesFromServer } from '../utils/sucursalQueryCache';
 import { useAuth } from './AuthContext';
 import { useCart } from './CartContext';
 
@@ -25,7 +27,7 @@ interface SucursalContextType {
   isError: boolean;
   confirmSucursal: (sucursalId: string) => void;
   selectSucursal: (sucursalId: string) => void;
-  refetchSucursales: () => void;
+  refetchSucursales: () => Promise<void>;
 }
 
 const SucursalContext = createContext<SucursalContextType | undefined>(undefined);
@@ -33,6 +35,7 @@ const SucursalContext = createContext<SucursalContextType | undefined>(undefined
 export const SucursalProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
+  const queryClient = useQueryClient();
   const { user } = useAuth();
   const { items, clearCart } = useCart();
   const isCliente = user?.rol === RolUsuario.CLIENTE;
@@ -46,8 +49,11 @@ export const SucursalProvider: React.FC<{ children: React.ReactNode }> = ({
     data,
     isPending,
     isError,
-    refetch,
   } = useListSucursales(dataConnect);
+
+  const refreshSucursales = useCallback(async () => {
+    await refreshSucursalesFromServer(queryClient);
+  }, [queryClient]);
 
   useEffect(() => {
     if (isCliente) {
@@ -61,6 +67,14 @@ export const SucursalProvider: React.FC<{ children: React.ReactNode }> = ({
       setSucursalConfirmed(false);
     }
   }, [user?.id, isCliente, user]);
+
+  useEffect(() => {
+    if (!user) {
+      return;
+    }
+
+    void refreshSucursales();
+  }, [user?.id, refreshSucursales, user]);
 
   const sucursales = useMemo<SucursalInfo[]>(
     () =>
@@ -83,6 +97,14 @@ export const SucursalProvider: React.FC<{ children: React.ReactNode }> = ({
   );
 
   const needsSucursalSelection = isCliente && !sucursalConfirmed;
+
+  useEffect(() => {
+    if (!needsSucursalSelection) {
+      return;
+    }
+
+    void refreshSucursales();
+  }, [needsSucursalSelection, refreshSucursales]);
 
   const applySelection = useCallback((sucursalId: string) => {
     setSelectedSucursalId(sucursalId);
@@ -141,7 +163,7 @@ export const SucursalProvider: React.FC<{ children: React.ReactNode }> = ({
       isError,
       confirmSucursal,
       selectSucursal,
-      refetchSucursales: refetch,
+      refetchSucursales: refreshSucursales,
     }),
     [
       sucursales,
@@ -154,7 +176,7 @@ export const SucursalProvider: React.FC<{ children: React.ReactNode }> = ({
       isError,
       confirmSucursal,
       selectSucursal,
-      refetch,
+      refreshSucursales,
     ],
   );
 

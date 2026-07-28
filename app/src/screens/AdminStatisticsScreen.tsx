@@ -7,7 +7,6 @@ import {
   StatusBar,
   Platform,
   ActivityIndicator,
-  TouchableOpacity,
   RefreshControl,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
@@ -27,6 +26,7 @@ import { StatsSummaryCards } from '../components/admin/stats/StatsSummaryCards';
 import { HourlyActivityChart } from '../components/admin/stats/HourlyActivityChart';
 import { MonthlyBreakdown } from '../components/admin/stats/MonthlyBreakdown';
 import { BranchRankingPanel } from '../components/admin/stats/BranchRankingPanel';
+import { HorizontalFilterBar } from '../components/HorizontalFilterBar';
 import { dataConnect } from '../config/firebase';
 import { useRequireAdmin } from '../navigation/useRoleGuard';
 import { refreshAdminOrdersFromServer } from '../utils/orderQueryCache';
@@ -153,6 +153,28 @@ export const AdminStatisticsScreen: React.FC<AdminStatisticsScreenProps> = ({
     }
   }, [queryClient]);
 
+  const sucursalFilterItems = useMemo(
+    () => [
+      { id: 'all', label: 'Todas' },
+      ...sucursales.map(sucursal => ({
+        id: sucursal.id,
+        label: sucursal.nombre,
+      })),
+    ],
+    [sucursales],
+  );
+
+  const monthFilterItems = useMemo(
+    () => [
+      { id: 'all', label: 'Todos' },
+      ...availableMonths.map(monthKey => ({
+        id: monthKey,
+        label: formatMonthLabel(monthKey),
+      })),
+    ],
+    [availableMonths],
+  );
+
   useFocusEffect(
     useCallback(() => {
       StatusBar.setBarStyle('dark-content');
@@ -162,44 +184,6 @@ export const AdminStatisticsScreen: React.FC<AdminStatisticsScreenProps> = ({
 
       void refreshStatistics();
     }, [refreshStatistics]),
-  );
-
-  const renderFilterPills = (
-    label: string,
-    items: Array<{ id: string; label: string }>,
-    selectedId: string,
-    onSelect: (id: string) => void,
-  ) => (
-    <View style={styles.filterGroup}>
-      <Text style={styles.filterGroupLabel}>{label}</Text>
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.filtersContent}
-      >
-        {items.map(item => {
-          const isSelected = selectedId === item.id;
-
-          return (
-            <TouchableOpacity
-              key={item.id}
-              activeOpacity={0.8}
-              style={[styles.filterPill, isSelected && styles.filterPillSelected]}
-              onPress={() => onSelect(item.id)}
-            >
-              <Text
-                style={[
-                  styles.filterLabel,
-                  isSelected && styles.filterLabelSelected,
-                ]}
-              >
-                {item.label}
-              </Text>
-            </TouchableOpacity>
-          );
-        })}
-      </ScrollView>
-    </View>
   );
 
   if (isPending && statsOrders.length === 0) {
@@ -234,31 +218,23 @@ export const AdminStatisticsScreen: React.FC<AdminStatisticsScreenProps> = ({
           </View>
         ) : null}
 
-        {renderFilterPills(
-          'SUCURSAL',
-          [
-            { id: 'all', label: 'Todas' },
-            ...sucursales.map(sucursal => ({
-              id: sucursal.id,
-              label: sucursal.nombre,
-            })),
-          ],
-          sucursalFilter,
-          id => setSucursalFilter(id),
-        )}
+        <HorizontalFilterBar
+          groupLabel="SUCURSAL"
+          items={sucursalFilterItems}
+          selectedId={sucursalFilter}
+          onSelect={id => setSucursalFilter(id)}
+          tone="admin"
+          containerStyle={styles.filterGroup}
+        />
 
-        {renderFilterPills(
-          'MES',
-          [
-            { id: 'all', label: 'Todos' },
-            ...availableMonths.map(monthKey => ({
-              id: monthKey,
-              label: formatMonthLabel(monthKey),
-            })),
-          ],
-          monthFilter,
-          id => setMonthFilter(id),
-        )}
+        <HorizontalFilterBar
+          groupLabel="MES"
+          items={monthFilterItems}
+          selectedId={monthFilter}
+          onSelect={id => setMonthFilter(id)}
+          tone="admin"
+          containerStyle={styles.filterGroup}
+        />
 
         <View style={styles.contextBanner}>
           <Text style={styles.contextTitle}>{selectedSucursalName}</Text>
@@ -312,38 +288,6 @@ const styles = StyleSheet.create({
   },
   filterGroup: {
     marginBottom: 12,
-  },
-  filterGroupLabel: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: Colors.textSecondary,
-    letterSpacing: 1,
-    marginBottom: 8,
-  },
-  filtersContent: {
-    gap: 8,
-    paddingRight: 4,
-  },
-  filterPill: {
-    backgroundColor: Colors.surface,
-    borderRadius: 20,
-    paddingHorizontal: 14,
-    paddingVertical: 9,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    marginRight: 8,
-  },
-  filterPillSelected: {
-    backgroundColor: Colors.accent,
-    borderColor: Colors.accent,
-  },
-  filterLabel: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: Colors.textPrimary,
-  },
-  filterLabelSelected: {
-    color: Colors.accentText,
   },
   contextBanner: {
     backgroundColor: Colors.surface,
