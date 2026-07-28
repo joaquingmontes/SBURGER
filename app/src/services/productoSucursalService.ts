@@ -1,6 +1,7 @@
 import { dataConnect } from '../config/firebase';
 import {
   createProductoSucursal,
+  EstadoProductoSucursal,
   listSucursales,
 } from '@dataconnect/generated';
 
@@ -16,6 +17,7 @@ export const createProductoSucursalPricesForAllBranches = async (
       productoId,
       sucursalId: sucursal.id,
       precio: precioBase,
+      estado: EstadoProductoSucursal.ACTIVO,
     });
   }
 };

@@ -82,9 +82,19 @@ export const DetailScreen: React.FC<DetailScreenProps> = ({ route, navigation })
     : calculateItemPrice(burger.price, customizations);
   const totalPrice = unitPrice * (isSimpleProduct ? 1 : quantity);
 
+  const isOutOfStock = burger.stockStatus === 'sin_stock';
+
   const handleAddToCart = () => {
     if (guestMode) {
       setLoginModalVisible(true);
+      return;
+    }
+
+    if (isOutOfStock) {
+      Alert.alert(
+        'Sin stock',
+        'Este producto no tiene stock disponible en la sucursal seleccionada.',
+      );
       return;
     }
 
@@ -172,6 +182,14 @@ export const DetailScreen: React.FC<DetailScreenProps> = ({ route, navigation })
             <Text style={styles.branchHint}>
               Precio en {selectedSucursal.nombre}
             </Text>
+          ) : null}
+
+          {isOutOfStock ? (
+            <View style={styles.outOfStockBanner}>
+              <Text style={styles.outOfStockBannerText}>
+                Sin stock en esta sucursal
+              </Text>
+            </View>
           ) : null}
 
           {isSimpleProduct ? (
@@ -263,10 +281,16 @@ export const DetailScreen: React.FC<DetailScreenProps> = ({ route, navigation })
 
       <View style={styles.footer}>
         <CustomButton
-          title="Agregar al carrito"
+          title={isOutOfStock ? 'Sin stock' : 'Agregar al carrito'}
           onPress={handleAddToCart}
-          disabled={isNotesLengthExceeded}
-          variant={isNotesLengthExceeded ? 'disabled' : isSimpleProduct ? 'accent' : 'primary'}
+          disabled={isNotesLengthExceeded || isOutOfStock}
+          variant={
+            isOutOfStock || isNotesLengthExceeded
+              ? 'disabled'
+              : isSimpleProduct
+                ? 'accent'
+                : 'primary'
+          }
           rightElement={
             <Text
               style={[
@@ -328,6 +352,21 @@ const styles = StyleSheet.create({
     color: Colors.textSecondary,
     marginTop: -4,
     marginBottom: 12,
+  },
+  outOfStockBanner: {
+    backgroundColor: '#FFF4E5',
+    borderWidth: 1,
+    borderColor: '#F5C26B',
+    borderRadius: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    marginBottom: 16,
+  },
+  outOfStockBannerText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#9A6700',
+    textAlign: 'center',
   },
   description: {
     fontSize: 14,

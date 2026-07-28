@@ -1,9 +1,10 @@
 import {
   CategoriaProducto,
   EstadoPedido,
+  EstadoProductoSucursal,
   ModalidadEntrega,
 } from '@dataconnect/generated';
-import { Burger, MenuCategory } from '../constants/mockData';
+import { Burger, MenuCategory, ProductStockStatus } from '../constants/mockData';
 import { AdminProduct, ProductCategory } from '../constants/adminProducts';
 import { DEFAULT_PRODUCT_IMAGE } from '../constants/productImages';
 import { Order, OrderItem, OrderStatus } from '../constants/mockOrders';
@@ -87,6 +88,25 @@ export const resolvePrecioProductoSucursal = (
   preciosSucursal?: Array<{ precio: number }> | null,
 ): number => preciosSucursal?.[0]?.precio ?? precioBase;
 
+const resolveStockStatus = (
+  estado?: EstadoProductoSucursal | null,
+): ProductStockStatus | 'inexistente' => {
+  if (!estado || estado === EstadoProductoSucursal.ACTIVO) {
+    return 'activo';
+  }
+
+  if (estado === EstadoProductoSucursal.SIN_STOCK) {
+    return 'sin_stock';
+  }
+
+  return 'inexistente';
+};
+
+export const isProductVisibleForSucursal = (producto: {
+  productoSucursals_on_producto?: Array<{ estado?: EstadoProductoSucursal | null }> | null;
+}): boolean =>
+  resolveStockStatus(producto.productoSucursals_on_producto?.[0]?.estado) !== 'inexistente';
+
 export const mapProductoPorSucursalToBurger = (producto: {
   id: string;
   nombre: string;
@@ -95,19 +115,28 @@ export const mapProductoPorSucursalToBurger = (producto: {
   precio: number;
   categoria: CategoriaProducto;
   imagenUrl: string;
-  productoSucursals_on_producto?: Array<{ precio: number }> | null;
-}): Burger => ({
-  id: producto.id,
-  name: producto.nombre,
-  description: producto.descripcion,
-  ingredients: producto.ingredientes ?? producto.descripcion,
-  price: resolvePrecioProductoSucursal(
-    producto.precio,
-    producto.productoSucursals_on_producto,
-  ),
-  image: producto.imagenUrl,
-  category: CATEGORY_TO_MENU[producto.categoria],
-});
+  productoSucursals_on_producto?: Array<{
+    precio: number;
+    estado?: EstadoProductoSucursal | null;
+  }> | null;
+}): Burger => {
+  const sucursalRecord = producto.productoSucursals_on_producto?.[0];
+  const stockStatus = resolveStockStatus(sucursalRecord?.estado);
+
+  return {
+    id: producto.id,
+    name: producto.nombre,
+    description: producto.descripcion,
+    ingredients: producto.ingredientes ?? producto.descripcion,
+    price: resolvePrecioProductoSucursal(
+      producto.precio,
+      producto.productoSucursals_on_producto,
+    ),
+    image: producto.imagenUrl,
+    category: CATEGORY_TO_MENU[producto.categoria],
+    stockStatus: stockStatus === 'inexistente' ? undefined : stockStatus,
+  };
+};
 
 export const mapProductoToAdminProduct = (producto: {
   id: string;

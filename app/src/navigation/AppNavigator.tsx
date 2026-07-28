@@ -10,6 +10,7 @@ import { CheckoutScreen } from '../screens/CheckoutScreen';
 import { OrdersScreen } from '../screens/OrdersScreen';
 import { AdminProductsScreen } from '../screens/AdminProductsScreen';
 import { AdminOrdersScreen } from '../screens/AdminOrdersScreen';
+import { AdminStatisticsScreen } from '../screens/AdminStatisticsScreen';
 import { AdminOrderDetailScreen } from '../screens/AdminOrderDetailScreen';
 import { Colors } from '../constants/colors';
 import { Burger } from '../constants/mockData';
@@ -23,6 +24,7 @@ export type RootStackParamList = {
   Orders: undefined;
   AdminProducts: undefined;
   AdminOrders: undefined;
+  AdminStatistics: undefined;
   AdminOrderDetail: { order: AdminClientOrder };
   Detail: { burger: Burger; guestMode?: boolean };
   Cart: { simulateError?: boolean }; // Soporta simulación de estado de error por rúbrica
@@ -93,6 +95,13 @@ export const AppNavigator = () => {
       <Stack.Screen
         name="AdminOrders"
         component={AdminOrdersScreen}
+        options={{
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="AdminStatistics"
+        component={AdminStatisticsScreen}
         options={{
           headerShown: false,
         }}

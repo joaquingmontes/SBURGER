@@ -1,73 +1,84 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../../navigation/AppNavigator';
 import { Colors } from '../../constants/colors';
 
-export type AdminTabId = 'products' | 'orders';
+export type AdminTabId = 'products' | 'orders' | 'statistics';
 
 type AdminNavigationProp = StackNavigationProp<
   RootStackParamList,
-  'AdminProducts' | 'AdminOrders'
+  'AdminProducts' | 'AdminOrders' | 'AdminStatistics'
 >;
+
+interface AdminTabConfig {
+  id: AdminTabId;
+  icon: string;
+  label: string;
+  route: 'AdminProducts' | 'AdminOrders' | 'AdminStatistics';
+}
 
 interface AdminTabsProps {
   activeTab: AdminTabId;
   navigation: AdminNavigationProp;
 }
 
+const ADMIN_TABS: AdminTabConfig[] = [
+  { id: 'products', icon: '🛍', label: 'Productos', route: 'AdminProducts' },
+  { id: 'orders', icon: '📦', label: 'Pedidos de clientes', route: 'AdminOrders' },
+  { id: 'statistics', icon: '📊', label: 'Estadísticas', route: 'AdminStatistics' },
+];
+
 export const AdminTabs: React.FC<AdminTabsProps> = ({ activeTab, navigation }) => {
   return (
-    <View style={styles.tabs}>
-      <TouchableOpacity
-        style={styles.tab}
-        activeOpacity={0.8}
-        onPress={() => {
-          if (activeTab !== 'products') {
-            navigation.navigate('AdminProducts');
-          }
-        }}
+    <View style={styles.tabsContainer}>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.tabsContent}
       >
-        <Text style={[styles.tabIcon, activeTab === 'products' && styles.tabIconActive]}>
-          🛍
-        </Text>
-        <Text style={[styles.tabLabel, activeTab === 'products' && styles.tabLabelActive]}>
-          Productos
-        </Text>
-        {activeTab === 'products' && <View style={styles.tabIndicator} />}
-      </TouchableOpacity>
+        {ADMIN_TABS.map(tab => {
+          const isActive = activeTab === tab.id;
 
-      <TouchableOpacity
-        style={styles.tab}
-        activeOpacity={0.8}
-        onPress={() => {
-          if (activeTab !== 'orders') {
-            navigation.navigate('AdminOrders');
-          }
-        }}
-      >
-        <Text style={[styles.tabIcon, activeTab === 'orders' && styles.tabIconActive]}>
-          📦
-        </Text>
-        <Text style={[styles.tabLabel, activeTab === 'orders' && styles.tabLabelActive]}>
-          Pedidos de clientes
-        </Text>
-        {activeTab === 'orders' && <View style={styles.tabIndicator} />}
-      </TouchableOpacity>
+          return (
+            <TouchableOpacity
+              key={tab.id}
+              style={styles.tab}
+              activeOpacity={0.8}
+              onPress={() => {
+                if (!isActive) {
+                  navigation.navigate(tab.route);
+                }
+              }}
+            >
+              <Text style={[styles.tabIcon, isActive && styles.tabIconActive]}>
+                {tab.icon}
+              </Text>
+              <Text style={[styles.tabLabel, isActive && styles.tabLabelActive]}>
+                {tab.label}
+              </Text>
+              {isActive && <View style={styles.tabIndicator} />}
+            </TouchableOpacity>
+          );
+        })}
+      </ScrollView>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  tabs: {
-    flexDirection: 'row',
+  tabsContainer: {
     borderBottomWidth: 1,
     borderBottomColor: Colors.border,
     marginBottom: 16,
   },
+  tabsContent: {
+    paddingHorizontal: 12,
+  },
   tab: {
-    flex: 1,
+    minWidth: 128,
     alignItems: 'center',
+    paddingHorizontal: 12,
     paddingBottom: 12,
     position: 'relative',
   },
@@ -91,8 +102,8 @@ const styles = StyleSheet.create({
   tabIndicator: {
     position: 'absolute',
     bottom: 0,
-    left: 16,
-    right: 16,
+    left: 10,
+    right: 10,
     height: 3,
     backgroundColor: Colors.accent,
     borderTopLeftRadius: 3,

@@ -9,7 +9,7 @@ import { UserProfileMenu } from '../UserProfileMenu';
 
 type AdminNavigationProp = StackNavigationProp<
   RootStackParamList,
-  'AdminProducts' | 'AdminOrders'
+  'AdminProducts' | 'AdminOrders' | 'AdminStatistics'
 >;
 
 interface AdminHeaderProps {

@@ -14,6 +14,7 @@ interface AdminProductCardProps {
   product: AdminProduct;
   onEdit: (product: AdminProduct) => void;
   onEditPrices: (product: AdminProduct) => void;
+  onEditAvailability: (product: AdminProduct) => void;
   onDelete: (product: AdminProduct) => void;
 }
 
@@ -21,26 +22,26 @@ const AdminProductCardComponent: React.FC<AdminProductCardProps> = ({
   product,
   onEdit,
   onEditPrices,
+  onEditAvailability,
   onDelete,
 }) => {
   return (
     <View style={styles.card}>
-      <Image
-        source={{ uri: resolveProductImageUri(product.image, 'thumb') }}
-        style={styles.image}
-        resizeMode="cover"
-        fadeDuration={0}
-      />
-      <View style={styles.info}>
-        <Text style={styles.name} numberOfLines={1}>
-          {product.name}
-        </Text>
-        <Text style={styles.category}>{product.category}</Text>
-        <Text style={styles.price}>
-          ${product.price.toLocaleString('es-AR')}
-        </Text>
+      <View style={styles.topRow}>
+        <Image
+          source={{ uri: resolveProductImageUri(product.image, 'thumb') }}
+          style={styles.image}
+          resizeMode="cover"
+          fadeDuration={0}
+        />
+        <View style={styles.info}>
+          <Text style={styles.name} numberOfLines={1}>
+            {product.name}
+          </Text>
+          <Text style={styles.category}>{product.category}</Text>
+        </View>
       </View>
-      <View style={styles.actions}>
+      <View style={styles.actionsRow}>
         <TouchableOpacity
           style={styles.actionButton}
           activeOpacity={0.7}
@@ -62,6 +63,15 @@ const AdminProductCardComponent: React.FC<AdminProductCardProps> = ({
         <TouchableOpacity
           style={styles.actionButton}
           activeOpacity={0.7}
+          onPress={() => onEditAvailability(product)}
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          accessibilityLabel={`Disponibilidad por sucursal de ${product.name}`}
+        >
+          <Text style={styles.availabilityIcon}>📦</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.actionButton}
+          activeOpacity={0.7}
           onPress={() => onDelete(product)}
           hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           accessibilityLabel={`Eliminar ${product.name}`}
@@ -77,8 +87,6 @@ export const AdminProductCard = memo(AdminProductCardComponent);
 
 const styles = StyleSheet.create({
   card: {
-    flexDirection: 'row',
-    alignItems: 'center',
     backgroundColor: Colors.cardBackground,
     borderRadius: 16,
     borderWidth: 1,
@@ -90,6 +98,11 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.04,
     shadowRadius: 3,
     elevation: 1,
+  },
+  topRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
   },
   image: {
     width: 72,
@@ -111,16 +124,11 @@ const styles = StyleSheet.create({
   category: {
     fontSize: 12,
     color: Colors.textSecondary,
-    marginBottom: 6,
   },
-  price: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: Colors.accent,
-  },
-  actions: {
-    gap: 8,
-    zIndex: 2,
+  actionsRow: {
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    gap: 10,
   },
   actionButton: {
     width: 38,
@@ -140,6 +148,9 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '800',
     color: Colors.accent,
+  },
+  availabilityIcon: {
+    fontSize: 16,
   },
   deleteIcon: {
     fontSize: 16,

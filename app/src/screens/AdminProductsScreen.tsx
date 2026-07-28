@@ -30,6 +30,7 @@ import { AdminProductCard } from '../components/admin/AdminProductCard';
 import { ProductFormModal } from '../components/admin/ProductFormModal';
 import { DeleteProductModal } from '../components/admin/DeleteProductModal';
 import { SucursalPricesModal } from '../components/admin/SucursalPricesModal';
+import { SucursalAvailabilityModal } from '../components/admin/SucursalAvailabilityModal';
 import { AdminHeader } from '../components/admin/AdminHeader';
 import { AdminTabs } from '../components/admin/AdminTabs';
 import { dataConnect } from '../config/firebase';
@@ -71,6 +72,7 @@ export const AdminProductsScreen: React.FC<AdminProductsScreenProps> = ({
   const [selectedProduct, setSelectedProduct] = useState<AdminProduct | undefined>();
   const [productToDelete, setProductToDelete] = useState<AdminProduct | undefined>();
   const [productForPrices, setProductForPrices] = useState<AdminProduct | undefined>();
+  const [productForAvailability, setProductForAvailability] = useState<AdminProduct | undefined>();
 
   const { data, isPending, isError, refetch, isRefetching } =
     useListProductosAdmin(dataConnect);
@@ -132,6 +134,10 @@ export const AdminProductsScreen: React.FC<AdminProductsScreenProps> = ({
 
   const openPricesModal = useCallback((product: AdminProduct) => {
     setProductForPrices(product);
+  }, []);
+
+  const openAvailabilityModal = useCallback((product: AdminProduct) => {
+    setProductForAvailability(product);
   }, []);
 
   const handleDeleteProduct = useCallback((product: AdminProduct) => {
@@ -209,10 +215,11 @@ export const AdminProductsScreen: React.FC<AdminProductsScreenProps> = ({
         product={item}
         onEdit={openEditForm}
         onEditPrices={openPricesModal}
+        onEditAvailability={openAvailabilityModal}
         onDelete={handleDeleteProduct}
       />
     ),
-    [handleDeleteProduct, openEditForm, openPricesModal],
+    [handleDeleteProduct, openAvailabilityModal, openEditForm, openPricesModal],
   );
 
   return (
@@ -288,6 +295,12 @@ export const AdminProductsScreen: React.FC<AdminProductsScreenProps> = ({
         visible={!!productForPrices}
         product={productForPrices}
         onClose={() => setProductForPrices(undefined)}
+      />
+
+      <SucursalAvailabilityModal
+        visible={!!productForAvailability}
+        product={productForAvailability}
+        onClose={() => setProductForAvailability(undefined)}
       />
 
       <DeleteProductModal

@@ -28,7 +28,7 @@ import { ClientHeaderActions } from '../components/ClientHeaderActions';
 import { Colors } from '../constants/colors';
 import { FLAT_LIST_PERF_PROPS } from '../constants/listPerformance';
 import { dataConnect } from '../config/firebase';
-import { mapProductoPorSucursalToBurger } from '../utils/firebaseMappers';
+import { mapProductoPorSucursalToBurger, isProductVisibleForSucursal } from '../utils/firebaseMappers';
 import { resetToLogin } from '../navigation/navigationUtils';
 import { SucursalSelectionModal } from '../components/SucursalSelectionModal';
 
@@ -153,7 +153,9 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation, route }) => 
 
   const menuItems = useMemo(() => {
     const products = data?.productos ?? [];
-    const mapped = products.map(mapProductoPorSucursalToBurger);
+    const mapped = products
+      .filter(isProductVisibleForSucursal)
+      .map(mapProductoPorSucursalToBurger);
     const query = searchQuery.trim().toLowerCase();
 
     return mapped.filter(item => {
