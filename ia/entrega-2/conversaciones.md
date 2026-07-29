@@ -1,7 +1,33 @@
-# Entrega 2 - StackBurger
+# Registro de Interacciones con la IA · StackBurger E2
+
+* **Materia:** Desarrollo de Aplicaciones Móviles  
+* **Entrega:** Entrega 2 — Escalado Funcional (E2)  
+* **Asistente de IA:** Asistente de Desarrollo (Cursor)  
+
+* **Archivo de Entrega:** `/ia/entrega-2/conversaciones.md`
+
+---
+
+## 📌 Índice de Temas Consultados
+
+1. [Consulta 1: Pantalla de registro y navegación desde login](#consulta-1-pantalla-de-registro-y-navegación-desde-login)
+2. [Consulta 2: Rediseño del menú principal (catálogo, categorías y bottom nav)](#consulta-2-rediseño-del-menú-principal-catálogo-categorías-y-bottom-nav)
+3. [Consulta 3: Pantalla "Mis pedidos" del cliente](#consulta-3-pantalla-mis-pedidos-del-cliente)
+4. [Consulta 4: Pantallas administrador — productos y pedidos](#consulta-4-pantallas-administrador--productos-y-pedidos)
+5. [Consulta 5: Modo invitado y modal de login requerido](#consulta-5-modo-invitado-y-modal-de-login-requerido)
+6. [Consulta 6: Persistencia de datos en Firebase (no local)](#consulta-6-persistencia-de-datos-en-firebase-no-local)
+7. [Consulta 7: Configuración Firebase, seeds y .gitignore para GitHub](#consulta-7-configuración-firebase-seeds-y-gitignore-para-github)
+8. [Consulta 8: Cambio de estado de pedidos en admin (backend y sincronización UI)](#consulta-8-cambio-de-estado-de-pedidos-en-admin-backend-y-sincronización-ui)
+9. [Consulta 9: Corrección de registro de usuarios (mensajes y email duplicado)](#consulta-9-corrección-de-registro-de-usuarios-mensajes-y-email-duplicado)
+10. [Consulta 10: Tema claro unificado en todas las pantallas](#consulta-10-tema-claro-unificado-en-todas-las-pantallas)
+
+---
+
 _Exported on 6/23/2026 at 23:23:15 GMT-3 from Cursor (3.8.11)_
 
 ---
+
+### Consulta 1: Pantalla de registro y navegación desde login
 
 **User**
 
@@ -46,6 +72,8 @@ Listo. Implementé la pantalla de registro y la conecté con el login.
 **Nota:** La flecha de volver está arriba a la **izquierda**, como en tu imagen. Si preferís moverla a la derecha, decime y la ajusto.
 
 ---
+
+### Consulta 2: Rediseño del menú principal (catálogo, categorías y bottom nav)
 
 **User**
 
@@ -95,6 +123,8 @@ Listo. Rediseñé el menú principal para que coincida con tu imagen. Resumen de
 Tema oscuro (`#0C0C0C` de fondo, `#1A1A1A` en tarjetas, `#F39C12` como acento) alineado con login y registro. Cuando quieras, seguimos con el filtro del buscador o la pantalla de Mis pedidos.
 
 ---
+
+### Consulta 3: Pantalla "Mis pedidos" del cliente
 
 **User**
 
@@ -243,6 +273,8 @@ Ahora debería mostrarse completo **"Cerrar sesión"**. Probalo y avisame si sig
 
 ---
 
+### Consulta 4: Pantallas administrador — productos y pedidos
+
 **User**
 
 ahora quiero que hagas dos pantallas para el rol "Administrador". hace tal cual la imagen que te mande. las paginas serian "Productos" y "Pedidos". Al tocar en editar se despliega la imagen 2 que te mandé (la info del producto ya se carga automaticamente, dando la posibilidad de modificarlos), la cual se abre cuando tocas en el lapiz de editar en algun menu. En la tercera imagen podes ver lo que se muestra al tocar en "+" (podes reutilizar codigo de la pantalla de editar un menu para esta de creacion de un menu). en ambas pantallas de edicion y creacion en la parte de categoria guiate con la 4ta imagen que te mandé. para que yo de manera de desarrollo pueda acceder a todo este menu del admin hace que desde el loguin haya un boton muy simple que diga "entrar como admin" para ir probando cómo queda. la otra pantalla de los admin es "Pedidos de clientes", pero por ahora hace que el boton no funcione hasta que te pida hacerla. Tomate tu tiempo para resolver todo esto, no hay prisa
@@ -293,6 +325,8 @@ Listo. Implementé el panel de administrador según tus imágenes. Resumen:
 Los cambios de productos quedan en estado local de la pantalla (sin backend todavía). Cuando quieras, seguimos con **Pedidos de clientes** para admin.
 
 ---
+
+### Consulta 10: Tema claro unificado en todas las pantallas
 
 **User**
 
@@ -494,6 +528,8 @@ La pantalla de éxito también muestra la modalidad elegida (delivery con direcc
 
 ---
 
+### Consulta 5: Modo invitado y modal de login requerido
+
 **User**
 
 quiero que hagas que al tocar en la pagina de "login" el boton "ver menu sin registrarse" se pase a esta pantalla (visualmente la diferencia seria los iniciar sesion y la barra de invitado). ambas cosas deben llevarte a la pagina de login. si tocas en "ver mas" en algun producto podes ver la info del producto, pero al tocar "agregar al carrito" salta la ventana de la imagen 2 que te mandé (acordate de hacerlo modo claro todo)
@@ -552,6 +588,8 @@ Implementando usuarios de prueba, catálogo completo, pedidos por cliente y aute
 
 
 ---
+
+### Consulta 6: Persistencia de datos en Firebase (no local)
 
 **User**
 
@@ -619,6 +657,8 @@ Si usás el **emulador local** de Data Connect, la app en dev intenta conectarse
 ¿Querés que te ayude a completar el `firebaseConfig.ts` con los valores de tu consola de Firebase?
 
 ---
+
+### Consulta 7: Configuración Firebase, seeds y .gitignore para GitHub
 
 **User**
 
@@ -1002,6 +1042,8 @@ Después de confirmar un pedido, debería aparecer en **Mis pedidos** y en el pa
 
 ---
 
+### Consulta 8: Cambio de estado de pedidos en admin (backend y sincronización UI)
+
 **User**
 
 no funciona cuando un administrador quiere cambiar el estado de un pedido (de "En preparacion" a "Cancelado" o "Finalizado"). corregi eso
@@ -1352,6 +1394,8 @@ npx firebase-tools deploy --only dataconnect
 Probalo con un pedido que tenga hamburguesa personalizada y otro con notas en papas/bebidas/postres, y contame cómo quedó o qué ajustarías.
 
 ---
+
+### Consulta 9: Corrección de registro de usuarios (mensajes y email duplicado)
 
 **User**
 
