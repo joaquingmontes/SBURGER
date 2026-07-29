@@ -1,0 +1,203 @@
+mutation SeedProductoSucursalEstados @auth(level: PUBLIC, insecureReason: "Distribucion de estados ProductoSucursal") {
+
+  ps_est_001: productoSucursal_update(id: "55555555-5555-5555-5555-555501010000", data: { estado: ACTIVO })
+
+  ps_est_002: productoSucursal_update(id: "55555555-5555-5555-5555-555501020000", data: { estado: ACTIVO })
+
+  ps_est_003: productoSucursal_update(id: "55555555-5555-5555-5555-555501030000", data: { estado: ACTIVO })
+
+  ps_est_004: productoSucursal_update(id: "55555555-5555-5555-5555-555501040000", data: { estado: ACTIVO })
+
+  ps_est_005: productoSucursal_update(id: "55555555-5555-5555-5555-555501050000", data: { estado: ACTIVO })
+
+  ps_est_006: productoSucursal_update(id: "55555555-5555-5555-5555-555502010000", data: { estado: ACTIVO })
+
+  ps_est_007: productoSucursal_update(id: "55555555-5555-5555-5555-555502020000", data: { estado: ACTIVO })
+
+  ps_est_008: productoSucursal_update(id: "55555555-5555-5555-5555-555502030000", data: { estado: ACTIVO })
+
+  ps_est_009: productoSucursal_update(id: "55555555-5555-5555-5555-555502040000", data: { estado: ACTIVO })
+
+  ps_est_010: productoSucursal_update(id: "55555555-5555-5555-5555-555502050000", data: { estado: ACTIVO })
+
+  ps_est_011: productoSucursal_update(id: "55555555-5555-5555-5555-555503010000", data: { estado: ACTIVO })
+
+  ps_est_012: productoSucursal_update(id: "55555555-5555-5555-5555-555503020000", data: { estado: ACTIVO })
+
+  ps_est_013: productoSucursal_update(id: "55555555-5555-5555-5555-555503030000", data: { estado: ACTIVO })
+
+  ps_est_014: productoSucursal_update(id: "55555555-5555-5555-5555-555503040000", data: { estado: ACTIVO })
+
+  ps_est_015: productoSucursal_update(id: "55555555-5555-5555-5555-555503050000", data: { estado: ACTIVO })
+
+  ps_est_016: productoSucursal_update(id: "55555555-5555-5555-5555-555504010000", data: { estado: ACTIVO })
+
+  ps_est_017: productoSucursal_update(id: "55555555-5555-5555-5555-555504020000", data: { estado: ACTIVO })
+
+  ps_est_018: productoSucursal_update(id: "55555555-5555-5555-5555-555504030000", data: { estado: ACTIVO })
+
+  ps_est_019: productoSucursal_update(id: "55555555-5555-5555-5555-555504040000", data: { estado: ACTIVO })
+
+  ps_est_020: productoSucursal_update(id: "55555555-5555-5555-5555-555504050000", data: { estado: ACTIVO })
+
+  ps_est_021: productoSucursal_update(id: "55555555-5555-5555-5555-555505010000", data: { estado: ACTIVO })
+
+  ps_est_022: productoSucursal_update(id: "55555555-5555-5555-5555-555505020000", data: { estado: ACTIVO })
+
+  ps_est_023: productoSucursal_update(id: "55555555-5555-5555-5555-555505030000", data: { estado: ACTIVO })
+
+  ps_est_024: productoSucursal_update(id: "55555555-5555-5555-5555-555505040000", data: { estado: ACTIVO })
+
+  ps_est_025: productoSucursal_update(id: "55555555-5555-5555-5555-555505050000", data: { estado: ACTIVO })
+
+  ps_est_026: productoSucursal_update(id: "55555555-5555-5555-5555-555506010000", data: { estado: ACTIVO })
+
+  ps_est_027: productoSucursal_update(id: "55555555-5555-5555-5555-555506020000", data: { estado: ACTIVO })
+
+  ps_est_028: productoSucursal_update(id: "55555555-5555-5555-5555-555506030000", data: { estado: ACTIVO })
+
+  ps_est_029: productoSucursal_update(id: "55555555-5555-5555-5555-555506040000", data: { estado: ACTIVO })
+
+  ps_est_030: productoSucursal_update(id: "55555555-5555-5555-5555-555506050000", data: { estado: ACTIVO })
+
+  ps_est_031: productoSucursal_update(id: "55555555-5555-5555-5555-555507010000", data: { estado: ACTIVO })
+
+  ps_est_032: productoSucursal_update(id: "55555555-5555-5555-5555-555507020000", data: { estado: ACTIVO })
+
+  ps_est_033: productoSucursal_update(id: "55555555-5555-5555-5555-555507030000", data: { estado: ACTIVO })
+
+  ps_est_034: productoSucursal_update(id: "55555555-5555-5555-5555-555507040000", data: { estado: ACTIVO })
+
+  ps_est_035: productoSucursal_update(id: "55555555-5555-5555-5555-555507050000", data: { estado: ACTIVO })
+
+  ps_est_036: productoSucursal_update(id: "55555555-5555-5555-5555-555508010000", data: { estado: ACTIVO })
+
+  ps_est_037: productoSucursal_update(id: "55555555-5555-5555-5555-555508020000", data: { estado: ACTIVO })
+
+  ps_est_038: productoSucursal_update(id: "55555555-5555-5555-5555-555508030000", data: { estado: ACTIVO })
+
+  ps_est_039: productoSucursal_update(id: "55555555-5555-5555-5555-555508040000", data: { estado: ACTIVO })
+
+  ps_est_040: productoSucursal_update(id: "55555555-5555-5555-5555-555508050000", data: { estado: ACTIVO })
+
+  ps_est_041: productoSucursal_update(id: "55555555-5555-5555-5555-555509010000", data: { estado: ACTIVO })
+
+  ps_est_042: productoSucursal_update(id: "55555555-5555-5555-5555-555509020000", data: { estado: ACTIVO })
+
+  ps_est_043: productoSucursal_update(id: "55555555-5555-5555-5555-555509030000", data: { estado: ACTIVO })
+
+  ps_est_044: productoSucursal_update(id: "55555555-5555-5555-5555-555509040000", data: { estado: ACTIVO })
+
+  ps_est_045: productoSucursal_update(id: "55555555-5555-5555-5555-555509050000", data: { estado: ACTIVO })
+
+  ps_est_046: productoSucursal_update(id: "55555555-5555-5555-5555-555510010000", data: { estado: ACTIVO })
+
+  ps_est_047: productoSucursal_update(id: "55555555-5555-5555-5555-555510020000", data: { estado: ACTIVO })
+
+  ps_est_048: productoSucursal_update(id: "55555555-5555-5555-5555-555510030000", data: { estado: ACTIVO })
+
+  ps_est_049: productoSucursal_update(id: "55555555-5555-5555-5555-555510040000", data: { estado: ACTIVO })
+
+  ps_est_050: productoSucursal_update(id: "55555555-5555-5555-5555-555510050000", data: { estado: ACTIVO })
+
+  ps_est_051: productoSucursal_update(id: "55555555-5555-5555-5555-555511010000", data: { estado: ACTIVO })
+
+  ps_est_052: productoSucursal_update(id: "55555555-5555-5555-5555-555511020000", data: { estado: ACTIVO })
+
+  ps_est_053: productoSucursal_update(id: "55555555-5555-5555-5555-555511030000", data: { estado: ACTIVO })
+
+  ps_est_054: productoSucursal_update(id: "55555555-5555-5555-5555-555511040000", data: { estado: ACTIVO })
+
+  ps_est_055: productoSucursal_update(id: "55555555-5555-5555-5555-555511050000", data: { estado: ACTIVO })
+
+  ps_est_056: productoSucursal_update(id: "55555555-5555-5555-5555-555512010000", data: { estado: ACTIVO })
+
+  ps_est_057: productoSucursal_update(id: "55555555-5555-5555-5555-555512020000", data: { estado: ACTIVO })
+
+  ps_est_058: productoSucursal_update(id: "55555555-5555-5555-5555-555512030000", data: { estado: ACTIVO })
+
+  ps_est_059: productoSucursal_update(id: "55555555-5555-5555-5555-555512040000", data: { estado: ACTIVO })
+
+  ps_est_060: productoSucursal_update(id: "55555555-5555-5555-5555-555512050000", data: { estado: ACTIVO })
+
+  ps_est_061: productoSucursal_update(id: "55555555-5555-5555-5555-555513010000", data: { estado: ACTIVO })
+
+  ps_est_062: productoSucursal_update(id: "55555555-5555-5555-5555-555513020000", data: { estado: ACTIVO })
+
+  ps_est_063: productoSucursal_update(id: "55555555-5555-5555-5555-555513030000", data: { estado: ACTIVO })
+
+  ps_est_064: productoSucursal_update(id: "55555555-5555-5555-5555-555513040000", data: { estado: ACTIVO })
+
+  ps_est_065: productoSucursal_update(id: "55555555-5555-5555-5555-555513050000", data: { estado: ACTIVO })
+
+  ps_est_066: productoSucursal_update(id: "55555555-5555-5555-5555-555514010000", data: { estado: ACTIVO })
+
+  ps_est_067: productoSucursal_update(id: "55555555-5555-5555-5555-555514020000", data: { estado: ACTIVO })
+
+  ps_est_068: productoSucursal_update(id: "55555555-5555-5555-5555-555514030000", data: { estado: ACTIVO })
+
+  ps_est_069: productoSucursal_update(id: "55555555-5555-5555-5555-555514040000", data: { estado: ACTIVO })
+
+  ps_est_070: productoSucursal_update(id: "55555555-5555-5555-5555-555514050000", data: { estado: ACTIVO })
+
+  ps_est_071: productoSucursal_update(id: "55555555-5555-5555-5555-555515010000", data: { estado: ACTIVO })
+
+  ps_est_072: productoSucursal_update(id: "55555555-5555-5555-5555-555515020000", data: { estado: ACTIVO })
+
+  ps_est_073: productoSucursal_update(id: "55555555-5555-5555-5555-555515030000", data: { estado: ACTIVO })
+
+  ps_est_074: productoSucursal_update(id: "55555555-5555-5555-5555-555515040000", data: { estado: ACTIVO })
+
+  ps_est_075: productoSucursal_update(id: "55555555-5555-5555-5555-555515050000", data: { estado: ACTIVO })
+
+  ps_est_076: productoSucursal_update(id: "55555555-5555-5555-5555-555516010000", data: { estado: ACTIVO })
+
+  ps_est_077: productoSucursal_update(id: "55555555-5555-5555-5555-555516020000", data: { estado: ACTIVO })
+
+  ps_est_078: productoSucursal_update(id: "55555555-5555-5555-5555-555516030000", data: { estado: ACTIVO })
+
+  ps_est_079: productoSucursal_update(id: "55555555-5555-5555-5555-555516040000", data: { estado: ACTIVO })
+
+  ps_est_080: productoSucursal_update(id: "55555555-5555-5555-5555-555516050000", data: { estado: ACTIVO })
+
+  ps_est_081: productoSucursal_update(id: "66666666-6666-6666-6666-666601010001", data: { estado: ACTIVO })
+
+  ps_est_082: productoSucursal_update(id: "66666666-6666-6666-6666-666601020001", data: { estado: ACTIVO })
+
+  ps_est_083: productoSucursal_update(id: "66666666-6666-6666-6666-666601030001", data: { estado: ACTIVO })
+
+  ps_est_084: productoSucursal_update(id: "66666666-6666-6666-6666-666601040001", data: { estado: ACTIVO })
+
+  ps_est_085: productoSucursal_update(id: "66666666-6666-6666-6666-666601050001", data: { estado: ACTIVO })
+
+  ps_est_086: productoSucursal_update(id: "66666666-6666-6666-6666-666602010001", data: { estado: ACTIVO })
+
+  ps_est_087: productoSucursal_update(id: "66666666-6666-6666-6666-666602020001", data: { estado: ACTIVO })
+
+  ps_est_088: productoSucursal_update(id: "66666666-6666-6666-6666-666602030001", data: { estado: ACTIVO })
+
+  ps_est_089: productoSucursal_update(id: "66666666-6666-6666-6666-666602040001", data: { estado: ACTIVO })
+
+  ps_est_090: productoSucursal_update(id: "66666666-6666-6666-6666-666602050001", data: { estado: ACTIVO })
+
+  ps_est_091: productoSucursal_update(id: "66666666-6666-6666-6666-666603010001", data: { estado: SIN_STOCK })
+
+  ps_est_092: productoSucursal_update(id: "66666666-6666-6666-6666-666603020001", data: { estado: SIN_STOCK })
+
+  ps_est_093: productoSucursal_update(id: "66666666-6666-6666-6666-666603030001", data: { estado: SIN_STOCK })
+
+  ps_est_094: productoSucursal_update(id: "66666666-6666-6666-6666-666603040001", data: { estado: SIN_STOCK })
+
+  ps_est_095: productoSucursal_update(id: "66666666-6666-6666-6666-666603050001", data: { estado: SIN_STOCK })
+
+  ps_est_096: productoSucursal_update(id: "66666666-6666-6666-6666-666604010001", data: { estado: INEXISTENTE })
+
+  ps_est_097: productoSucursal_update(id: "66666666-6666-6666-6666-666604020001", data: { estado: INEXISTENTE })
+
+  ps_est_098: productoSucursal_update(id: "66666666-6666-6666-6666-666604030001", data: { estado: INEXISTENTE })
+
+  ps_est_099: productoSucursal_update(id: "66666666-6666-6666-6666-666604040001", data: { estado: INEXISTENTE })
+
+  ps_est_100: productoSucursal_update(id: "66666666-6666-6666-6666-666604050001", data: { estado: INEXISTENTE })
+
+}

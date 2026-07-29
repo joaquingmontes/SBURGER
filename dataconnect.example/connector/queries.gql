@@ -1,0 +1,151 @@
+query ListProductosActivos @auth(level: PUBLIC, insecureReason: "Catalogo publico del menu") {
+  productos(where: { activo: { eq: true } }) {
+    id
+    nombre
+    descripcion
+    ingredientes
+    precio
+    categoria
+    imagenUrl
+  }
+}
+
+query ListProductosPorSucursal($sucursalId: UUID!) @auth(level: PUBLIC, insecureReason: "Catalogo publico del menu") {
+  productos(where: { activo: { eq: true } }) {
+    id
+    nombre
+    descripcion
+    ingredientes
+    precio
+    categoria
+    imagenUrl
+    productoSucursals_on_producto(where: { sucursalId: { eq: $sucursalId } }, limit: 1) {
+      precio
+      estado
+    }
+  }
+}
+
+query ListProductosAdmin @auth(level: USER) {
+  productos(orderBy: { createdAt: DESC }) {
+    id
+    nombre
+    descripcion
+    ingredientes
+    precio
+    categoria
+    imagenUrl
+    activo
+  }
+}
+
+query ListProductoSucursalByProducto($productoId: UUID!) @auth(level: USER) {
+  productoSucursals(where: { productoId: { eq: $productoId } }) {
+    id
+    precio
+    estado
+    sucursal {
+      id
+      nombre
+      direccion
+    }
+  }
+}
+
+query ListMyPedidos @auth(level: USER) {
+  pedidos(
+    where: { usuario: { authUid: { eq_expr: "auth.uid" } } }
+    orderBy: { createdAt: DESC }
+  ) {
+    id
+    codigo
+    estado
+    subtotal
+    costoEnvio
+    total
+    modalidadEntrega
+    nombreContacto
+    telefonoContacto
+    direccion
+    createdAt
+    sucursal {
+      id
+      nombre
+      direccion
+    }
+    pedidoItems_on_pedido {
+      id
+      nombreProducto
+      cantidad
+      precioUnitario
+      precioTotalLinea
+      extraMedallon
+      extraCheddar
+      extraPanceta
+      extraCebolla
+      notas
+    }
+  }
+}
+
+query ListPedidosAdmin @auth(level: USER) {
+  pedidos(orderBy: { createdAt: DESC }) {
+    id
+    codigo
+    estado
+    subtotal
+    costoEnvio
+    total
+    modalidadEntrega
+    nombreContacto
+    telefonoContacto
+    direccion
+    createdAt
+    sucursal {
+      id
+      nombre
+      direccion
+    }
+    pedidoItems_on_pedido {
+      id
+      nombreProducto
+      cantidad
+      precioUnitario
+      precioTotalLinea
+      extraMedallon
+      extraCheddar
+      extraPanceta
+      extraCebolla
+      notas
+    }
+  }
+}
+
+query GetMe @auth(level: USER) {
+  usuarios(where: { authUid: { eq_expr: "auth.uid" } }, limit: 1) {
+    id
+    nombreCompleto
+    email
+    rol
+  }
+}
+
+query GetProductoById($id: UUID!) @auth(level: PUBLIC, insecureReason: "Catalogo publico del menu") {
+  productos(where: { id: { eq: $id } }, limit: 1) {
+    id
+    nombre
+    descripcion
+    ingredientes
+    precio
+    categoria
+    imagenUrl
+  }
+}
+
+query ListSucursales @auth(level: PUBLIC, insecureReason: "Listado publico de sucursales") {
+  sucursals(orderBy: { nombre: ASC }) {
+    id
+    nombre
+    direccion
+  }
+}

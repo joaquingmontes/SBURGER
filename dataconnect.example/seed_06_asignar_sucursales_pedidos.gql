@@ -1,0 +1,94 @@
+﻿mutation AsignarSucursalesPedidos @auth(level: PUBLIC, insecureReason: "Asignacion manual de sucursales a pedidos existentes") {
+
+  pedido_1: pedido_update(
+    id: "bbf60219-2d56-4478-b50c-89770dbb43de"
+    data: {
+      sucursalId: "44444444-4444-4444-4444-444444444401"
+    }
+  )
+
+  pedido_2: pedido_update(
+    id: "b6a18c2d-9e8a-4526-985e-b5b3c09146f1"
+    data: {
+      sucursalId: "44444444-4444-4444-4444-444444444402"
+    }
+  )
+
+  pedido_3: pedido_update(
+    id: "c8088961-05d8-4ff2-a41f-fb497c949fdc"
+    data: {
+      sucursalId: "44444444-4444-4444-4444-444444444403"
+    }
+  )
+
+  pedido_4: pedido_update(
+    id: "72df25cb-93d6-41e1-aae4-6401be20c5ab"
+    data: {
+      sucursalId: "44444444-4444-4444-4444-444444444404"
+    }
+  )
+
+  pedido_5: pedido_update(
+    id: "8d024f2a-d601-41cf-8b7c-c1dbbed17b06"
+    data: {
+      sucursalId: "44444444-4444-4444-4444-444444444405"
+    }
+  )
+
+  pedido_6: pedido_update(
+    id: "654f4099-268f-4dd9-a1ed-0e87041f9e32"
+    data: {
+      sucursalId: "44444444-4444-4444-4444-444444444401"
+    }
+  )
+
+  pedido_7: pedido_update(
+    id: "03775c60-0fd0-434d-8db6-7ae68187b669"
+    data: {
+      sucursalId: "44444444-4444-4444-4444-444444444402"
+    }
+  )
+
+  pedido_8: pedido_update(
+    id: "0b08a5f9-d2aa-4a81-be9d-eb01802e649b"
+    data: {
+      sucursalId: "44444444-4444-4444-4444-444444444403"
+    }
+  )
+
+  pedido_9: pedido_update(
+    id: "b9e30c34-24bd-4e4d-92f5-91de3ef82633"
+    data: {
+      sucursalId: "44444444-4444-4444-4444-444444444404"
+    }
+  )
+
+  pedido_10: pedido_update(
+    id: "e398f97b-7b52-4ea4-9f89-45a0e2826f21"
+    data: {
+      sucursalId: "44444444-4444-4444-4444-444444444405"
+    }
+  )
+
+  pedido_11: pedido_update(
+    id: "5359b9ad-8aed-4c73-a66e-52e1b634822f"
+    data: {
+      sucursalId: "44444444-4444-4444-4444-444444444401"
+    }
+  )
+
+  pedido_12: pedido_update(
+    id: "f1414912-92d6-40f0-95b2-a4a627ff4e1c"
+    data: {
+      sucursalId: "44444444-4444-4444-4444-444444444402"
+    }
+  )
+
+  pedido_13: pedido_update(
+    id: "700b95af-4191-43f3-9bed-a9ba4e4618d6"
+    data: {
+      sucursalId: "44444444-4444-4444-4444-444444444403"
+    }
+  )
+
+}

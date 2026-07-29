@@ -1,0 +1,164 @@
+mutation CreateUsuarioProfile(
+  $nombreCompleto: String!
+  $email: String!
+  $rol: RolUsuario
+) @auth(level: USER) {
+  usuario_insert(
+    data: {
+      nombreCompleto: $nombreCompleto
+      email: $email
+      authUid_expr: "auth.uid"
+      rol: $rol
+    }
+  )
+}
+
+mutation LinkMyAccount @auth(level: USER) {
+  usuario_update(
+    first: {
+      where: {
+        email: { eq_expr: "auth.token.email" }
+        authUid: { eq: null }
+      }
+    }
+    data: {
+      authUid_expr: "auth.uid"
+    }
+  )
+}
+
+mutation CreateProducto(
+  $nombre: String!
+  $descripcion: String!
+  $ingredientes: String
+  $precio: Int!
+  $categoria: CategoriaProducto!
+  $imagenUrl: String!
+) @auth(level: USER) {
+  producto_insert(
+    data: {
+      nombre: $nombre
+      descripcion: $descripcion
+      ingredientes: $ingredientes
+      precio: $precio
+      categoria: $categoria
+      imagenUrl: $imagenUrl
+    }
+  )
+}
+
+mutation UpdateProducto(
+  $id: UUID!
+  $nombre: String!
+  $descripcion: String!
+  $ingredientes: String
+  $precio: Int!
+  $categoria: CategoriaProducto!
+  $imagenUrl: String!
+) @auth(level: USER) {
+  producto_update(
+    id: $id
+    data: {
+      nombre: $nombre
+      descripcion: $descripcion
+      ingredientes: $ingredientes
+      precio: $precio
+      categoria: $categoria
+      imagenUrl: $imagenUrl
+    }
+  )
+}
+
+mutation DeleteProducto($id: UUID!) @auth(level: USER) {
+  producto_update(id: $id, data: { activo: false })
+}
+
+mutation CreatePedido(
+  $codigo: String!
+  $usuarioId: UUID!
+  $sucursalId: UUID!
+  $subtotal: Int!
+  $costoEnvio: Int!
+  $total: Int!
+  $modalidadEntrega: ModalidadEntrega!
+  $nombreContacto: String!
+  $telefonoContacto: String!
+  $direccion: String
+) @auth(level: USER) {
+  pedido_insert(
+    data: {
+      codigo: $codigo
+      usuarioId: $usuarioId
+      sucursalId: $sucursalId
+      subtotal: $subtotal
+      costoEnvio: $costoEnvio
+      total: $total
+      modalidadEntrega: $modalidadEntrega
+      nombreContacto: $nombreContacto
+      telefonoContacto: $telefonoContacto
+      direccion: $direccion
+    }
+  )
+}
+
+mutation CreatePedidoItem(
+  $pedidoId: UUID!
+  $productoId: UUID
+  $nombreProducto: String!
+  $cantidad: Int!
+  $precioUnitario: Int!
+  $precioTotalLinea: Int!
+  $extraMedallon: Int
+  $extraCheddar: Int
+  $extraPanceta: Int
+  $extraCebolla: Int
+  $notas: String
+) @auth(level: USER) {
+  pedidoItem_insert(
+    data: {
+      pedidoId: $pedidoId
+      productoId: $productoId
+      nombreProducto: $nombreProducto
+      cantidad: $cantidad
+      precioUnitario: $precioUnitario
+      precioTotalLinea: $precioTotalLinea
+      extraMedallon: $extraMedallon
+      extraCheddar: $extraCheddar
+      extraPanceta: $extraPanceta
+      extraCebolla: $extraCebolla
+      notas: $notas
+    }
+  )
+}
+
+mutation UpdatePedidoEstado($id: UUID!, $estado: EstadoPedido!) @auth(level: USER) {
+  pedido_update(id: $id, data: { estado: $estado })
+}
+
+mutation CreateSucursal($nombre: String!, $direccion: String!) @auth(level: USER) {
+  sucursal_insert(data: { nombre: $nombre, direccion: $direccion })
+}
+
+mutation CreateProductoSucursal(
+  $productoId: UUID!
+  $sucursalId: UUID!
+  $precio: Int!
+  $estado: EstadoProductoSucursal
+) @auth(level: USER) {
+  productoSucursal_insert(
+    data: {
+      productoId: $productoId
+      sucursalId: $sucursalId
+      precio: $precio
+      estado: $estado
+    }
+  )
+}
+
+mutation UpdateProductoSucursal(
+  $id: UUID!
+  $precio: Int
+  $estado: EstadoProductoSucursal
+) @auth(level: USER) {
+  productoSucursal_update(id: $id, data: { precio: $precio, estado: $estado })
+}

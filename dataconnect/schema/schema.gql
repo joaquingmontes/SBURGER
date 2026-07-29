@@ -1,0 +1,179 @@
+enum RolUsuario {
+
+  CLIENTE
+
+  ADMIN
+
+}
+
+
+
+enum CategoriaProducto {
+
+  HAMBURGUESAS
+
+  PAPAS
+
+  BEBIDAS
+
+  POSTRES
+
+}
+
+
+
+enum EstadoPedido {
+
+  PREPARING
+
+  COMPLETED
+
+  CANCELLED
+
+}
+
+
+
+enum ModalidadEntrega {
+
+  DELIVERY
+
+  TAKEAWAY
+
+}
+
+
+
+enum EstadoProductoSucursal {
+
+  ACTIVO
+
+  SIN_STOCK
+
+  INEXISTENTE
+
+}
+
+
+
+type Usuario @table {
+
+  nombreCompleto: String!
+
+  email: String! @unique
+
+  authUid: String @unique
+
+  passwordHash: String
+
+  rol: RolUsuario! @default(value: CLIENTE)
+
+  createdAt: Timestamp! @default(expr: "request.time")
+
+}
+
+
+
+type Producto @table {
+
+  nombre: String!
+
+  descripcion: String!
+
+  ingredientes: String
+
+  precio: Int!
+
+  categoria: CategoriaProducto!
+
+  imagenUrl: String!
+
+  activo: Boolean! @default(value: true)
+
+  createdAt: Timestamp! @default(expr: "request.time")
+
+}
+
+
+
+type ProductoSucursal @table {
+
+  producto: Producto!
+
+  sucursal: Sucursal!
+
+  precio: Int!
+
+  estado: EstadoProductoSucursal! @default(value: ACTIVO)
+
+}
+
+
+
+type Pedido @table {
+
+  codigo: String! @unique
+
+  usuario: Usuario!
+
+  sucursal: Sucursal
+
+  estado: EstadoPedido! @default(value: PREPARING)
+
+  subtotal: Int!
+
+  costoEnvio: Int!
+
+  total: Int!
+
+  modalidadEntrega: ModalidadEntrega!
+
+  nombreContacto: String!
+
+  telefonoContacto: String!
+
+  direccion: String
+
+  createdAt: Timestamp! @default(expr: "request.time")
+
+}
+
+
+
+type Sucursal @table {
+
+  nombre: String!
+
+  direccion: String!
+
+}
+
+
+
+type PedidoItem @table {
+
+  pedido: Pedido!
+
+  producto: Producto
+
+  nombreProducto: String!
+
+  cantidad: Int!
+
+  precioUnitario: Int!
+
+  precioTotalLinea: Int!
+
+  extraMedallon: Int! @default(value: 0)
+
+  extraCheddar: Int! @default(value: 0)
+
+  extraPanceta: Int! @default(value: 0)
+
+  extraCebolla: Int! @default(value: 0)
+
+  notas: String
+
+}
+
+

@@ -1,0 +1,15 @@
+specVersion: "v1"
+serviceId: "TU_PROYECTO-service"
+location: "southamerica-west1"
+
+schema:
+  source: "./schema"
+  datasource:
+    postgresql:
+      database: "TU_PROYECTO-database"
+      cloudSql:
+        instanceId: "TU_PROYECTO-instance"
+        schemaValidation: "COMPATIBLE"
+
+connectorDirs:
+  - "./connector"
