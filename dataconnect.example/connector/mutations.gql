@@ -143,16 +143,22 @@ mutation CreateProductoSucursal(
   $productoId: UUID!
   $sucursalId: UUID!
   $precio: Int!
+  $estado: EstadoProductoSucursal
 ) @auth(level: USER) {
   productoSucursal_insert(
     data: {
       productoId: $productoId
       sucursalId: $sucursalId
       precio: $precio
+      estado: $estado
     }
   )
 }
 
-mutation UpdateProductoSucursal($id: UUID!, $precio: Int!) @auth(level: USER) {
-  productoSucursal_update(id: $id, data: { precio: $precio })
+mutation UpdateProductoSucursal(
+  $id: UUID!
+  $precio: Int
+  $estado: EstadoProductoSucursal
+) @auth(level: USER) {
+  productoSucursal_update(id: $id, data: { precio: $precio, estado: $estado })
 }

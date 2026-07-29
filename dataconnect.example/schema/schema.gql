@@ -44,6 +44,18 @@ enum ModalidadEntrega {
 
 
 
+enum EstadoProductoSucursal {
+
+  ACTIVO
+
+  SIN_STOCK
+
+  INEXISTENTE
+
+}
+
+
+
 type Usuario @table {
 
   nombreCompleto: String!
@@ -91,6 +103,8 @@ type ProductoSucursal @table {
   sucursal: Sucursal!
 
   precio: Int!
+
+  estado: EstadoProductoSucursal! @default(value: ACTIVO)
 
 }
 

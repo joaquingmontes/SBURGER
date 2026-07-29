@@ -21,6 +21,7 @@ query ListProductosPorSucursal($sucursalId: UUID!) @auth(level: PUBLIC, insecure
     imagenUrl
     productoSucursals_on_producto(where: { sucursalId: { eq: $sucursalId } }, limit: 1) {
       precio
+      estado
     }
   }
 }
@@ -42,6 +43,7 @@ query ListProductoSucursalByProducto($productoId: UUID!) @auth(level: USER) {
   productoSucursals(where: { productoId: { eq: $productoId } }) {
     id
     precio
+    estado
     sucursal {
       id
       nombre

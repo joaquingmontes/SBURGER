@@ -1,0 +1,203 @@
+mutation SeedProductoSucursalExtra @auth(level: PUBLIC, insecureReason: "Productos adicionales por sucursal") {
+
+  ps_extra_p01_s01: productoSucursal_insert(
+    data: {
+      id: "66666666-6666-6666-6666-666601010001"
+      productoId: "64780aa7-cf4b-42b6-bf02-a6d724636ced"
+      sucursalId: "44444444-4444-4444-4444-444444444401"
+      precio: 4500
+      estado: ACTIVO
+    }
+  )
+
+  ps_extra_p01_s02: productoSucursal_insert(
+    data: {
+      id: "66666666-6666-6666-6666-666601020001"
+      productoId: "64780aa7-cf4b-42b6-bf02-a6d724636ced"
+      sucursalId: "44444444-4444-4444-4444-444444444402"
+      precio: 4500
+      estado: ACTIVO
+    }
+  )
+
+  ps_extra_p01_s03: productoSucursal_insert(
+    data: {
+      id: "66666666-6666-6666-6666-666601030001"
+      productoId: "64780aa7-cf4b-42b6-bf02-a6d724636ced"
+      sucursalId: "44444444-4444-4444-4444-444444444403"
+      precio: 4500
+      estado: ACTIVO
+    }
+  )
+
+  ps_extra_p01_s04: productoSucursal_insert(
+    data: {
+      id: "66666666-6666-6666-6666-666601040001"
+      productoId: "64780aa7-cf4b-42b6-bf02-a6d724636ced"
+      sucursalId: "44444444-4444-4444-4444-444444444404"
+      precio: 4500
+      estado: ACTIVO
+    }
+  )
+
+  ps_extra_p01_s05: productoSucursal_insert(
+    data: {
+      id: "66666666-6666-6666-6666-666601050001"
+      productoId: "64780aa7-cf4b-42b6-bf02-a6d724636ced"
+      sucursalId: "44444444-4444-4444-4444-444444444405"
+      precio: 4500
+      estado: ACTIVO
+    }
+  )
+
+  ps_extra_p02_s01: productoSucursal_insert(
+    data: {
+      id: "66666666-6666-6666-6666-666602010001"
+      productoId: "b902a4d1-b6db-4ada-95b1-9e6f88934c32"
+      sucursalId: "44444444-4444-4444-4444-444444444401"
+      precio: 4500
+      estado: ACTIVO
+    }
+  )
+
+  ps_extra_p02_s02: productoSucursal_insert(
+    data: {
+      id: "66666666-6666-6666-6666-666602020001"
+      productoId: "b902a4d1-b6db-4ada-95b1-9e6f88934c32"
+      sucursalId: "44444444-4444-4444-4444-444444444402"
+      precio: 4500
+      estado: ACTIVO
+    }
+  )
+
+  ps_extra_p02_s03: productoSucursal_insert(
+    data: {
+      id: "66666666-6666-6666-6666-666602030001"
+      productoId: "b902a4d1-b6db-4ada-95b1-9e6f88934c32"
+      sucursalId: "44444444-4444-4444-4444-444444444403"
+      precio: 4500
+      estado: ACTIVO
+    }
+  )
+
+  ps_extra_p02_s04: productoSucursal_insert(
+    data: {
+      id: "66666666-6666-6666-6666-666602040001"
+      productoId: "b902a4d1-b6db-4ada-95b1-9e6f88934c32"
+      sucursalId: "44444444-4444-4444-4444-444444444404"
+      precio: 4500
+      estado: ACTIVO
+    }
+  )
+
+  ps_extra_p02_s05: productoSucursal_insert(
+    data: {
+      id: "66666666-6666-6666-6666-666602050001"
+      productoId: "b902a4d1-b6db-4ada-95b1-9e6f88934c32"
+      sucursalId: "44444444-4444-4444-4444-444444444405"
+      precio: 4500
+      estado: ACTIVO
+    }
+  )
+
+  ps_extra_p03_s01: productoSucursal_insert(
+    data: {
+      id: "66666666-6666-6666-6666-666603010001"
+      productoId: "17b00530-4309-4395-be54-16e68ecbf914"
+      sucursalId: "44444444-4444-4444-4444-444444444401"
+      precio: 4500
+      estado: ACTIVO
+    }
+  )
+
+  ps_extra_p03_s02: productoSucursal_insert(
+    data: {
+      id: "66666666-6666-6666-6666-666603020001"
+      productoId: "17b00530-4309-4395-be54-16e68ecbf914"
+      sucursalId: "44444444-4444-4444-4444-444444444402"
+      precio: 4500
+      estado: ACTIVO
+    }
+  )
+
+  ps_extra_p03_s03: productoSucursal_insert(
+    data: {
+      id: "66666666-6666-6666-6666-666603030001"
+      productoId: "17b00530-4309-4395-be54-16e68ecbf914"
+      sucursalId: "44444444-4444-4444-4444-444444444403"
+      precio: 4500
+      estado: ACTIVO
+    }
+  )
+
+  ps_extra_p03_s04: productoSucursal_insert(
+    data: {
+      id: "66666666-6666-6666-6666-666603040001"
+      productoId: "17b00530-4309-4395-be54-16e68ecbf914"
+      sucursalId: "44444444-4444-4444-4444-444444444404"
+      precio: 4500
+      estado: ACTIVO
+    }
+  )
+
+  ps_extra_p03_s05: productoSucursal_insert(
+    data: {
+      id: "66666666-6666-6666-6666-666603050001"
+      productoId: "17b00530-4309-4395-be54-16e68ecbf914"
+      sucursalId: "44444444-4444-4444-4444-444444444405"
+      precio: 4500
+      estado: ACTIVO
+    }
+  )
+
+  ps_extra_p04_s01: productoSucursal_insert(
+    data: {
+      id: "66666666-6666-6666-6666-666604010001"
+      productoId: "74eb4b57-362e-4bbc-8c84-07505e98c7a2"
+      sucursalId: "44444444-4444-4444-4444-444444444401"
+      precio: 4500
+      estado: ACTIVO
+    }
+  )
+
+  ps_extra_p04_s02: productoSucursal_insert(
+    data: {
+      id: "66666666-6666-6666-6666-666604020001"
+      productoId: "74eb4b57-362e-4bbc-8c84-07505e98c7a2"
+      sucursalId: "44444444-4444-4444-4444-444444444402"
+      precio: 4500
+      estado: ACTIVO
+    }
+  )
+
+  ps_extra_p04_s03: productoSucursal_insert(
+    data: {
+      id: "66666666-6666-6666-6666-666604030001"
+      productoId: "74eb4b57-362e-4bbc-8c84-07505e98c7a2"
+      sucursalId: "44444444-4444-4444-4444-444444444403"
+      precio: 4500
+      estado: ACTIVO
+    }
+  )
+
+  ps_extra_p04_s04: productoSucursal_insert(
+    data: {
+      id: "66666666-6666-6666-6666-666604040001"
+      productoId: "74eb4b57-362e-4bbc-8c84-07505e98c7a2"
+      sucursalId: "44444444-4444-4444-4444-444444444404"
+      precio: 4500
+      estado: ACTIVO
+    }
+  )
+
+  ps_extra_p04_s05: productoSucursal_insert(
+    data: {
+      id: "66666666-6666-6666-6666-666604050001"
+      productoId: "74eb4b57-362e-4bbc-8c84-07505e98c7a2"
+      sucursalId: "44444444-4444-4444-4444-444444444405"
+      precio: 4500
+      estado: ACTIVO
+    }
+  )
+
+}
