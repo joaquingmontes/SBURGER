@@ -66,7 +66,64 @@ El proyecto se construye de forma incremental en **3 entregas**:
 
 ---
 
+## 📸 Capturas de pantalla
 
+Vistas principales de la aplicación. Las imágenes se guardan en `ia/screenshots/`; reemplazá cada archivo o actualizá la ruta en el markdown si usás otro nombre.
+
+> **Cómo agregar las fotos:** exportá capturas desde el emulador o dispositivo, guardalas en la carpeta indicada y verificá que el nombre coincida con la ruta de abajo.
+
+### Acceso
+
+| Login |
+| :---: |
+| *Pantalla de inicio de sesión y registro* |
+| ![Login — StackBurger](screenshots/login.png) |
+
+### Cliente
+
+| Catálogo | Mis pedidos |
+| :---: | :---: |
+| *Menú por categorías y selector de sucursal* | *Historial de pedidos del usuario* |
+| ![Catálogo — StackBurger](screenshots/cliente-catalogo.png) | ![Mis pedidos — StackBurger](screenshots/cliente-mis-pedidos.png) |
+
+| Carrito |
+| :---: |
+| *Ítems agregados y total antes de confirmar* |
+| ![Carrito — StackBurger](screenshots/cliente-carrito.png) |
+
+### Administrador
+
+| Productos | Precios por sucursal |
+| :---: | :---: |
+| *Listado y gestión del menú* | *Modal de edición de precio por local* |
+| ![Productos — StackBurger](screenshots/admin-productos.png) | ![Precios por sucursal — StackBurger](screenshots/admin-precios-sucursal.png) |
+
+| Disponibilidad por sucursal | Pedidos de clientes |
+| :---: | :---: |
+| *Modal de estado Activo / Sin stock / Inexistente* | *Listado de pedidos con filtros* |
+| ![Disponibilidad por sucursal — StackBurger](screenshots/admin-disponibilidad-sucursal.png) | ![Pedidos de clientes — StackBurger](screenshots/admin-pedidos.png) |
+
+| Estadísticas |
+| :---: |
+| *Panel de métricas, gráficos y ranking entre sucursales* |
+| ![Estadísticas — StackBurger](screenshots/admin-estadisticas.png) |
+
+**Archivos esperados en `ia/screenshots/`:**
+
+```
+ia/screenshots/
+├── login.png
+├── cliente-catalogo.png
+├── cliente-mis-pedidos.png
+├── cliente-carrito.png
+├── admin-productos.png
+├── admin-precios-sucursal.png
+├── admin-disponibilidad-sucursal.png
+├── admin-pedidos.png
+└── admin-estadisticas.png
+```
+
+---
 
 ## 🛠️ Tecnologías
 
@@ -189,6 +246,16 @@ SBURGER/
 │   ├── entrega-3/                    # Conversaciones con IA — E3
 │   ├── conversaciones_finales.md     # Rejunte consolidado de las 3 entregas
 │   └── readme.md                     # Este archivo
+├── screenshots/
+|   ├── login.png
+|   ├── cliente-catalogo.png
+|   ├── cliente-mis-pedidos.png
+|   ├── cliente-carrito.png
+|   ├── admin-productos.png
+|   ├── admin-precios-sucursal.png
+|   ├── admin-disponibilidad-sucursal.png
+|   ├── admin-pedidos.png
+|   └── admin-estadisticas.png
 ├── scripts/                          # Emulador, seed Firebase, generación de SDK
 ├── firebase.json.example
 ├── storage.rules.example
