@@ -108,20 +108,6 @@ Vistas principales de la aplicación. Las imágenes se guardan en `ia/screenshot
 | *Panel de métricas, gráficos y ranking entre sucursales* |
 | ![Estadísticas — StackBurger](screenshots/admin-estadisticas.png) |
 
-**Archivos esperados en `ia/screenshots/`:**
-
-```
-ia/screenshots/
-├── login.png
-├── cliente-catalogo.png
-├── cliente-mis-pedidos.png
-├── cliente-carrito.png
-├── admin-productos.png
-├── admin-precios-sucursal.png
-├── admin-disponibilidad-sucursal.png
-├── admin-pedidos.png
-└── admin-estadisticas.png
-```
 
 ---
 
