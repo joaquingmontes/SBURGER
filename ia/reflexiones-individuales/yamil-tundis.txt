@@ -1,0 +1,5 @@
+Mi reflexion:
+
+El uso de IA en el proyecto se basó en la orquestación de los requerimientos funcionales que la aplicación debia cumplir. Obviamente tuve que validar el correcto funcionamiento y ajustes en caso de ser necesarios. En mi caso utilicé Cursor ya que empecé a usarla en el trabajo en el que estoy, pagando yo mismo el plan pro.
+
+En este proyecto aprendi a usar mejor la IA, por ejemplo a cómo hacer prompts bien explicados y detallados para que el agente entienda bien qué quiero y cómo. Y la verdad me respondió muy bien, y de esa manera, pude encarar el desarrollo de Stack Burger más como diseñador de requerimientos funcionales y de usabilidad, en vez de programador puro y duro.
