@@ -3,6 +3,17 @@
 > Aplicación móvil de pedidos para delivery & takeaway — React Native  
 > Proyecto Integrador · Desarrollo de Aplicaciones Móviles · 2026
 
+## 👥 Integrantes
+
+
+| Nombre            | GitHub                                               |
+| ----------------- | ---------------------------------------------------- |
+| *Yamil Tundis*    | [@yamiltundis](https://github.com/yamiltundis)       |
+| *Julian Figueira* | [@JulianFigueira](https://github.com/JulianFigueira) |
+| *Joaquin Montes*  | [@joaquingmontes](https://github.com/joaquingmontes) |
+| *Jeronimo Molina* | [@usuario](https://github.com/usuario)               |
+| *Leonel Piquet*   | [@LeonelPiquet](https://github.com/LeonelPiquet)     |
+
 ---
 
 ## 📋 Descripción
