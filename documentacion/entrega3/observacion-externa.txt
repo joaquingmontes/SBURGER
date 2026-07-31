@@ -1,0 +1,11 @@
+Test de usabilidad
+
+La persona elegida fue alguien externa al area informática, la cual nos dió las siguientes observaciones:
+
+- Al seleccionar un producto no se puede incrementar la calidad pedida (solo funciona para los productos con categoria "Hamburguesa"), y la unica forma de hacerlo es desde el carrito.
+- Desde la parte del administrador los pedidos entrantes no se ven actualizados a no ser que se refresque la pagina, lo mismo pasa con los pedidos de los clientes en la pagina "Mis pedidos"
+- Es raro que al crear una cuenta te inicie sesion al instante, y no que como cliente lo hagas despues de manera electiva
+
+Además, nos dió los aspectos positivos y posibles mejor:
+- Lo positivo fue: funciona bien, es linda esteticamente, es intuitiva para usar
+- Una mejora seria: avisarle al cliente el tiempo posible de demora y hacer un seguimiento del camino realizado del delivery desde la sucursal
