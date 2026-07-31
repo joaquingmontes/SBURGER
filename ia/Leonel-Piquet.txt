@@ -1,6 +1,0 @@
-Durante el desarrollo de la app móvil para la hamburguesería, la inteligencia artificial fue un recurso clave en la generación de código base, el maquetado de interfaces (catálogo de productos y carrito de compras),
-la depuración de errores y la creación de documentación y datos de prueba (mock data).
-La herramienta funcionó muy bien para agilizar tareas repetitivas y resolver bugs puntuales de sintaxis o renderizado. Sin embargo, se debieron descartar o corregir soluciones genéricas
-que omitían la lógica propia del rubro gastronómico.
-Respecto a proyectos anteriores, el flujo de trabajo cambió radicalmente: el equipo pasó de escribir código desde cero a adoptar un rol de supervisión y edición crítica. 
-Esto redujo los tiempos de desarrollo en las etapas iniciales, permitiendo enfocar más esfuerzo en la usabilidad y la validación del proceso de compra.
