@@ -1,0 +1,23 @@
+Uso de Inteligencia Artificial:
+
+La inteligencia artificial fue utilizada principalmente como una herramienta de apoyo para la generación de código, 
+la depuración de errores (debugging) y el diseño de las pantallas de la aplicación. En cuanto a la definición del alcance 
+del proyecto, las decisiones fueron tomadas por el equipo. La IA se utilizó para consultar alternativas y mejorar la 
+redacción de algunos apartados, pero las definiciones finales siempre fueron realizadas por nosotros.
+
+Durante el desarrollo del trabajo, la inteligencia artificial resultó de gran utilidad, aunque en ningún momento se 
+aceptaron sus respuestas de forma automática. Cada propuesta fue analizada y validada antes de incorporarla al proyecto.
+En numerosas ocasiones fue necesario solicitar modificaciones al código generado porque no cumplía con los requerimientos 
+funcionales definidos. Del mismo modo, se realizaron múltiples ajustes sobre los diseños propuestos para adaptarlos a la 
+estética buscada y también se revisaron las redacciones generadas para que reflejaran con mayor precisión las decisiones 
+tomadas por el equipo.
+
+Este proyecto me permitió utilizar la inteligencia artificial de una manera más responsable y crítica que en trabajos
+anteriores. Más allá de agilizar el desarrollo y ayudar a resolver dudas puntuales, fue necesario verificar constantemente 
+que los requerimientos funcionales y no funcionales, los casos de uso y la implementación de la aplicación mantuvieran coherencia 
+entre sí. En la práctica, fueron muy pocas las ocasiones en las que la primera respuesta proporcionada por la IA resultó suficiente.
+Generalmente fue necesario solicitar varias modificaciones, mejoras o correcciones hasta obtener un resultado que se ajustara a 
+las necesidades del proyecto.
+Considero que este proceso de revisión fue fundamental para garantizar la calidad del trabajo. De haber incorporado las respuestas de 
+la inteligencia artificial sin validarlas previamente, el resultado probablemente habría sido una aplicación con inconsistencias entre 
+los requisitos definidos y la solución implementada.
