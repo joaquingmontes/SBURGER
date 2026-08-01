@@ -1,0 +1,7 @@
+Reflexión Joaquín Montes:
+
+Durante la realización de SBURGER usé inteligencia artificial más que nada como un asistente para avanzar rápido con el código. Me sirvió bastante para armar la base de las pantallas en React Native (como el catálogo, el carrito y las pantallas de administración), resolver bugs de TypeScript y destrabar temas de configuración con el emulador de Android. También la usé para generar datos de prueba (como sucursales, productos y pedidos) y dar una mano redactando parte de la documentación.
+
+Lo que mejor anduvo fue la velocidad para resolver código repetitivo y armar componentes rápidos. Sin embargo, tuve que corregir y descartar un montón de respuestas. Muchas veces la IA me tiraba código con librerías desactualizadas o soluciones que no servían para cómo teníamos configurado Firebase DataConnect o React Query. Tampoco entendía cosas específicas del negocio, como que un producto puede tener distinto precio o estar disponible en una sucursal y en otra no, así que tuve que ajustar el código a mano y volver a pedirle cosas siendo más específico con los prompts.
+
+Comparado con proyectos anteriores donde escribía todo a mano desde cero, esta vez mi forma de trabajar cambió. En vez de estar horas renegando con la sintaxis inicial, pasé a estar más enfocado en pensar bien la lógica de los requerimientos, pedirle las cosas de forma clara a la IA y revisar con cuidado todo lo que devolvía para asegurarme de que la app funcione bien y no rompa nada.
